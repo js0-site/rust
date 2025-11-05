@@ -1,0 +1,41 @@
+[package]
+name = "add_space"
+version = "0.1.18"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/dev/add_space"
+description = "Automated typesetting tool that adds spaces between Chinese and English characters to enhance readability. / 自动排版工具，在中文和英文字符之间添加空格以增强可读性。"
+keywords = ["cli", "formatter", "cjk", "spacing", "typography"]
+
+[features]
+default = ["cli"]
+cli = ["dep:clap"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+aok = "0.1.18"
+unic-emoji-char = "0.9.0"
+unicode-script = "0.5.7"
+clap = { version = "4", features = ["derive"], optional = true }
+xbin = "0.1.9"
+xerr = "0.1.16"
+
+[dev-dependencies]
+aok = "0.1.18"
+log_init = "0.1.27"
+loginit = "0.1.18"
+static_init = "1.0.4"
+tracing = "0.1.41"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
+
+[[bin]]
+name = "add_space"
+path = "src/main.rs"
+required-features = ["cli"]

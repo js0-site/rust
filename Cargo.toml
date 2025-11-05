@@ -1,0 +1,21 @@
+[workspace]
+resolver = "2"
+members = ["add_space", "http_grpc"]
+exclude = ["sh/_tmpl"]
+
+[profile.release]
+lto = true
+opt-level = 3
+incremental = true
+codegen-units = 1
+overflow-checks = false
+debug-assertions = false
+# panic = 'abort'
+# strip = false
+
+[profile.dev]
+split-debuginfo = "unpacked"
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
