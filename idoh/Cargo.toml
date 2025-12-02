@@ -1,0 +1,50 @@
+[package]
+name = "idoh"
+version = "0.1.9"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/dev/idoh"
+description = "Fast and secure DNS over HTTPS resolution / 极速安全的 DoH 解析库"
+keywords = ["dns", "doh", "https", "async", "tokio"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+mx = []
+
+[dependencies]
+aok = "0.1.18"
+defer-lite = "1.0.0"
+sonic-rs = "0.5.6"
+crossfire = "2.1.7"
+log = "0.4.28"
+
+[dependencies.riter]
+version = "0.1.1"
+
+[dependencies.serde]
+version = "1.0.228"
+features = ["derive"]
+
+[dependencies.ireq]
+version = "0.1.31"
+features = ["proxy"]
+
+[dependencies.tokio]
+version = "1.48.0"
+features = ["time", "net", "rt"]
+
+[dependencies.xerr]
+version = "0.1.16"
+
+[dev-dependencies]
+log_init = "0.1.28"
+static_init = "1.0.4"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = ["test-util", "macros"]
