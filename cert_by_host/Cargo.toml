@@ -42,7 +42,7 @@ version = "1.48.0"
 features = [ "time" ]
 
 [dependencies.expire_set]
-version = "0.1.5"
+version = "0.1.7"
 path = "../expire_set"
 
 [dependencies.xkv]

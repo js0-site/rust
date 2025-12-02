@@ -1,6 +1,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 use std::{
+  borrow::Borrow,
   sync::atomic::{AtomicUsize, Ordering},
   time::Duration,
 };
@@ -17,9 +18,12 @@ mod set;
 pub trait Map: Default + Send + Sync {
   type Key;
   type Val;
+  type RefVal<'a>
+  where
+    Self: 'a;
   fn clear(&self);
-  fn insert(&self, key: &Self::Key, val: Self::Val);
-  fn get(&self, key: &Self::Key) -> Option<Self::Val>;
+  fn insert(&self, key: Self::Key, val: Self::Val);
+  fn get<'a>(&'a self, key: &Self::Key) -> Option<Self::RefVal<'a>>;
 }
 
 struct Inner<T> {
@@ -36,7 +40,8 @@ unsafe impl<T: Map> Send for Expire<T> {}
 unsafe impl<T: Map> Sync for Expire<T> {}
 
 impl<T: Map + 'static> Expire<T> {
-  pub fn get(&self, key: &T::Key) -> Option<T::Val> {
+  pub fn get<'a>(&'a self, key: impl Borrow<T::Key>) -> Option<T::RefVal<'a>> {
+    let key = key.borrow();
     unsafe {
       let inner = &*self.inner;
       let pos = inner.pos.load(Ordering::Relaxed);
@@ -47,7 +52,7 @@ impl<T: Map + 'static> Expire<T> {
     }
   }
 
-  pub fn insert(&self, key: &T::Key, val: T::Val) {
+  pub fn insert(&self, key: T::Key, val: T::Val) {
     unsafe {
       let inner = &*self.inner;
       let idx = inner.pos.load(Ordering::Acquire);

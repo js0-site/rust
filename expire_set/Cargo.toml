@@ -1,24 +1,31 @@
 [package]
 name = "expire_set"
-version = "0.1.5"
+version = "0.1.7"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
 homepage = "https://github.com/js0-site/rust/tree/main/expire_set"
 description = "High-performance concurrent expiration set using unsafe raw pointers / 基于非安全原始指针的高性能并发过期集合"
-keywords = ["cache", "expire", "unsafe", "concurrency", "performance"]
-
-[features]
-default = []
+keywords = [ "cache", "expire", "unsafe", "concurrency", "performance" ]
 
 [package.metadata.docs.rs]
 all-features = true
-rustdoc-args = ["--cfg", "docsrs"]
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
 
 [dependencies]
 dashmap = "6.1.0"
-defer-lite = "1.0.0"
-tokio = { version = "1.48.0", features = ["time", "rt"] }
+
+[dependencies.expire_cache]
+version = "0.1.5"
+path = "../expire_cache"
+features = [ "dashset" ]
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "time", "rt" ]
 
 [dev-dependencies]
 aok = "0.1.18"
@@ -28,4 +35,4 @@ static_init = "1.0.4"
 
 [dev-dependencies.tokio]
 version = "1.48.0"
-features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]

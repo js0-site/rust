@@ -6,7 +6,7 @@
 
 # expire_set : High-performance concurrent expiration set
 
-A high-performance, concurrent set with automatic item expiration, implemented using `unsafe` raw pointers for maximum efficiency.
+A high-performance, concurrent set with automatic item expiration, built on top of `expire_cache`.
 
 ## Table of Contents
 
@@ -23,16 +23,15 @@ A high-performance, concurrent set with automatic item expiration, implemented u
 
 `expire_set` is a specialized Rust library designed for high-throughput scenarios where items need to expire after a short duration, such as **caching 404 request paths** to prevent DoS attacks.
 
-Unlike traditional TTL caches that store a timestamp for *every single item*, `expire_set` uses a double-buffering strategy. This approach eliminates the memory overhead of per-item timestamps and the CPU overhead of checking them, making it extremely memory-efficient and fast.
+It is a wrapper around `expire_cache`, providing a simplified `Set` interface while leveraging the efficient double-buffering expiration strategy of the underlying library.
 
 ## Features
 
-- **Memory Efficient**: Does **not** store expiration timestamps for individual items. Saves significant memory when caching millions of small items (like IP addresses or URLs).
+- **Memory Efficient**: Does **not** store expiration timestamps for individual items.
 - **Ideal for Short-Lived Cache**: Perfect for use cases like "expire after 1 minute," such as 404 flooding protection or deduplication buffers.
-- **High Performance**: Uses `unsafe` raw pointers and `AtomicUsize` to avoid `Arc` reference counting overhead.
-- **Concurrency**: Built on `DashSet` for thread-safe, concurrent access.
-- **Automatic Bulk Expiration**: Background timer rotates buffers to expire old items in bulk, rather than scanning for expired items one by one.
-- **Zero Overhead Sharing**: State is shared between the timer and the main struct using raw pointers.
+- **High Performance**: Leverages `expire_cache`'s lock-free and double-buffering mechanisms.
+- **Concurrency**: Thread-safe concurrent access.
+- **Automatic Bulk Expiration**: Background timer rotates buffers to expire old items in bulk.
 
 ## Usage
 
@@ -40,7 +39,8 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-expire_set = "0.1.0"
+expire_set = "0.1.5"
+tokio = { version = "1", features = ["full"] }
 ```
 
 Example usage:
@@ -72,45 +72,34 @@ async fn main() {
 
 ## Design Philosophy
 
-The core design is based on a **Double Buffering** (or Rotating Cache) mechanism:
+The core design relies on the **Double Buffering** mechanism provided by `expire_cache`:
 
-1.  **Two Buffers**: The struct holds two `DashSet` instances.
-2.  **Atomic Index**: An `AtomicUsize` indicates the "current" active buffer (0 or 1).
-3.  **Insertion**: New items are always inserted into the `current` buffer.
-4.  **Querying**: `contains` checks *both* buffers to ensure items are valid until they are fully cleared.
-5.  **Rotation**: A background Tokio task sleeps for the `expire` duration. Upon waking, it flips the index (0 -> 1 or 1 -> 0) and clears the *new* current buffer (which holds the oldest data).
-
-This approach avoids checking timestamps for every item. Instead, items expire in bulk when their buffer is cleared.
-
-### Unsafe Optimization
-
-To satisfy strict performance requirements, `Arc` is bypassed in favor of `unsafe` raw pointers (`*const`) and `Box::leak`.
--   Data is leaked to the heap with `'static` lifetime.
--   Pointers are wrapped in a `SendPtr` struct to allow passing them to the background task.
--   Memory is manually reclaimed in `Drop`.
+1.  **Underlying Storage**: Uses `expire_cache::Expire<DashSet<K>>` internally.
+2.  **Simplified Interface**: Exposes `insert` and `contains` methods tailored for Set operations.
+3.  **Efficient Expiration**: Inherits the bulk expiration strategy where items are cleared in generations rather than individually.
 
 ## API Documentation
 
 ### `ExpireSet<K>`
 
-The main struct. `K` must implement `Hash + Eq + Clone + Send + Sync + 'static`.
+The main struct. `K` must implement `Hash + Eq + Send + Sync + 'static`.
 
 #### `fn new(expire: u64) -> Self`
 Creates a new `ExpireSet`.
 -   `expire`: The duration in seconds before the buffer rotates. Items live for roughly `expire` to `2 * expire` seconds.
 
 #### `fn insert(&self, key: K)`
-Inserts a key into the current active set.
+Inserts a key into the set.
 
-#### `fn contains(&self, key: &K) -> bool`
-Checks if the key exists in either the current or the previous set.
+#### `fn contains(&self, key: impl Borrow<K>) -> bool`
+Checks if the key exists in the set.
 
 ## Technology Stack
 
 -   **Rust**: Core language.
--   **Tokio**: Async runtime for the background timer task.
--   **DashMap**: Concurrent associative array for storage.
--   **Atomic**: Standard library atomics for synchronization.
+-   **expire_cache**: Underlying expiration logic.
+-   **Tokio**: Async runtime.
+-   **DashMap**: Concurrent associative array (via `expire_cache`).
 
 ## Directory Structure
 
@@ -123,7 +112,7 @@ Checks if the key exists in either the current or the previous set.
 ├── src/
 │   └── lib.rs          # Source code (ExpireSet implementation)
 └── tests/
-    └── main.rs         # Integration tests
+│   └── main.rs         # Integration tests
 ```
 
 ## Historical Trivia
@@ -134,7 +123,7 @@ The "rotating cache" technique used in this project is analogous to **Double Buf
 
 Double buffering originated in the late 1960s and became standard in the 1980s with systems like the **Amiga**. In graphics, it involves drawing to a hidden "back buffer" while displaying the "front buffer," then swapping them instantly to prevent screen tearing.
 
-Similarly, `expire_set` writes to a "current" buffer while keeping the "previous" buffer available for reads. When the timer fires, it "swaps" the buffers (by changing the index) and clears the old one, ensuring a smooth transition and efficient bulk expiration, much like the artifact-free rendering in early graphics hardware.
+Similarly, `expire_set` (via `expire_cache`) writes to a "current" buffer while keeping the "previous" buffer available for reads. When the timer fires, it "swaps" the buffers and clears the old one, ensuring a smooth transition and efficient bulk expiration.
 
 ---
 
@@ -151,9 +140,9 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 <a id="zh"></a>
 
-# expire_set : 基于非安全原始指针的高性能并发过期集合
+# expire_set : 基于 expire_cache 的高性能并发过期集合
 
-使用 `unsafe` 原始指针实现的高性能并发集合，支持自动过期。
+基于 `expire_cache` 构建的高性能并发集合，支持自动过期。
 
 ## 目录
 
@@ -170,16 +159,15 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 `expire_set` 是一个专为高吞吐量场景设计的 Rust 库，适用于需要短时间过期的项目，例如**缓存 404 请求路径**以防止 DoS 攻击。
 
-与为*每个项目*存储时间戳的传统 TTL 缓存不同，`expire_set` 采用双缓冲策略。这种方法完全消除了存储每项时间戳的内存开销和检查时间戳的 CPU 开销，使其具有极高的内存效率和速度。
+它是 `expire_cache` 的封装，提供了简化的 `Set` 接口，同时利用了底层库高效的双缓冲过期策略。
 
 ## 特性
 
--   **极致省内存**：**不**为单个项目保存过期时间戳。在缓存数百万个小对象（如 IP 地址或 URL）时，可节省大量内存。
+-   **极致省内存**：**不**为单个项目保存过期时间戳。
 -   **短时缓存利器**：非常适合“一分钟后过期”这类场景，如 404 洪水攻击防护或去重缓冲区。
--   **高性能**：使用 `unsafe` 原始指针和 `AtomicUsize`，避免 `Arc` 引用计数开销。
--   **高并发**：基于 `DashSet` 实现线程安全并发访问。
--   **批量自动过期**：后台定时器轮转缓冲区，批量过期旧项目，而非逐个扫描过期项。
--   **零开销共享**：通过原始指针在定时器任务和主结构体间共享状态。
+-   **高性能**：利用 `expire_cache` 的无锁和双缓冲机制。
+-   **高并发**：线程安全并发访问。
+-   **批量自动过期**：后台定时器轮转缓冲区，批量过期旧项目。
 
 ## 使用演示
 
@@ -187,7 +175,8 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 ```toml
 [dependencies]
-expire_set = "0.1.0"
+expire_set = "0.1.5"
+tokio = { version = "1", features = ["full"] }
 ```
 
 代码示例：
@@ -219,45 +208,34 @@ async fn main() {
 
 ## 设计思路
 
-核心设计基于 **双缓冲**（Double Buffering）或轮转缓存机制：
+核心设计依赖于 `expire_cache` 提供的 **双缓冲** 机制：
 
-1.  **双缓冲区**：结构体持有两个 `DashSet` 实例。
-2.  **原子索引**：使用 `AtomicUsize` 指示“当前”活跃缓冲区（0 或 1）。
-3.  **写入**：新项目总是插入到 `current` 缓冲区。
-4.  **查询**：`contains` 同时检查两个缓冲区，确保数据在完全清除前可用。
-5.  **轮转**：后台 Tokio 任务休眠 `expire` 时长。唤醒后，切换索引（0 -> 1 或 1 -> 0）并清空*新*的当前缓冲区（其中包含最旧数据）。
-
-此方法避免了为每个项目检查时间戳。项目在缓冲区清空时批量过期。
-
-### Unsafe 优化
-
-为满足严格性能要求，放弃 `Arc`，改用 `unsafe` 原始指针（`*const`）和 `Box::leak`。
--   数据泄漏到堆上，具有 `'static` 生命周期。
--   指针封装在 `SendPtr` 结构中，以便传递给后台任务。
--   在 `Drop` 中手动回收内存。
+1.  **底层存储**：内部使用 `expire_cache::Expire<DashSet<K>>`。
+2.  **简化接口**：暴露专为 Set 操作定制的 `insert` 和 `contains` 方法。
+3.  **高效过期**：继承了批量过期策略，按代清除数据而非逐个清除。
 
 ## API 文档
 
 ### `ExpireSet<K>`
 
-主结构体。`K` 必须实现 `Hash + Eq + Clone + Send + Sync + 'static`。
+主结构体。`K` 必须实现 `Hash + Eq + Send + Sync + 'static`。
 
 #### `fn new(expire: u64) -> Self`
 创建新 `ExpireSet`。
 -   `expire`: 缓冲区轮转间隔（秒）。项目存活时间约为 `expire` 到 `2 * expire` 秒。
 
 #### `fn insert(&self, key: K)`
-将键插入当前活跃集合。
+将键插入集合。
 
-#### `fn contains(&self, key: &K) -> bool`
-检查键是否存在于当前或上一个集合中。
+#### `fn contains(&self, key: impl Borrow<K>) -> bool`
+检查键是否存在于集合中。
 
 ## 技术堆栈
 
 -   **Rust**: 核心语言。
--   **Tokio**: 用于后台定时器任务的异步运行时。
--   **DashMap**: 用于存储的并发关联数组。
--   **Atomic**: 标准库原子操作，用于同步。
+-   **expire_cache**: 底层过期逻辑。
+-   **Tokio**: 异步运行时。
+-   **DashMap**: 并发关联数组（通过 `expire_cache`）。
 
 ## 目录结构
 
@@ -281,7 +259,7 @@ async fn main() {
 
 双缓冲起源于 20 世纪 60 年代末，并在 80 年代随着 **Amiga** 等系统的出现成为标准。在图形学中，它涉及在显示“前缓冲区”的同时向隐藏的“后缓冲区”绘图，然后瞬间交换两者以防止画面撕裂。
 
-类似地，`expire_set` 写入“当前”缓冲区，同时保留“上一个”缓冲区供读取。当定时器触发时，通过更改索引“交换”缓冲区并清空旧缓冲区。这种机制确保了平滑过渡和高效批量过期，正如早期图形硬件实现无伪影渲染一样。
+类似地，`expire_set`（通过 `expire_cache`）写入“当前”缓冲区，同时保留“上一个”缓冲区供读取。当定时器触发时，它“交换”缓冲区并清空旧缓冲区，确保平滑过渡和高效批量过期。
 
 ---
 

@@ -88,11 +88,11 @@ Main struct managing cache state. `T` must implement `Map` trait.
 #### `new(expire: u64) -> Self`
 Creates new cache instance. `expire` specifies rotation interval in seconds.
 
-#### `insert(&self, key: &T::Key, val: T::Val)`
+#### `insert(&self, key: T::Key, val: T::Val)`
 Inserts key-value pair into active cache.
 
-#### `get(&self, key: &T::Key) -> Option<T::Val>`
-Retrieves value. Checks active cache first, then inactive cache.
+#### `get(&self, key: impl Borrow<T::Key>) -> Option<T::RefVal<'_>>`
+Retrieves value. Checks active cache first, then inactive cache. Returns a reference guard.
 
 ### `Map` Trait
 Abstraction over underlying storage (e.g., `DashMap`, `DashSet`).

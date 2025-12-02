@@ -88,11 +88,11 @@ async fn main() {
 #### `new(expire: u64) -> Self`
 创建新缓存实例。`expire` 指定轮转间隔（秒）。
 
-#### `insert(&self, key: &T::Key, val: T::Val)`
+#### `insert(&self, key: T::Key, val: T::Val)`
 将键值对插入活跃缓存。
 
-#### `get(&self, key: &T::Key) -> Option<T::Val>`
-获取值。先检查活跃缓存，后检查非活跃缓存。
+#### `get(&self, key: impl Borrow<T::Key>) -> Option<T::RefVal<'_>>`
+获取值。先检查活跃缓存，后检查非活跃缓存。返回引用守卫。
 
 ### `Map` Trait
 底层存储（如 `DashMap`, `DashSet`）的抽象接口。

@@ -11,22 +11,27 @@ extern "C" fn _log_init() {
 
 #[tokio::test]
 async fn test_map() -> Void {
-  let cache: Expire<DashMap<String, String>> = Expire::new(1);
-  cache.insert(&"key".to_string(), "val".to_string());
-  assert_eq!(cache.get(&"key".to_string()), Some("val".to_string()));
+  let cache: Expire<DashMap<_, _>> = Expire::new(1);
+  cache.insert("key", "val");
+  let val = cache.get("key");
+  assert!(val.is_some());
+
+  if let Some(val) = val {
+    assert_eq!(val.value(), &"val");
+  }
 
   tokio::time::sleep(Duration::from_secs(3)).await;
-  assert_eq!(cache.get(&"key".to_string()), None);
+  assert!(cache.get("key").is_none());
   OK
 }
 
 #[tokio::test]
 async fn test_set() -> Void {
-  let cache: Expire<DashSet<String>> = Expire::new(1);
-  cache.insert(&"key".to_string(), ());
-  assert!(cache.get(&"key".to_string()).is_some());
+  let cache: Expire<DashSet<_>> = Expire::new(1);
+  cache.insert("key", ());
+  assert!(cache.get("key").is_some());
 
   tokio::time::sleep(Duration::from_secs(3)).await;
-  assert!(cache.get(&"key".to_string()).is_none());
+  assert!(cache.get("key").is_none());
   OK
 }
