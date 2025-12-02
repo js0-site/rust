@@ -21,7 +21,7 @@ aok = "0.1.18"
 defer-lite = "1.0.0"
 sonic-rs = "0.5.6"
 crossfire = "2.1.7"
-log = "0.4.28"
+log = "0.4.29"
 
 [dependencies.riter]
 version = "0.1.1"

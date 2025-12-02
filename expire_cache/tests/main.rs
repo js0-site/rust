@@ -17,7 +17,7 @@ async fn test_map() -> Void {
   assert!(val.is_some());
 
   if let Some(val) = val {
-    assert_eq!(val.value(), &"val");
+    assert_eq!(&*val, &"val");
   }
 
   tokio::time::sleep(Duration::from_secs(3)).await;

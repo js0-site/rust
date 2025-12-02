@@ -24,7 +24,7 @@ bytes-utils = "0.1.4"
 fred = "10.1.0"
 genv = "0.1.18"
 intbin = "0.2.3"
-log = "0.4.28"
+log = "0.4.29"
 log_init = "0.1.28"
 mail-send = "0.5.2"
 static_init = "1.0.4"
@@ -76,7 +76,7 @@ features = [ "r" ]
 
 [dev-dependencies]
 aok = "0.1.18"
-log = "0.4.28"
+log = "0.4.29"
 log_init = "0.1.28"
 static_init = "1.0.4"
 
