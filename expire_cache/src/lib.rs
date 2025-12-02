@@ -1,70 +1,90 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
-use std::{sync::atomic::AtomicI8, time::Duration};
+use std::{
+  sync::atomic::{AtomicUsize, Ordering},
+  time::Duration,
+};
 
 use boxleak::boxleak;
 use sendptr::SendPtr;
-use set_timer::set_timer;
 use tokio::task::JoinHandle;
-use ts_::sec;
+
+#[cfg(feature = "dashmap")]
+mod map;
+#[cfg(feature = "dashset")]
+mod set;
 
 pub trait Map: Default + Send + Sync {
   type Key;
   type Val;
   fn clear(&self);
-  fn get(&self, key: &Self::Key) -> Option<Self::Val>;
   fn insert(&self, key: &Self::Key, val: Self::Val);
+  fn get(&self, key: &Self::Key) -> Option<Self::Val>;
+}
+
+struct Inner<T> {
+  pos: AtomicUsize,
+  cache: [T; 2],
 }
 
 pub struct Expire<T: Map> {
-  pub cache_a: *const T,
-  pub cache_b: *const T,
-  pub cache_now: *const T,
-  pub n: *const AtomicI8,
-  pub timer: JoinHandle<()>,
+  inner: *const Inner<T>,
+  timer: JoinHandle<()>,
 }
 
 unsafe impl<T: Map> Send for Expire<T> {}
 unsafe impl<T: Map> Sync for Expire<T> {}
 
-impl<T: Map> Expire<T> {
+impl<T: Map + 'static> Expire<T> {
   pub fn get(&self, key: &T::Key) -> Option<T::Val> {
-    let v = self.cache_a.get(key);
-    if v.is_some() {
-      v
-    } else {
-      self.cache_b.get(key)
+    unsafe {
+      let inner = &*self.inner;
+      let pos = inner.pos.load(Ordering::Relaxed);
+      if let Some(v) = inner.cache[pos].get(key) {
+        return Some(v);
+      }
+      inner.cache[1 - pos].get(key)
     }
   }
 
   pub fn insert(&self, key: &T::Key, val: T::Val) {
-    self.cache_now.insert(key, val)
+    unsafe {
+      let inner = &*self.inner;
+      let idx = inner.pos.load(Ordering::Acquire);
+      inner.cache[idx].insert(key, val)
+    }
   }
 
   pub fn new(expire: u64) -> Self {
-    let cache_a = boxleak(Default::default());
-    let cache_b = boxleak(Default::default());
-    let n = boxleak(AtomicI8::new(0));
-    let n_ptr = SendPtr::new(n);
-    let a = SendPtr::new(cache_a);
-    let b = SendPtr::new(cache_b);
+    let inner = boxleak(Inner {
+      pos: AtomicUsize::new(0),
+      cache: [T::default(), T::default()],
+    });
+    let inner_ptr = SendPtr::new(inner);
+
     Self {
-      cache_a,
-      cache_b,
-      cache_now: cache_a,
-      n,
-      timer: set_timer(
-        || {
-          let n: *const AtomicUsize = n_ptr.get();
-          let current: usize = (*n).load(Ordering::Acquire);
-        },
-        Duration::from_secs(expire),
-      ),
+      inner,
+      timer: tokio::spawn(async move {
+        defer_lite::defer! {
+          unsafe {
+            let _ = Box::from_raw(inner_ptr.get() as *mut Inner<T>);
+          }
+        }
+        loop {
+          tokio::time::sleep(Duration::from_secs(expire)).await;
+          unsafe {
+            let inner = &*inner_ptr.get();
+            let n = (inner.pos.load(Ordering::Relaxed) + 1) % 2;
+            inner.cache[n].clear();
+            inner.pos.store(n, Ordering::Release);
+          }
+        }
+      }),
     }
   }
 }
 
-impl Drop for Expire<T> {
+impl<T: Map> Drop for Expire<T> {
   fn drop(&mut self) {
     self.timer.abort();
   }
