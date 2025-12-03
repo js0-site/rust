@@ -27,11 +27,14 @@ intbin = "0.2.3"
 log = "0.4.29"
 log_init = "0.1.28"
 mail-send = "0.5.2"
-sk_dkim = { version = "0.1.5", path = "../sk_dkim" }
 static_init = "1.0.4"
 thiserror = "2.0.17"
 xboot = "0.1.29"
 xerr = "0.1.16"
+
+[dependencies.sk_dkim]
+version = "0.1.5"
+path = "../sk_dkim"
 
 [dependencies.rustls]
 version = "0.23.35"
@@ -64,7 +67,7 @@ version = "0.1.48"
 features = [ "v3" ]
 
 [dependencies.msgq]
-version = "0.1.9"
+version = "0.1.11"
 path = "../msgq"
 
 [dependencies.tokio]

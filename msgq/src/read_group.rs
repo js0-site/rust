@@ -16,7 +16,7 @@ pub struct ReadGroup<P: Parse> {
   args: Vec<Value>,
 }
 
-impl<P: Parse + Clone + Send + Sync + 'static> ReadGroup<P> {
+impl<P: Parse + Send + Sync + 'static> ReadGroup<P> {
   pub fn new(parse: P, conf: Conf) -> Self {
     let count_str = conf.count.to_string();
     let claim_str = conf.claim_idle_ms.to_string();
@@ -63,36 +63,40 @@ impl<P: Parse + Clone + Send + Sync + 'static> ReadGroup<P> {
           break;
         }
 
-        let mut ing = Vec::with_capacity(li.len());
-
-        for StreamItem { id, retry, kv, .. } in li {
-          let parser = self.parse.clone();
-          ing.push((
-            id,
-            retry,
-            kv.clone(),
-            tokio::spawn(async move { parser.run(&kv, retry).await }),
-          ));
+        let ing = unsafe {
+          async_scoped::TokioScope::scope_and_collect(|s| {
+            for StreamItem { retry, kv, .. } in &li {
+              s.spawn(self.parse.run(kv, *retry))
+            }
+          })
+          .await
         }
+        .1;
 
         let mut id_li: Vec<String> = Vec::new();
 
-        for (id, retry, kv, task) in ing {
-          let err = match task.await {
-            Ok(Err(err)) => err.to_string(),
+        for (res, StreamItem { id, retry, kv, .. }) in ing.into_iter().zip(li.into_iter()) {
+          let err = match res {
             Err(err) => err.to_string(),
-            _ => {
-              id_li.push(id);
-              continue;
-            }
+            Ok(task) => match task {
+              Ok(_) => {
+                id_li.push(id);
+                continue;
+              }
+              Err(err) => err.to_string(),
+            },
           };
+
           log::error!("{id} retry {retry} {err}");
           if retry > self.conf.max_retry {
             id_li.push(id);
-            let parse = self.parse.clone();
-            tokio::spawn(async move { xerr::log!(parse.on_error(kv, err).await) });
+            let task = self.parse.on_error(kv, err);
+            if let Err(e) = task.await {
+              log::error!("{e}");
+            }
           }
         }
+
         if !id_li.is_empty() {
           crate::rm_id_li(&self.conf.stream, &self.conf.group, id_li).await?;
         }

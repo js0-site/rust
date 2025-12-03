@@ -24,7 +24,8 @@ Robust Redis Stream based message queue with auto-claim and retry handling.
 - **Consumer Groups**: Supports multiple consumers within a group for parallel processing.
 - **Automatic Group Creation**: Automatically creates the Redis Stream group and consumer if they don't exist.
 - **Reliable Delivery**: Implements auto-claiming of idle pending messages to prevent message loss.
-- **Concurrent Processing**: Uses `tokio::spawn` to process messages concurrently for high throughput.
+- **Concurrent Processing**: Uses `tokio::spawn` with `async-scoped` to process messages concurrently.
+- **Zero-Copy**: Leverages `async-scoped` to process borrowed data from the stream response without cloning, maximizing performance.
 - **Configurable Retries**: Automatic retry mechanism for failed messages, with a configurable limit.
 - **Centralized Configuration**: A simple `Conf` struct to manage all connection and behavior settings.
 - **Trait-Based Callbacks**: Uses a `Parse` trait for clear and reusable message processing and error handling logic.
@@ -36,7 +37,6 @@ Define a struct and implement the `Parse` trait to handle your message processin
 ```rust
 use msgq::{Conf, Kv, Parse, ReadGroup};
 use std::future::Future;
-use std::sync::Arc;
 use aok::{OK, Void};
 use log::info;
 
@@ -88,7 +88,10 @@ The `ReadGroup::run` method executes a continuous loop that ensures robust messa
 2.  **Fetch New Messages**: It then executes `XREADGROUP` with a `BLOCK` timeout to efficiently wait for and receive a new batch of messages.
 3.  **Group Management**: If the command fails with a `NOGROUP` error, the `auto_new` function is called to automatically create the consumer group, making setup seamless.
 4.  **Parse and Process**: All claimed and new messages are parsed by `parse_stream` into a list of `StreamItem`s.
-5.  **Concurrent Execution**: For each `StreamItem`, a `tokio` task is spawned. Inside the task, the `run` method of the provided `Parse` trait implementation is called to execute the user-defined logic.
+5.  **Concurrent Execution with Zero-Copy**:
+    -   The system uses `async_scoped` to spawn a `tokio` task for each `StreamItem`.
+    -   Crucially, this allows the tasks to borrow data (like the message body) directly from the `StreamItem` without needing to clone it (`'static` lifetime is not required).
+    -   This "zero-copy" approach significantly reduces memory overhead and improves performance, especially for large messages.
 6.  **Error Handling & Retry**:
     -   If the `run` method returns an error, the system will allow the message to be re-claimed and retried later.
     -   The `retry` count for each message is tracked. If a message's retry count exceeds `max_retry`, it is passed to the `on_error` callback of the `Parse` trait for final handling (e.g., moving to a dead-letter queue).
@@ -98,6 +101,7 @@ The `ReadGroup::run` method executes a continuous loop that ensures robust messa
 
 -   **Rust**: Core language for performance and safety.
 -   **Tokio**: Asynchronous runtime for handling concurrency.
+-   **Async Scoped**: Enables spawning non-`'static` futures, allowing for efficient zero-copy processing of borrowed data.
 -   **Fred**: A high-performance, low-level Redis client for Rust.
 -   **ThisError**: A library for deriving boilerplate `Error` implementations.
 
@@ -194,7 +198,8 @@ We are redefining the development paradigm of the Internet in a componentized wa
 - **消费组**: 支持组内多个消费者并行处理，提高吞吐量。
 - **自动创建组**: 如果 Redis Stream 组和消费者不存在，会自动创建。
 - **可靠投递**: 实现空闲消息（Pending Messages）的自动认领，防止消息丢失。
-- **并发处理**: 使用 `tokio::spawn` 并发处理消息，实现高吞吐。
+- **并发处理**: 使用 `tokio::spawn` 结合 `async-scoped` 并发处理消息。
+- **零拷贝**: 利用 `async-scoped` 处理来自 Stream 响应的借用数据，无需克隆，从而最大化性能。
 - **可配置重试**: 为失败的消息提供自动重试机制，并可配置重试次数。
 - **集中化配置**: 使用简单的 `Conf` 结构体管理所有连接和行为设置。
 - **基于 Trait 的回调**: 使用 `Parse` Trait 定义消息处理和错误处理逻辑，使代码更清晰和可复用。
@@ -206,7 +211,6 @@ We are redefining the development paradigm of the Internet in a componentized wa
 ```rust
 use msgq::{Conf, Kv, Parse, ReadGroup};
 use std::future::Future;
-use std::sync::Arc;
 use aok::{OK, Void};
 use log::info;
 
@@ -258,7 +262,10 @@ async fn main() -> Void {
 2.  **获取新消息**: 接着执行带 `BLOCK` 超时的 `XREADGROUP` 命令，高效地等待并接收一批新消息。
 3.  **组管理**: 如果命令因 `NOGROUP` 错误而失败，将调用 `auto_new` 函数自动创建消费组，使启动过程无缝衔接。
 4.  **解析与处理**: 所有被认领和新获取的消息都由 `parse_stream` 解析成 `StreamItem` 列表。
-5.  **并发执行**: 为每个 `StreamItem` 生成一个 `tokio` 任务。在任务内部，调用 `Parse` trait 实现的 `run` 方法来执行用户定义的逻辑。
+5.  **零拷贝并发执行**:
+    -   系统使用 `async_scoped` 为每个 `StreamItem` 生成一个 `tokio` 任务。
+    -   关键在于，这允许任务直接从 `StreamItem` 借用数据（如消息体），而无需进行克隆（不需要 `'static` 生命周期）。
+    -   这种“零拷贝”方法显著降低了内存开销并提高了性能，尤其是对于大消息而言。
 6.  **错误处理与重试**:
     -   如果 `run` 方法返回错误，系统将允许该消息在稍后被重新认领和重试。
     -   系统会跟踪每条消息的 `retry`（重试）次数。如果消息的重试次数超过 `max_retry`，它将被传递给 `Parse` trait 的 `on_error` 回调进行最终处理（例如，移入死信队列）。
@@ -268,6 +275,7 @@ async fn main() -> Void {
 
 -   **Rust**: 核心语言，提供高性能和内存安全。
 -   **Tokio**: 用于处理并发的异步运行时。
+-   **Async Scoped**: 支持生成非 `'static` 的 Future，允许对借用数据进行高效的零拷贝处理。
 -   **Fred**: 一个高性能、底层的 Rust Redis 客户端。
 -   **ThisError**: 一个用于派生 `Error` 实现的库，简化错误处理。
 

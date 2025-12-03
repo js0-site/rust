@@ -1,4 +1,3 @@
-use bytes::Bytes;
 use fred::prelude::Value;
 
 use crate::StreamItem;
@@ -15,7 +14,7 @@ pub fn parse_stream(val: Value) -> Vec<StreamItem> {
           let retry = retry as u64;
           if let Some(Value::Integer(idle_ms)) = li.pop() {
             let idle_ms = idle_ms as u64;
-            
+
             // Parse kv pairs - expecting Array([field, value, field, value, ...])
             let kv = if let Some(Value::Array(kv_array)) = li.pop() {
               let mut result = Vec::new();
@@ -24,13 +23,13 @@ pub fn parse_stream(val: Value) -> Vec<StreamItem> {
                 if let Some(val) = iter.next() {
                   // Convert key to Bytes
                   let key_bytes = match key {
-                    Value::String(s) => Bytes::from(s.into_inner()),
+                    Value::String(s) => s.into_inner(),
                     Value::Bytes(b) => b,
                     _ => continue,
                   };
                   // Convert value to Bytes
                   let val_bytes = match val {
-                    Value::String(s) => s.into_inner().into(),
+                    Value::String(s) => s.into_inner(),
                     Value::Bytes(b) => b,
                     _ => continue,
                   };
@@ -41,7 +40,7 @@ pub fn parse_stream(val: Value) -> Vec<StreamItem> {
             } else {
               Vec::new()
             };
-            
+
             if let Some(Value::String(stream_id)) = li.pop() {
               res.push(StreamItem {
                 id: stream_id.to_string(),

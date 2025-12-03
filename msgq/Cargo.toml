@@ -1,6 +1,6 @@
 [package]
 name = "msgq"
-version = "0.1.9"
+version = "0.1.11"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
@@ -17,8 +17,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 aok = "0.1.18"
+async-scoped = { version = "0.9.0", features = ["use-tokio"] }
 bytes = "1.11.0"
-bytes-utils = "0.1.4"
 fred = "10.1.0"
 log = "0.4.29"
 tokio = { version = "1.48.0", features = ["time"] }

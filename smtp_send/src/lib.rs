@@ -15,8 +15,10 @@ pub const R_SEND: &str = "send";
 
 pub static ROOT_CERTS: std::sync::OnceLock<rustls::RootCertStore> = std::sync::OnceLock::new();
 
-#[derive(Clone)]
-pub struct MailParse;
+pub struct MailParse {
+  selector: String,
+  sk: Sk,
+}
 
 impl msgq::Parse for MailParse {
   async fn run(&self, kv: &Kv, retry: u64) -> Void {
@@ -44,18 +46,17 @@ impl msgq::Parse for MailParse {
 }
 
 pub struct SmtpSend {
-  selector: String,
-  sk: Sk,
   read_group: ReadGroup<MailParse>,
 }
 
 impl SmtpSend {
   pub fn new(selector: impl Into<String>, sk: impl AsRef<[u8]>) -> Self {
     SmtpSend {
-      selector: selector.into(),
-      sk: Sk::new(sk),
       read_group: ReadGroup::new(
-        MailParse,
+        MailParse {
+          selector: selector.into(),
+          sk: Sk::new(sk),
+        },
         msgq::Conf::new("smtp", "send", &*HOST, 6, 300, 100, 3),
         // msgq::Conf::new("smtp", "send", &*HOST, 60, 300, 100, 3),
       ),

@@ -1,4 +1,5 @@
 mod auto_new;
+
 pub use auto_new::auto_new;
 use bytes::Bytes;
 use fred::types::streams::XReadValue;
