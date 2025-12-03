@@ -1,0 +1,116 @@
+warning: unused import: `Transport`
+ --> smtp_recv/tests/main.rs:2:64
+  |
+2 | ...utor, Transport,
+  |          ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: `smtp_recv` (test "main") generated 1 warning
+    Finished `test` profile [optimized + debuginfo] target(s) in 0.10s
+     Running unittests src/lib.rs (/tmp/rust/debug/deps/smtp_recv-a92c015895c528b9)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (/tmp/rust/debug/deps/smtp_recv-5c8c77fb81d01b37)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/main.rs (/tmp/rust/debug/deps/main-3f88bf9b60fc31a5)
+
+running 1 test
+SMTP server listening on port 8465 with implicit TLS
+
+=== Testing SMTP Client Connection ===
+
+
+thread 'test_smtp' (18321531) panicked at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustls-0.23.35/src/crypto/mod.rs:249:14:
+
+Could not automatically determine the process-level CryptoProvider from Rustls crate features.
+Call CryptoProvider::install_default() before this point to select a provider manually, or make sure exactly one of the 'aws-lc-rs' and 'ring' features is enabled.
+See the documentation of the CryptoProvider type for more information.
+            
+stack backtrace:
+   0: __rustc::rust_begin_unwind
+             at /rustc/0df64c57843a9612c68dd78bafa133f5b5d340c4/library/std/src/panicking.rs:690:5
+   1: core::panicking::panic_fmt
+             at /rustc/0df64c57843a9612c68dd78bafa133f5b5d340c4/library/core/src/panicking.rs:80:14
+   2: core::panicking::panic_display
+             at /rustc/0df64c57843a9612c68dd78bafa133f5b5d340c4/library/core/src/panicking.rs:259:5
+   3: core::option::expect_failed
+             at /rustc/0df64c57843a9612c68dd78bafa133f5b5d340c4/library/core/src/option.rs:2184:5
+   4: core::option::Option<T>::expect
+             at /Users/z/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/option.rs:971:21
+   5: rustls::crypto::CryptoProvider::get_default_or_install_from_crate_features
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustls-0.23.35/src/crypto/mod.rs:249:14
+   6: rustls::client::client_conn::ClientConfig::builder_with_protocol_versions
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/rustls-0.23.35/src/client/client_conn.rs:317:13
+   7: main::test_smtp_client::{{closure}}
+             at ./tests/main.rs:105:16
+   8: main::test_smtp::{{closure}}
+             at ./tests/main.rs:52:22
+   9: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /Users/z/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/future/future.rs:133:9
+  10: <core::pin::Pin<P> as core::future::future::Future>::poll
+             at /Users/z/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/future/future.rs:133:9
+  11: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}::{{closure}}
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:742:70
+  12: tokio::task::coop::with_budget
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/task/coop/mod.rs:167:5
+  13: tokio::task::coop::budget
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/task/coop/mod.rs:133:5
+  14: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}::{{closure}}
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:742:25
+  15: tokio::runtime::scheduler::current_thread::Context::enter
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:432:19
+  16: tokio::runtime::scheduler::current_thread::CoreGuard::block_on::{{closure}}
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:741:44
+  17: tokio::runtime::scheduler::current_thread::CoreGuard::enter::{{closure}}
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:829:68
+  18: tokio::runtime::context::scoped::Scoped<T>::set
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/context/scoped.rs:40:9
+  19: tokio::runtime::context::set_scheduler::{{closure}}
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/context.rs:176:38
+  20: std::thread::local::LocalKey<T>::try_with
+             at /Users/z/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/thread/local.rs:508:12
+  21: std::thread::local::LocalKey<T>::with
+             at /Users/z/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/std/src/thread/local.rs:472:20
+  22: tokio::runtime::context::set_scheduler
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/context.rs:176:17
+  23: tokio::runtime::scheduler::current_thread::CoreGuard::enter
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:829:27
+  24: tokio::runtime::scheduler::current_thread::CoreGuard::block_on
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:729:24
+  25: tokio::runtime::scheduler::current_thread::CurrentThread::block_on::{{closure}}
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:200:33
+  26: tokio::runtime::context::runtime::enter_runtime
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/context/runtime.rs:65:16
+  27: tokio::runtime::scheduler::current_thread::CurrentThread::block_on
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/scheduler/current_thread/mod.rs:188:9
+  28: tokio::runtime::runtime::Runtime::block_on_inner
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/runtime.rs:368:52
+  29: tokio::runtime::runtime::Runtime::block_on
+             at /Users/z/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/tokio-1.48.0/src/runtime/runtime.rs:342:18
+  30: main::test_smtp
+             at ./tests/main.rs:57:3
+  31: main::test_smtp::{{closure}}
+             at ./tests/main.rs:38:25
+  32: core::ops::function::FnOnce::call_once
+             at /Users/z/.rustup/toolchains/nightly-aarch64-apple-darwin/lib/rustlib/src/rust/library/core/src/ops/function.rs:250:5
+  33: core::ops::function::FnOnce::call_once
+             at /rustc/0df64c57843a9612c68dd78bafa133f5b5d340c4/library/core/src/ops/function.rs:250:5
+note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
+test test_smtp ... FAILED
+
+failures:
+
+failures:
+    test_smtp
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.86s
+
+error: test failed, to rerun pass `--test main`

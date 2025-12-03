@@ -1,0 +1,58 @@
+[package]
+name = "smtp_srv"
+version = "0.2.2"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/smtp_srv"
+description = "smtp_srv"
+keywords = [ ]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+aok = "0.1.18"
+bitcode = "0.6.7"
+intbin = "0.2.3"
+log_init = "0.1.28"
+rustls = "0.23.35"
+static_init = "1.0.4"
+xboot = "0.1.29"
+
+[dependencies.mimalloc]
+version = "0.1.48"
+features = [ "v3" ]
+
+[dependencies.mail_struct]
+version = "0.1.9"
+path = "../mail_struct"
+features = [ "encode" ]
+
+[dependencies.xkv]
+version = "0.1.51"
+features = [ "r" ]
+
+[dependencies.auth_env]
+version = "0.1.3"
+path = "../auth_env"
+
+[dependencies.cert_by_host]
+version = "0.1.5"
+path = "../cert_by_host"
+
+[dependencies.smtp_recv]
+version = "0.1.10"
+path = "../smtp_recv"
+
+[dependencies.ssl_trait]
+version = "0.1.3"
+path = "../ssl_trait"
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "rt-multi-thread" ]
