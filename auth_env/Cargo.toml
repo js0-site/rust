@@ -1,0 +1,23 @@
+[package]
+name = "auth_env"
+version = "0.1.3"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/auth_env"
+description = "auth_env"
+keywords = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dependencies]
+anyhow = "1.0.100"
+
+[dependencies.auth_trait]
+version = "0.1.5"
+path = "../auth_trait"

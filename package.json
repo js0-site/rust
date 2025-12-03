@@ -1,0 +1,6 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@3-/cargo_upgrade": "^0.1.3"
+  }
+}
