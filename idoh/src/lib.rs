@@ -5,11 +5,11 @@ pub mod record_type;
 mod resolve;
 
 #[cfg(feature = "mx")]
-#[cfg_attr(docsrs, doc(cfg(feature = "mx")))]
-mod mx;
+pub mod mx;
 
 #[cfg(feature = "mx")]
-#[cfg_attr(docsrs, doc(cfg(feature = "mx")))]
-pub use mx::{Mx, mx};
+pub use mx::{Mx, MxLookup};
 pub use post::{Answer, DohError, post};
 pub use resolve::{DOH_LI, resolve};
+mod resolve_trait;
+pub use resolve_trait::{Resolve, Resolver};

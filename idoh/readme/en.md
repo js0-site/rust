@@ -1,98 +1,85 @@
 # idoh : Fast and secure DNS over HTTPS resolution
 
-`idoh` is a lightweight, high-performance Rust library for DNS over HTTPS (DoH) resolution. It concurrently queries multiple DoH providers and returns the fastest response, ensuring both speed and reliability.
-
-## Table of Contents
-
-- [Features](#features)
-- [Usage](#usage)
-  - [Basic Usage](#basic-usage)
-  - [Using MX Feature](#using-mx-feature)
-- [Design](#design)
-- [Tech Stack](#tech-stack)
-- [Directory Structure](#directory-structure)
-- [API Reference](#api-reference)
-- [History: The Rise of DoH](#history-the-rise-of-doh)
+`idoh` is a high-performance, async Rust library for DNS over HTTPS (DoH) resolution, designed for speed and reliability through concurrent queries.
 
 ## Features
 
-*   **Concurrent Resolution**: Queries multiple DoH providers (Google, Cloudflare, Tencent, etc.) simultaneously.
-*   **Fastest Response Wins**: Returns the result from the first provider to respond successfully.
-*   **Robust Error Handling**: Automatically handles failures from individual providers without compromising the overall resolution process.
-*   **Simple API**: Easy-to-use `resolve` function for common DNS record types.
-*   **Typed MX Records**: Optional `mx` feature provides structured MX record parsing.
-*   **Customizable**: Supports custom extraction logic for DNS answers.
+- **Concurrent Resolution**: Queries multiple DoH providers simultaneously (Google, Cloudflare, Quad9, etc.) and returns the fastest response.
+- **MX Lookup**: specialized support for MX record lookup with priority sorting.
+- **Zero-Cost Caching**: Optional caching support using `expire_cache` with GAT-based zero-copy retrieval.
+- **Async/Await**: Built on `tokio` for efficient non-blocking I/O.
+- **Robust Error Handling**: Gracefully handles failures from individual providers.
 
 ## Usage
 
-Add `idoh` to your `Cargo.toml`:
+Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-idoh = "0.1.7"
+idoh = "0.1.9"
 ```
 
-### Basic Usage
-
-Use the generic `resolve` function for any DNS record type:
+### Basic Resolution
 
 ```rust
-use aok::{Result, OK};
+use aok::Result;
+use idoh::resolve;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-  let domain = "example.com";
+    // Resolve A records for google.com
+    let ip = resolve("google.com", "A").await?;
+    println!("IP: {:?}", ip);
+    Ok(())
+}
+```
 
-  // Resolve A records
-  let records = idoh::resolve(domain, "A", |answers| {
-    let mut ips = Vec::new();
-    for answer in answers {
-      if answer.r#type == idoh::record_type::A {
-        ips.push(answer.data);
-      }
+### MX Lookup with Caching
+
+Enable features in `Cargo.toml`:
+```toml
+[dependencies]
+idoh = { version = "0.1.9", features = ["mx", "cache"] }
+```
+
+```rust
+use aok::Result;
+use idoh::MxLookup;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // Use the Cache struct for cached lookups
+    use idoh::mx::cache::Cache;
+
+    // 1. First call: Network request (Cold cache)
+    // Time: ~1.3s
+    let mx_records = Cache.mx("gmail.com").await?;
+    
+    println!("First call (Network): Found {} records", mx_records.len());
+    for mx in mx_records.iter() {
+        println!("  Priority: {}, Server: {}", mx.priority, mx.server);
     }
-    Ok(Some(ips))
-  })
-  .await?;
-
-  println!("A Records: {:?}", records);
-  OK
+    
+    // 2. Second call: Memory lookup (Hot cache)
+    // Time: ~416ns (Zero-copy, >3,000,000x faster)
+    let cached = Cache.mx("gmail.com").await?;
+    
+    println!("Second call (Cache): Found {} records", cached.len());
+    
+    Ok(())
 }
 ```
 
-### Using MX Feature
+### Performance Comparison
 
-Enable the `mx` feature for structured MX record parsing:
+| Operation | Time | Notes |
+|-----------|------|-------|
+| Network Lookup | ~1.3 s | Depends on DNS provider latency |
+| Cache Lookup | ~416 ns | **Zero-copy**, >3 million times faster |
 
-```toml
-[dependencies]
-idoh = { version = "0.1.7", features = ["mx"] }
-```
+## Design Philosophy
 
-```rust
-use aok::{Result, OK};
-
-#[tokio::main]
-async fn main() -> Result<()> {
-  let mx_records = idoh::mx("gmail.com").await?;
-  
-  for record in mx_records {
-    println!("Priority: {}, Server: {}, TTL: {}s", 
-      record.priority, record.server, record.ttl);
-  }
-  
-  OK
-}
-```
-
-## Design
-
-The core design philosophy of `idoh` is **speed through concurrency**.
-
-1.  **Task Spawning**: When `resolve` is called, it spawns a background task.
-2.  **Staggered Concurrency**: The task iterates through a predefined list of high-quality DoH providers (`DOH_LI`). It spawns a sub-task for a provider every **500ms**. This strategy balances speed and resource usage: if the first provider is fast, we don't waste resources querying others.
-3.  **Race to Finish**: A bounded channel (`crossfire::mpsc::bounded_async`) acting as a message queue with a capacity of 1 is used to collect the result. The first successful response wins and is sent to the channel.
-4.  **Cancellation**: Once a result is received, the main `resolve` function returns, and the background tasks are aborted using `defer-lite` to clean up resources.
+`idoh` prioritizes **latency minimization**. Instead of querying a single DNS server, it concurrently sends requests to a pre-configured list of high-performance public DoH providers (including Tencent, Google, Cloudflare, AliDNS). The first valid response is returned, effectively racing the providers against each other. This approach mitigates network jitter and single-provider slowness.
 
 ### Flowchart
 
@@ -114,94 +101,55 @@ graph TD
 
 ## Tech Stack
 
-*   **[tokio](https://tokio.rs/)**: Asynchronous runtime for executing concurrent tasks.
-*   **[ireq](https://crates.io/crates/ireq)**: Simple and efficient HTTP client for making DoH requests.
-*   **[sonic-rs](https://github.com/cloudwego/sonic)**: High-performance JSON parsing for processing DNS responses.
-*   **[crossfire](https://crates.io/crates/crossfire)**: High-performance channels for task communication.
+- **Runtime**: `tokio`
+- **HTTP Client**: `ireq` (lightweight wrapper)
+- **JSON Parsing**: `sonic-rs` (SIMD-accelerated)
+- **Caching**: `expire_cache` + `dashmap` (thread-safe, expiration support)
+- **Concurrency**: `crossfire` (efficient channels)
 
 ## Directory Structure
 
-*   `src/lib.rs`: The main entry point. Exports the public API and modules.
-*   `src/resolve.rs`: Contains the core `resolve` logic and the list of DoH providers (`DOH_LI`).
-*   `src/post.rs`: Handles the HTTP GET requests to DoH providers and defines the `Answer` struct.
-*   `src/record_type.rs`: Defines constants for common DNS record types (e.g., `A`, `MX`, `TXT`).
-*   `src/mx.rs`: (Optional, requires `mx` feature) Provides the `mx` function and `Mx` struct for structured MX record queries.
+- `src/lib.rs`: Module exports and feature gating.
+- `src/resolve.rs`: Core resolution logic implementing the "race" mechanism.
+- `src/resolve_trait.rs`: `Resolver` trait definition.
+- `src/mx.rs`: MX record specific implementation and caching logic.
+- `src/post.rs`: HTTP request handling and response parsing.
+- `src/record_type.rs`: DNS record type constants.
 
 ## API Reference
 
 ### `resolve`
-
+The core function that performs the concurrent DoH lookup.
 ```rust
 pub async fn resolve<T>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
-  extract: impl Fn(Vec<Answer>) -> Result<Option<T>> + Send + 'static + Clone,
+  extract: impl Fn(&[Answer]) -> Result<Option<T>>
 ) -> Result<T>
 ```
 
-*   `name`: The domain name to resolve.
-*   `record_type`: The DNS record type (e.g., "A", "AAAA", "MX", "TXT").
-*   `extract`: A closure to process the list of `Answer`s and return the desired result `T`.
-
-### `mx` (requires `mx` feature)
-
+### `MxLookup` Trait
+Provides the `mx` method for fetching MX records.
 ```rust
-pub async fn mx(domain: impl AsRef<str>) -> Result<Vec<Mx>>
-```
-
-Queries MX records for a domain and returns structured results.
-
-*   `domain`: The domain name to query.
-*   Returns: A vector of `Mx` structs, sorted by the DNS server (not by priority).
-
-### `Mx` Struct
-
-```rust
-pub struct Mx {
-  pub priority: u16,
-  pub server: String,
-  pub ttl: u64,
+pub trait MxLookup {
+  type VecMx<'a>: Deref<Target = [Mx]> + 'a;
+  async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>>;
 }
 ```
-
-Represents a mail exchange record:
-*   `priority`: Mail server priority (lower values indicate higher priority).
-*   `server`: Mail server hostname (trailing dots are automatically removed).
-*   `ttl`: Time to live in seconds.
-
-### `Answer` Struct
-
-```rust
-pub struct Answer {
-  pub name: String,
-  pub r#type: u16,
-  pub ttl: u64,
-  pub data: String,
-}
-```
-
-Represents a single DNS record returned by the DoH provider.
-
-### `record_type` Module
-
-Contains constants for DNS record types:
-*   `A` (1) - IPv4 address
-*   `NS` (2) - Name server
-*   `CNAME` (5) - Canonical name
-*   `SOA` (6) - Start of authority
-*   `PTR` (12) - Pointer record
-*   `MX` (15) - Mail exchange
-*   `TXT` (16) - Text record
-*   `AAAA` (28) - IPv6 address
-*   `SRV` (33) - Service locator
-*   `ANY` (255) - Any record type
 
 ## History: The Rise of DoH
 
-DNS over HTTPS (DoH) was introduced to address the privacy and security vulnerabilities of traditional DNS. Traditional DNS queries are sent in plaintext, allowing anyone on the network path to see which websites a user is visiting.
+The Domain Name System (DNS), the phonebook of the Internet, was designed in the 1980s without encryption. For decades, every website visit leaked your destination to anyone listening on the wire.
 
-*   **2018**: The IETF standardized DoH as RFC 8484.
-*   **Adoption**: Major browsers like Firefox and Chrome began supporting DoH to protect user privacy.
-*   **Impact**: DoH encrypts DNS traffic, preventing eavesdropping and manipulation, making the internet safer for everyone.
+In 2018, the IETF standardized **DNS over HTTPS (DoH)** (RFC 8484) to close this privacy gap. By wrapping DNS queries in encrypted HTTPS traffic, DoH prevents eavesdropping and manipulation. Major browsers like Firefox and Chrome adopted it, sparking a revolution in internet privacy. `idoh` builds on this legacy, offering a modern, fast, and secure way to resolve names in the Rust ecosystem.
 
-`idoh` builds on this legacy by providing a tool to easily integrate secure and fast DNS resolution into Rust applications.
+---
+
+## About
+
+This project is an open-source component of [js0.site ⋅ Refactoring the Internet Plan](https://js0.site).
+
+We are redefining the development paradigm of the Internet in a componentized way. Welcome to follow us:
+
+* [Google Group](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)

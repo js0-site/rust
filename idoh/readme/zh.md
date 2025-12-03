@@ -1,98 +1,85 @@
-# idoh : 极速安全的 DNS over HTTPS 解析库
+# idoh : 极速安全的 DoH 解析库
 
-`idoh` 是一个轻量级、高性能的 Rust 库，用于 DNS over HTTPS (DoH) 解析。它并发查询多个 DoH 提供商并返回最快的响应，确保速度和可靠性。
-
-## 目录
-
-- [功能特性](#功能特性)
-- [使用指南](#使用指南)
-  - [基础用法](#基础用法)
-  - [使用 MX 特性](#使用-mx-特性)
-- [设计思路](#设计思路)
-- [技术栈](#技术栈)
-- [目录结构](#目录结构)
-- [API 参考](#api-参考)
-- [历史背景：DoH 的崛起](#历史背景doh-的崛起)
+`idoh` 是一个高性能、异步的 Rust 库，用于通过 HTTPS (DoH) 进行 DNS 解析。它专为速度和可靠性而设计，通过并发查询多个上游服务来确保最快的响应。
 
 ## 功能特性
 
-*   **并发解析**：同时查询多个 DoH 提供商（Google, Cloudflare, 腾讯等）。
-*   **极速响应**：返回首个成功响应的提供商结果，唯快不破。
-*   **健壮容错**：自动处理单个提供商的失败，不影响整体解析流程。
-*   **API 简洁**：提供简单易用的 `resolve` 函数，满足常见 DNS 记录类型查询。
-*   **类型化 MX 记录**：可选的 `mx` 特性提供结构化的 MX 记录解析。
-*   **高度定制**：支持自定义 DNS 结果提取逻辑。
+- **并发解析**：同时向多个 DoH 提供商（如腾讯、阿里、Google、Cloudflare 等）发起查询，返回最快的结果。
+- **MX 查询**：专门优化的 MX 记录查询支持，自动按优先级排序。
+- **零成本缓存**：可选的缓存支持，基于 `expire_cache` 和 GAT 技术实现零拷贝获取，性能极致。
+- **异步/Await**：基于 `tokio` 构建，高效非阻塞。
+- **健壮的错误处理**：优雅处理单个提供商的失败或超时。
 
 ## 使用指南
 
-在 `Cargo.toml` 中添加 `idoh`：
+在 `Cargo.toml` 中添加：
 
 ```toml
 [dependencies]
-idoh = "0.1.7"
+idoh = "0.1.9"
 ```
 
-### 基础用法
-
-使用通用的 `resolve` 函数查询任意 DNS 记录类型：
+### 基础解析
 
 ```rust
-use aok::{Result, OK};
+use aok::Result;
+use idoh::resolve;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-  let domain = "example.com";
+    // 解析 google.com 的 A 记录
+    let ip = resolve("google.com", "A").await?;
+    println!("IP: {:?}", ip);
+    Ok(())
+}
+```
 
-  // 解析 A 记录
-  let records = idoh::resolve(domain, "A", |answers| {
-    let mut ips = Vec::new();
-    for answer in answers {
-      if answer.r#type == idoh::record_type::A {
-        ips.push(answer.data);
-      }
+### MX 查询与缓存
+
+启用特性：
+```toml
+[dependencies]
+idoh = { version = "0.1.9", features = ["mx", "cache"] }
+```
+
+```rust
+use aok::Result;
+use idoh::MxLookup;
+
+#[tokio::main]
+async fn main() -> Result<()> {
+    // 使用 Cache 结构体进行带缓存的查询
+    use idoh::mx::cache::Cache;
+
+    // 1. 首次调用：发起网络请求 (冷缓存)
+    // 耗时：约 1.3 秒
+    let mx_records = Cache.mx("gmail.com").await?;
+    
+    println!("首次调用 (网络): 找到 {} 条记录", mx_records.len());
+    for mx in mx_records.iter() {
+        println!("  优先级: {}, 服务器: {}", mx.priority, mx.server);
     }
-    Ok(Some(ips))
-  })
-  .await?;
-
-  println!("A 记录: {:?}", records);
-  OK
+    
+    // 2. 第二次调用：内存直接获取 (热缓存)
+    // 耗时：约 416 纳秒 (零拷贝，快 300 万倍)
+    let cached = Cache.mx("gmail.com").await?;
+    
+    println!("第二次调用 (缓存): 找到 {} 条记录", cached.len());
+    
+    Ok(())
 }
 ```
 
-### 使用 MX 特性
+### 性能对比
 
-启用 `mx` 特性以获得结构化的 MX 记录解析：
-
-```toml
-[dependencies]
-idoh = { version = "0.1.7", features = ["mx"] }
-```
-
-```rust
-use aok::{Result, OK};
-
-#[tokio::main]
-async fn main() -> Result<()> {
-  let mx_records = idoh::mx("gmail.com").await?;
-  
-  for record in mx_records {
-    println!("优先级: {}, 服务器: {}, TTL: {}秒", 
-      record.priority, record.server, record.ttl);
-  }
-  
-  OK
-}
-```
+| 操作 | 耗时 | 说明 |
+|------|------|------|
+| 网络查询 | ~1.3 秒 | 取决于 DNS 提供商延迟 |
+| 缓存查询 | ~416 纳秒 | **零拷贝**，快 300 万倍以上 |
 
 ## 设计思路
 
-`idoh` 的核心设计理念是 **通过并发实现极速**。
-
-1.  **任务生成**：调用 `resolve` 时，会启动一个后台任务。
-2.  **交错并发**：任务遍历预定义的优质 DoH 提供商列表 (`DOH_LI`)，每隔 **500毫秒** 启动一个新的查询子任务。这种策略在速度和资源之间取得了平衡：如果第一个提供商响应够快，就不必浪费资源查询后续提供商。
-3.  **竞速机制**：使用容量为 1 的有界通道 (`crossfire::mpsc::bounded_async`) 作为消息队列来收集结果。谁先成功响应，谁的结果就会被写入通道并返回。
-4.  **自动清理**：一旦收到结果，主 `resolve` 函数返回，并通过 `defer-lite` 自动中止剩余的后台任务，释放资源。
+`idoh` 的核心哲学是**最小化延迟**。它不是依赖单一的 DNS 服务器，而是并发地向预配置的高性能公共 DoH 提供商列表（包括腾讯云、阿里云、Google、Cloudflare 等）发送请求。它采用“赛跑”机制，只取最先返回的有效结果。这种方法有效地规避了网络抖动和单一服务商的偶发性卡顿。
 
 ### 流程图
 
@@ -114,94 +101,55 @@ graph TD
 
 ## 技术栈
 
-*   **[tokio](https://tokio.rs/)**：用于执行并发任务的异步运行时。
-*   **[ireq](https://crates.io/crates/ireq)**：简单高效的 HTTP 客户端，用于发送 DoH 请求。
-*   **[sonic-rs](https://github.com/cloudwego/sonic)**：高性能 JSON 解析库，用于处理 DNS 响应。
-*   **[crossfire](https://crates.io/crates/crossfire)**：高性能通道，用于任务间通信。
+- **运行时**: `tokio`
+- **HTTP 客户端**: `ireq` (轻量级封装)
+- **JSON 解析**: `sonic-rs` (SIMD 加速)
+- **缓存**: `expire_cache` + `dashmap` (线程安全，支持过期)
+- **并发**: `crossfire` (高效通道)
 
 ## 目录结构
 
-*   `src/lib.rs`：库入口，导出公共 API 和模块。
-*   `src/resolve.rs`：包含核心 `resolve` 逻辑和 DoH 提供商列表 (`DOH_LI`)。
-*   `src/post.rs`：处理向 DoH 提供商发送 HTTP GET 请求，定义 `Answer` 结构体。
-*   `src/record_type.rs`：定义常用 DNS 记录类型的常量（如 `A`, `MX`, `TXT`）。
-*   `src/mx.rs`：（可选，需要 `mx` 特性）提供 `mx` 函数和 `Mx` 结构体，用于结构化 MX 记录查询。
+- `src/lib.rs`: 模块导出和特性门控。
+- `src/resolve.rs`: 核心解析逻辑，实现了“赛跑”机制。
+- `src/resolve_trait.rs`: `Resolver` trait 定义。
+- `src/mx.rs`: MX 记录的具体实现及缓存逻辑。
+- `src/post.rs`: HTTP 请求处理和响应解析。
+- `src/record_type.rs`: DNS 记录类型常量。
 
 ## API 参考
 
 ### `resolve`
-
+执行并发 DoH 查询的核心函数。
 ```rust
 pub async fn resolve<T>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
-  extract: impl Fn(Vec<Answer>) -> Result<Option<T>> + Send + 'static + Clone,
+  extract: impl Fn(&[Answer]) -> Result<Option<T>>
 ) -> Result<T>
 ```
 
-*   `name`: 要解析的域名。
-*   `record_type`: DNS 记录类型（如 "A", "AAAA", "MX", "TXT"）。
-*   `extract`: 处理 `Answer` 列表并返回所需结果 `T` 的闭包。
-
-### `mx`（需要 `mx` 特性）
-
+### `MxLookup` Trait
+提供 `mx` 方法用于获取 MX 记录。
 ```rust
-pub async fn mx(domain: impl AsRef<str>) -> Result<Vec<Mx>>
-```
-
-查询域名的 MX 记录并返回结构化结果。
-
-*   `domain`: 要查询的域名。
-*   返回值: `Mx` 结构体的向量，按 DNS 服务器返回顺序排序（不按优先级排序）。
-
-### `Mx` 结构体
-
-```rust
-pub struct Mx {
-  pub priority: u16,
-  pub server: String,
-  pub ttl: u64,
+pub trait MxLookup {
+  type VecMx<'a>: Deref<Target = [Mx]> + 'a;
+  async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>>;
 }
 ```
 
-表示邮件交换记录：
-*   `priority`: 邮件服务器优先级（数值越小优先级越高）。
-*   `server`: 邮件服务器主机名（自动移除末尾的点号）。
-*   `ttl`: 生存时间（秒）。
+## 历史：DoH 的崛起
 
-### `Answer` 结构体
+域名系统 (DNS) 作为互联网的电话簿，设计于 1980 年代，当时并未考虑加密。几十年来，每一次网站访问都会在网络上明文暴露你的目的地。
 
-```rust
-pub struct Answer {
-  pub name: String,
-  pub r#type: u16,
-  pub ttl: u64,
-  pub data: String,
-}
-```
+2018 年，IETF 标准化了 **DNS over HTTPS (DoH)** (RFC 8484) 以填补这一隐私空白。通过将 DNS 查询封装在加密的 HTTPS 流量中，DoH 防止了窃听和篡改。Firefox 和 Chrome 等主流浏览器迅速采纳，引发了互联网隐私的革命。`idoh` 建立在这一遗产之上，为 Rust 生态系统提供了一种现代、快速且安全的域名解析方案。
 
-表示 DoH 提供商返回的单条 DNS 记录。
+---
 
-### `record_type` 模块
+## 关于
 
-包含 DNS 记录类型的常量：
-*   `A` (1) - IPv4 地址
-*   `NS` (2) - 名称服务器
-*   `CNAME` (5) - 规范名称
-*   `SOA` (6) - 授权起始
-*   `PTR` (12) - 指针记录
-*   `MX` (15) - 邮件交换
-*   `TXT` (16) - 文本记录
-*   `AAAA` (28) - IPv6 地址
-*   `SRV` (33) - 服务定位
-*   `ANY` (255) - 任意记录类型
+本项目为 [js0.site ⋅ 重构互联网计划](https://js0.site) 的开源组件。
 
-## 历史背景：DoH 的崛起
+我们正在以组件化的方式重新定义互联网的开发范式，欢迎关注：
 
-DNS over HTTPS (DoH) 的引入是为了解决传统 DNS 的隐私和安全漏洞。传统 DNS 查询以明文形式发送，允许网络路径上的任何人查看用户正在访问的网站。
-
-*   **2018年**：IETF 将 DoH 标准化为 RFC 8484。
-*   **普及**：Firefox 和 Chrome 等主流浏览器开始支持 DoH 以保护用户隐私。
-*   **影响**：DoH 加密了 DNS 流量，防止窃听和篡改，让互联网对每个人都更安全。
-
-`idoh` 建立在这一基础之上，为 Rust 应用提供了一种简单、快速且安全的 DNS 解析集成方案。
+* [谷歌邮件列表](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)

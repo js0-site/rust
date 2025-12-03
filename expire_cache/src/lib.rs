@@ -11,7 +11,7 @@ use sendptr::SendPtr;
 use tokio::task::JoinHandle;
 
 #[cfg(feature = "dashmap")]
-mod map;
+pub mod map;
 #[cfg(feature = "dashset")]
 mod set;
 

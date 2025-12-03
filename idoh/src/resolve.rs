@@ -24,7 +24,7 @@ pub static DOH_LI: &[&str] = &[
 pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
-  extract: impl Fn(Vec<Answer>) -> Result<Option<T>> + Send + 'static + Clone,
+  extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
 ) -> Result<T> {
   let query = format!("?name={}&type={}", name.as_ref(), record_type.as_ref());
   let (send, recv) = crossfire::mpsc::bounded_async::<Result<T>>(1);
@@ -55,7 +55,7 @@ pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
         }
 
         match r {
-          Ok(res) => match extract(res) {
+          Ok(res) => match extract(&res) {
             Ok(res) => {
               if let Some(res) = res {
                 let _ = send.send(Ok::<_, aok::Error>(res)).await;

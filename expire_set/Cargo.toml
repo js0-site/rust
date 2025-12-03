@@ -19,7 +19,7 @@ default = [ ]
 dashmap = "6.1.0"
 
 [dependencies.expire_cache]
-version = "0.1.6"
+version = "0.1.7"
 path = "../expire_cache"
 features = [ "dashset" ]
 
