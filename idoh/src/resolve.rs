@@ -25,7 +25,7 @@ pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
   extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
-) -> crate::Result<T> {
+) -> Result<Option<T>> {
   let query = format!("?name={}&type={}", name.as_ref(), record_type.as_ref());
   let (send, recv) = crossfire::mpsc::bounded_async::<Result<T>>(1);
 
@@ -79,8 +79,8 @@ pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
     spawn.abort();
   }
 
-  Ok(recv
-    .recv()
-    .await
-    .map_err(|_| crate::Error::DnsNoResult)??)
+  match recv.recv().await {
+    Ok(r) => Ok(Some(r?)),
+    Err(_) => Ok(None),
+  }
 }

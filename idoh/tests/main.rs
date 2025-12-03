@@ -13,11 +13,13 @@ async fn test_async() -> Void {
 
   let mx_records = Resolve.mx(domain).await?;
 
-  for mx in mx_records {
-    info!(
-      "MX Record - Priority: {}, Server: {}, TTL: {}",
-      mx.priority, mx.server, mx.ttl
-    );
+  if let Some(mx_records) = mx_records {
+    for mx in mx_records.iter() {
+      info!(
+        "MX Record - Priority: {}, Server: {}, TTL: {}",
+        mx.priority, mx.server, mx.ttl
+      );
+    }
   }
 
   OK
@@ -35,7 +37,9 @@ async fn test_cache() -> Void {
   let first_duration = start.elapsed();
 
   info!("First call took: {:?}", first_duration);
-  info!("Found {} MX records", mx_records1.len());
+  if let Some(ref records) = mx_records1 {
+    info!("Found {} MX records", records.len());
+  }
 
   // Second call - should return from cache (faster)
   let start = std::time::Instant::now();
@@ -46,10 +50,12 @@ async fn test_cache() -> Void {
 
   assert!(second_duration.as_micros() <= 1);
   // Verify results are the same
-  assert_eq!(mx_records1.len(), mx_records2.len());
-  for (mx1, mx2) in mx_records1.iter().zip(mx_records2.iter()) {
-    assert_eq!(mx1.priority, mx2.priority);
-    assert_eq!(mx1.server, mx2.server);
+  if let (Some(records1), Some(records2)) = (&mx_records1, &mx_records2) {
+    assert_eq!(records1.len(), records2.len());
+    for (mx1, mx2) in records1.iter().zip(records2.iter()) {
+      assert_eq!(mx1.priority, mx2.priority);
+      assert_eq!(mx1.server, mx2.server);
+    }
   }
 
   info!("Cache test passed - second call was faster and results matched");

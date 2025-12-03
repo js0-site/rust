@@ -16,20 +16,31 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-idoh = "0.1.9"
+idoh = "0.1.11"
 ```
 
 ### Basic Resolution
 
 ```rust
 use aok::Result;
-use idoh::resolve;
+use idoh::{resolve, DOH_LI};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Resolve A records for google.com
-    let ip = resolve("google.com", "A").await?;
-    println!("IP: {:?}", ip);
+    let ip = resolve(
+        "google.com",
+        "A",
+        |answers| {
+             // Custom extraction logic
+             // For example, return the first answer's data
+             Ok(answers.first().map(|a| a.data.clone()))
+        }
+    ).await?;
+    
+    if let Some(ip) = ip {
+        println!("IP: {:?}", ip);
+    }
     Ok(())
 }
 ```
@@ -39,7 +50,7 @@ async fn main() -> Result<()> {
 Enable features in `Cargo.toml`:
 ```toml
 [dependencies]
-idoh = { version = "0.1.9", features = ["mx", "cache"] }
+idoh = { version = "0.1.11", features = ["mx", "cache"] }
 ```
 
 ```rust
@@ -55,16 +66,20 @@ async fn main() -> Result<()> {
     // Time: ~1.3s
     let mx_records = Cache.mx("gmail.com").await?;
     
-    println!("First call (Network): Found {} records", mx_records.len());
-    for mx in mx_records.iter() {
-        println!("  Priority: {}, Server: {}", mx.priority, mx.server);
+    if let Some(records) = mx_records {
+        println!("First call (Network): Found {} records", records.len());
+        for mx in records.iter() {
+            println!("  Priority: {}, Server: {}", mx.priority, mx.server);
+        }
     }
     
     // 2. Second call: Memory lookup (Hot cache)
     // Time: ~416ns (Zero-copy, >3,000,000x faster)
     let cached = Cache.mx("gmail.com").await?;
     
-    println!("Second call (Cache): Found {} records", cached.len());
+    if let Some(records) = cached {
+        println!("Second call (Cache): Found {} records", records.len());
+    }
     
     Ok(())
 }
@@ -121,19 +136,24 @@ graph TD
 ### `resolve`
 The core function that performs the concurrent DoH lookup.
 ```rust
-pub async fn resolve<T>(
+pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
-  extract: impl Fn(&[Answer]) -> Result<Option<T>>
-) -> Result<T>
+  extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
+) -> Result<Option<T>>
 ```
 
 ### `MxLookup` Trait
 Provides the `mx` method for fetching MX records.
 ```rust
 pub trait MxLookup {
-  type VecMx<'a>: Deref<Target = [Mx]> + 'a;
-  async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>>;
+  type VecMx<'a>: Deref<Target = [Mx]> + 'a
+  where
+    Self: 'a;
+  fn mx<'a>(
+    &'a self,
+    domain: impl AsRef<str> + Send + 'a,
+  ) -> impl std::future::Future<Output = Result<Option<Self::VecMx<'a>>>> + Send + 'a;
 }
 ```
 

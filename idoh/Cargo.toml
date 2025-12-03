@@ -1,6 +1,6 @@
 [package]
 name = "idoh"
-version = "0.1.10"
+version = "0.1.12"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
@@ -24,10 +24,18 @@ sonic-rs = "0.5.6"
 crossfire = "2.1.7"
 log = "0.4.29"
 thiserror = "2.0.17"
-reqwest = { version = "0.12.24", features = ["http3"] }
+
+[dependencies.reqwest]
+version = "0.12.24"
+features = [ "http3" ]
+
+[dependencies.ireq]
+version = "0.1.32"
+path = "../ireq"
+features = [ "proxy" ]
 
 [dependencies.expire_cache]
-version = "0.1.7"
+version = "0.1.8"
 path = "../expire_cache"
 features = [ "dashmap" ]
 optional = true
@@ -46,10 +54,6 @@ version = "0.1.1"
 [dependencies.serde]
 version = "1.0.228"
 features = [ "derive" ]
-
-[dependencies.ireq]
-version = "0.1.31"
-features = [ "proxy" ]
 
 [dependencies.tokio]
 version = "1.48.0"

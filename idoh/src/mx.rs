@@ -20,7 +20,7 @@ pub trait MxLookup {
   fn mx<'a>(
     &'a self,
     domain: impl AsRef<str> + Send + 'a,
-  ) -> impl std::future::Future<Output = Result<Self::VecMx<'a>>> + Send + 'a;
+  ) -> impl std::future::Future<Output = Result<Option<Self::VecMx<'a>>>> + Send + 'a;
 }
 
 impl<T: Resolver + Sync> MxLookup for T {
@@ -28,7 +28,10 @@ impl<T: Resolver + Sync> MxLookup for T {
     = Vec<Mx>
   where
     Self: 'a;
-  async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>> {
+  async fn mx<'a>(
+    &'a self,
+    domain: impl AsRef<str> + Send + 'a,
+  ) -> Result<Option<Self::VecMx<'a>>> {
     self
       .resolve(domain, "MX", |li| {
         let mut r = Vec::with_capacity(li.len());
@@ -47,6 +50,7 @@ impl<T: Resolver + Sync> MxLookup for T {
             }
           }
         }
+        r.sort_unstable_by_key(|i| i.priority);
         Ok(Some(r))
       })
       .await
@@ -83,11 +87,14 @@ pub mod cache {
 
   impl super::MxLookup for Cache {
     type VecMx<'a> = MxRef<'a>;
-    async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>> {
+    async fn mx<'a>(
+      &'a self,
+      domain: impl AsRef<str> + Send + 'a,
+    ) -> Result<Option<Self::VecMx<'a>>> {
       let domain = domain.as_ref();
       let domain_key = domain.to_string();
       if let Some(result) = CACHE.get(&domain_key) {
-        return Ok(MxRef { inner: result });
+        return Ok(Some(MxRef { inner: result }));
       }
       let result = match Resolve.mx(domain).await {
         Ok(r) => r,
@@ -96,12 +103,10 @@ pub mod cache {
           Default::default()
         }
       };
-      loop {
-        CACHE.insert(domain_key.clone(), result.to_vec());
-        if let Some(r) = CACHE.get(&domain_key).map(|inner| MxRef { inner }) {
-          return Ok(r);
-        }
+      if let Some(vec) = result {
+        CACHE.insert(domain_key.clone(), vec);
       }
+      Ok(CACHE.get(&domain_key).map(|inner| MxRef { inner }))
     }
   }
 }

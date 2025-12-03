@@ -22,20 +22,31 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-idoh = "0.1.9"
+idoh = "0.1.10"
 ```
 
 ### Basic Resolution
 
 ```rust
 use aok::Result;
-use idoh::resolve;
+use idoh::{resolve, DOH_LI};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // Resolve A records for google.com
-    let ip = resolve("google.com", "A").await?;
-    println!("IP: {:?}", ip);
+    let ip = resolve(
+        "google.com",
+        "A",
+        |answers| {
+             // Custom extraction logic
+             // For example, return the first answer's data
+             Ok(answers.first().map(|a| a.data.clone()))
+        }
+    ).await?;
+    
+    if let Some(ip) = ip {
+        println!("IP: {:?}", ip);
+    }
     Ok(())
 }
 ```
@@ -45,7 +56,7 @@ async fn main() -> Result<()> {
 Enable features in `Cargo.toml`:
 ```toml
 [dependencies]
-idoh = { version = "0.1.9", features = ["mx", "cache"] }
+idoh = { version = "0.1.10", features = ["mx", "cache"] }
 ```
 
 ```rust
@@ -61,16 +72,20 @@ async fn main() -> Result<()> {
     // Time: ~1.3s
     let mx_records = Cache.mx("gmail.com").await?;
     
-    println!("First call (Network): Found {} records", mx_records.len());
-    for mx in mx_records.iter() {
-        println!("  Priority: {}, Server: {}", mx.priority, mx.server);
+    if let Some(records) = mx_records {
+        println!("First call (Network): Found {} records", records.len());
+        for mx in records.iter() {
+            println!("  Priority: {}, Server: {}", mx.priority, mx.server);
+        }
     }
     
     // 2. Second call: Memory lookup (Hot cache)
     // Time: ~416ns (Zero-copy, >3,000,000x faster)
     let cached = Cache.mx("gmail.com").await?;
     
-    println!("Second call (Cache): Found {} records", cached.len());
+    if let Some(records) = cached {
+        println!("Second call (Cache): Found {} records", records.len());
+    }
     
     Ok(())
 }
@@ -127,19 +142,24 @@ graph TD
 ### `resolve`
 The core function that performs the concurrent DoH lookup.
 ```rust
-pub async fn resolve<T>(
+pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
-  extract: impl Fn(&[Answer]) -> Result<Option<T>>
-) -> Result<T>
+  extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
+) -> Result<Option<T>>
 ```
 
 ### `MxLookup` Trait
 Provides the `mx` method for fetching MX records.
 ```rust
 pub trait MxLookup {
-  type VecMx<'a>: Deref<Target = [Mx]> + 'a;
-  async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>>;
+  type VecMx<'a>: Deref<Target = [Mx]> + 'a
+  where
+    Self: 'a;
+  fn mx<'a>(
+    &'a self,
+    domain: impl AsRef<str> + Send + 'a,
+  ) -> impl std::future::Future<Output = Result<Option<Self::VecMx<'a>>>> + Send + 'a;
 }
 ```
 
@@ -193,20 +213,31 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 ```toml
 [dependencies]
-idoh = "0.1.9"
+idoh = "0.1.10"
 ```
 
 ### 基础解析
 
 ```rust
 use aok::Result;
-use idoh::resolve;
+use idoh::{resolve, DOH_LI};
 
 #[tokio::main]
 async fn main() -> Result<()> {
     // 解析 google.com 的 A 记录
-    let ip = resolve("google.com", "A").await?;
-    println!("IP: {:?}", ip);
+    let ip = resolve(
+        "google.com",
+        "A",
+        |answers| {
+             // 自定义提取逻辑
+             // 例如，返回第一个回答的数据
+             Ok(answers.first().map(|a| a.data.clone()))
+        }
+    ).await?;
+    
+    if let Some(ip) = ip {
+        println!("IP: {:?}", ip);
+    }
     Ok(())
 }
 ```
@@ -216,7 +247,7 @@ async fn main() -> Result<()> {
 启用特性：
 ```toml
 [dependencies]
-idoh = { version = "0.1.9", features = ["mx", "cache"] }
+idoh = { version = "0.1.10", features = ["mx", "cache"] }
 ```
 
 ```rust
@@ -232,16 +263,20 @@ async fn main() -> Result<()> {
     // 耗时：约 1.3 秒
     let mx_records = Cache.mx("gmail.com").await?;
     
-    println!("首次调用 (网络): 找到 {} 条记录", mx_records.len());
-    for mx in mx_records.iter() {
-        println!("  优先级: {}, 服务器: {}", mx.priority, mx.server);
+    if let Some(records) = mx_records {
+        println!("首次调用 (网络): 找到 {} 条记录", records.len());
+        for mx in records.iter() {
+            println!("  优先级: {}, 服务器: {}", mx.priority, mx.server);
+        }
     }
     
     // 2. 第二次调用：内存直接获取 (热缓存)
     // 耗时：约 416 纳秒 (零拷贝，快 300 万倍)
     let cached = Cache.mx("gmail.com").await?;
     
-    println!("第二次调用 (缓存): 找到 {} 条记录", cached.len());
+    if let Some(records) = cached {
+        println!("第二次调用 (缓存): 找到 {} 条记录", records.len());
+    }
     
     Ok(())
 }
@@ -298,19 +333,24 @@ graph TD
 ### `resolve`
 执行并发 DoH 查询的核心函数。
 ```rust
-pub async fn resolve<T>(
+pub async fn resolve<T: Send + Unpin + std::fmt::Debug + 'static>(
   name: impl AsRef<str>,
   record_type: impl AsRef<str>,
-  extract: impl Fn(&[Answer]) -> Result<Option<T>>
-) -> Result<T>
+  extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
+) -> Result<Option<T>>
 ```
 
 ### `MxLookup` Trait
 提供 `mx` 方法用于获取 MX 记录。
 ```rust
 pub trait MxLookup {
-  type VecMx<'a>: Deref<Target = [Mx]> + 'a;
-  async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>>;
+  type VecMx<'a>: Deref<Target = [Mx]> + 'a
+  where
+    Self: 'a;
+  fn mx<'a>(
+    &'a self,
+    domain: impl AsRef<str> + Send + 'a,
+  ) -> impl std::future::Future<Output = Result<Option<Self::VecMx<'a>>>> + Send + 'a;
 }
 ```
 
