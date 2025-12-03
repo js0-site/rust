@@ -38,7 +38,9 @@ members = [
   "mx_ip",
   "sk_dkim",
   "expire_cache",
-  "sendptr", "set_timer",
+  "ireq",
+  "sendptr",
+  "set_timer",
 ]
 exclude = ["sh/_tmpl"]
 

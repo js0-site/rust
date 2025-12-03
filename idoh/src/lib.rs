@@ -13,3 +13,5 @@ pub use post::{Answer, DohError, post};
 pub use resolve::{DOH_LI, resolve};
 mod resolve_trait;
 pub use resolve_trait::{Resolve, Resolver};
+mod error;
+pub use error::{Error, Result};

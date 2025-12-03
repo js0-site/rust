@@ -47,7 +47,7 @@ path = "../host"
 [dependencies.idoh]
 version = "0.1.10"
 path = "../idoh"
-features = [ "mx" ]
+features = [ "mx", "cache" ]
 
 [dependencies.jiff]
 version = "0.2.16"

@@ -1,5 +1,3 @@
-use aok::Result;
-
 use crate::Answer;
 
 pub trait Resolver {
@@ -7,8 +5,8 @@ pub trait Resolver {
     &self,
     name: impl AsRef<str> + Send,
     record_type: impl AsRef<str> + Send,
-    extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
-  ) -> impl std::future::Future<Output = Result<T>> + Send;
+    extract: impl Fn(&[Answer]) -> aok::Result<Option<T>> + Send + 'static + Clone,
+  ) -> impl std::future::Future<Output = crate::Result<T>> + Send;
 }
 
 pub struct Resolve;
@@ -18,8 +16,8 @@ impl Resolver for Resolve {
     &self,
     name: impl AsRef<str> + Send,
     record_type: impl AsRef<str> + Send,
-    extract: impl Fn(&[Answer]) -> Result<Option<T>> + Send + 'static + Clone,
-  ) -> Result<T> {
+    extract: impl Fn(&[Answer]) -> aok::Result<Option<T>> + Send + 'static + Clone,
+  ) -> crate::Result<T> {
     crate::resolve::resolve(name, record_type, extract).await
   }
 }

@@ -24,7 +24,10 @@ pub trait MxLookup {
 }
 
 impl<T: Resolver + Sync> MxLookup for T {
-  type VecMx<'a> = Vec<Mx> where Self: 'a;
+  type VecMx<'a>
+    = Vec<Mx>
+  where
+    Self: 'a;
   async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Self::VecMx<'a>> {
     self
       .resolve(domain, "MX", |li| {
@@ -53,6 +56,7 @@ impl<T: Resolver + Sync> MxLookup for T {
 #[cfg(feature = "cache")]
 pub mod cache {
   use std::ops::Deref;
+
   use aok::Result;
   use dashmap::DashMap;
   use expire_cache::Expire;
@@ -85,11 +89,19 @@ pub mod cache {
       if let Some(result) = CACHE.get(&domain_key) {
         return Ok(MxRef { inner: result });
       }
-      let result = Resolve.mx(domain).await?;
-      CACHE.insert(domain_key.clone(), result.to_vec());
-      CACHE.get(&domain_key)
-        .map(|inner| MxRef { inner })
-        .ok_or_else(|| aok::Error::msg("Cache entry vanished"))
+      let result = match Resolve.mx(domain).await {
+        Ok(r) => r,
+        Err(err) => {
+          log::warn!("{domain} MX: {err}");
+          Default::default()
+        }
+      };
+      loop {
+        CACHE.insert(domain_key.clone(), result.to_vec());
+        if let Some(r) = CACHE.get(&domain_key).map(|inner| MxRef { inner }) {
+          return Ok(r);
+        }
+      }
     }
   }
 }

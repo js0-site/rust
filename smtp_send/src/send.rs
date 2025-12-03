@@ -2,10 +2,13 @@ use aok::{OK, Void};
 use mail_send::SmtpClientBuilder;
 use mail_struct::{DomainMail, Mail};
 
+use idoh::MxLookup;
+use idoh::mx::cache::Cache;
+
 pub async fn send(mail: Mail) -> Void {
   for DomainMail { domain, mail } in mail.domain_mail() {
-    let mut mx_li = match idoh::mx(&domain).await {
-      Ok(mx_li) => mx_li,
+    let mut mx_li = match Cache.mx(&domain).await {
+      Ok(mx_li) => mx_li.to_vec(),
       Err(e) => {
         log::error!("{domain} MX lookup failed: {e}");
         continue;

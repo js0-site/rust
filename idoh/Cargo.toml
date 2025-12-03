@@ -23,6 +23,8 @@ defer-lite = "1.0.0"
 sonic-rs = "0.5.6"
 crossfire = "2.1.7"
 log = "0.4.29"
+thiserror = "2.0.17"
+reqwest = { version = "0.12.24", features = ["http3"] }
 
 [dependencies.expire_cache]
 version = "0.1.7"
