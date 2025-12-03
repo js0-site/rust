@@ -34,9 +34,9 @@ xboot = "0.1.29"
 xerr = "0.1.16"
 
 [dependencies.expire_cache]
-version = "0.1.9"
+version = "0.1.12"
 path = "../expire_cache"
-features = [ "dashmap" ]
+features = [ "dashmap", "get_or_init" ]
 
 [dependencies.sk_dkim]
 version = "0.1.5"
@@ -55,7 +55,7 @@ version = "0.1.2"
 path = "../host"
 
 [dependencies.idoh]
-version = "0.1.12"
+version = "0.1.13"
 path = "../idoh"
 features = [ "mx", "cache" ]
 

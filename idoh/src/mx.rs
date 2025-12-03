@@ -59,7 +59,6 @@ impl<T: Resolver + Sync> MxLookup for T {
 
 #[cfg(feature = "cache")]
 pub mod cache {
-  use std::ops::Deref;
 
   use aok::Result;
   use dashmap::DashMap;
@@ -68,45 +67,36 @@ pub mod cache {
   use super::Mx;
   use crate::Resolve;
 
-  #[static_init::dynamic]
-  pub static CACHE: Expire<DashMap<String, Vec<Mx>>> = Expire::new(600);
+  pub struct MxRef<'a>(expire_cache::map::RefVal<'a, String, Option<Vec<Mx>>>);
 
-  pub struct Cache;
-
-  /// Wrapper around RefVal that derefs to [Mx] instead of Vec<Mx>
-  pub struct MxRef<'a> {
-    inner: expire_cache::map::RefVal<'a, String, Vec<Mx>>,
-  }
-
-  impl<'a> Deref for MxRef<'a> {
+  impl<'a> std::ops::Deref for MxRef<'a> {
     type Target = [Mx];
     fn deref(&self) -> &Self::Target {
-      &self.inner
+      match &*self.0 {
+        None => &[],
+        Some(li) => li,
+      }
     }
   }
 
+  #[static_init::dynamic]
+  pub static CACHE: Expire<DashMap<String, Option<Vec<Mx>>>> = Expire::new(600);
+
+  pub struct Cache;
+
   impl super::MxLookup for Cache {
     type VecMx<'a> = MxRef<'a>;
-    async fn mx<'a>(
-      &'a self,
-      domain: impl AsRef<str> + Send + 'a,
-    ) -> Result<Option<Self::VecMx<'a>>> {
+    async fn mx<'a>(&'a self, domain: impl AsRef<str> + Send + 'a) -> Result<Option<MxRef<'a>>> {
       let domain = domain.as_ref();
-      let domain_key = domain.to_string();
-      if let Some(result) = CACHE.get(&domain_key) {
-        return Ok(Some(MxRef { inner: result }));
+      let r = CACHE
+        .get_or_init_async(domain.to_owned(), move |domain| {
+          Box::pin(Resolve.mx(domain.clone()))
+        })
+        .await?;
+      if r.is_some() {
+        return Ok(Some(MxRef(r)));
       }
-      let result = match Resolve.mx(domain).await {
-        Ok(r) => r,
-        Err(err) => {
-          log::warn!("{domain} MX: {err}");
-          Default::default()
-        }
-      };
-      if let Some(vec) = result {
-        CACHE.insert(domain_key.clone(), vec);
-      }
-      Ok(CACHE.get(&domain_key).map(|inner| MxRef { inner }))
+      Ok(None)
     }
   }
 }

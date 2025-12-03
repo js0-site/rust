@@ -1,11 +1,26 @@
-use std::{borrow::Borrow, hash::Hash, ops::Deref};
+use std::{borrow::Borrow, future::Future, hash::Hash, ops::Deref};
 
 use dashmap::DashMap;
 use sendptr::SendPtr;
 
+use crate::Map;
+
 pub struct RefVal<'a, K, V> {
   _mapref: dashmap::mapref::one::Ref<'a, K, V>,
   val: SendPtr<V>,
+}
+
+impl<'a, K, V> RefVal<'a, K, V>
+where
+  K: Eq + Hash,
+{
+  pub fn new(mapref: dashmap::mapref::one::Ref<'a, K, V>) -> Self {
+    let val = SendPtr::new(mapref.value() as *const V);
+    Self {
+      _mapref: mapref,
+      val,
+    }
+  }
 }
 
 impl<'a, K, V> Borrow<V> for RefVal<'a, K, V> {
@@ -28,7 +43,53 @@ impl<'a, K, V> Deref for RefVal<'a, K, V> {
   }
 }
 
-use crate::Map;
+#[cfg(feature = "get_or_init_async")]
+impl<K, V> crate::GetOrInitAsync for DashMap<K, V>
+where
+  K: Clone + Eq + Hash + Send + Sync + 'static,
+  V: Send + Sync + 'static,
+{
+  fn get_or_init_async<'a>(
+    &'a self,
+    key: &Self::Key,
+    func: impl FnOnce(&Self::Key) -> std::pin::Pin<Box<dyn Future<Output = aok::Result<Self::Val>> + Send + 'a>> + Send + 'a,
+  ) -> std::pin::Pin<Box<dyn Future<Output = aok::Result<Self::RefVal<'a>>> + Send + 'a>> {
+    if let Some(r) = self.get(key) {
+      return Box::pin(async move { Ok(RefVal::new(r)) });
+    }
+    let key = key.clone();
+    let fut = func(&key);
+    let self_ref = self;
+    Box::pin(async move {
+      let val = fut.await?;
+      Ok(RefVal::new(
+        self_ref.entry(key).or_insert(val).downgrade(),
+      ))
+    })
+  }
+}
+
+#[cfg(feature = "get_or_init")]
+impl<K, V> crate::GetOrInit for DashMap<K, V>
+where
+  K: Clone + Eq + Hash + Send + Sync + 'static,
+  V: Send + Sync + 'static,
+{
+  fn get_or_init<'a>(
+    &'a self,
+    key: &Self::Key,
+    func: impl Fn(&Self::Key) -> aok::Result<Self::Val>,
+  ) -> aok::Result<Self::RefVal<'a>> {
+    if let Some(r) = self.get(key) {
+      return Ok(RefVal::new(r));
+    }
+    let val = func(key)?;
+    Ok(RefVal::new(
+      self.entry(key.clone()).or_insert(val).downgrade(),
+    ))
+  }
+}
+
 impl<K, V> Map for DashMap<K, V>
 where
   K: Eq + Hash + Send + Sync + 'static,
@@ -48,10 +109,6 @@ where
 
   fn get<'a>(&'a self, key: &Self::Key) -> Option<Self::RefVal<'a>> {
     let mapref = self.get(key.borrow())?;
-    let val = SendPtr::new(mapref.value() as *const V);
-    Some(RefVal {
-      _mapref: mapref,
-      val,
-    })
+    Some(RefVal::new(mapref))
   }
 }

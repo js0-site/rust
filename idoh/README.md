@@ -22,7 +22,7 @@ Add to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-idoh = "0.1.10"
+idoh = "0.1.11"
 ```
 
 ### Basic Resolution
@@ -56,7 +56,7 @@ async fn main() -> Result<()> {
 Enable features in `Cargo.toml`:
 ```toml
 [dependencies]
-idoh = { version = "0.1.10", features = ["mx", "cache"] }
+idoh = { version = "0.1.11", features = ["mx", "cache"] }
 ```
 
 ```rust
@@ -213,7 +213,7 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 ```toml
 [dependencies]
-idoh = "0.1.10"
+idoh = "0.1.11"
 ```
 
 ### 基础解析
@@ -247,7 +247,7 @@ async fn main() -> Result<()> {
 启用特性：
 ```toml
 [dependencies]
-idoh = { version = "0.1.10", features = ["mx", "cache"] }
+idoh = { version = "0.1.11", features = ["mx", "cache"] }
 ```
 
 ```rust

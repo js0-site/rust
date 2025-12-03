@@ -1,6 +1,6 @@
 [package]
 name = "expire_cache"
-version = "0.1.9"
+version = "0.1.12"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
@@ -12,12 +12,16 @@ keywords = ["cache", "expire", "concurrent", "async", "buffer"]
 default = []
 dashmap = ["dep:dashmap"]
 dashset = ["dep:dashmap"]
+get_or_init_async = []
+get_or_init = []
+
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
+aok = "0.1.18"
 boxleak = "0.1.2"
 dashmap = { version = "6.1.0", optional = true }
 defer-lite = "1.0.0"

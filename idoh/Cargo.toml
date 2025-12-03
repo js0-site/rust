@@ -1,6 +1,6 @@
 [package]
 name = "idoh"
-version = "0.1.12"
+version = "0.1.13"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
@@ -35,9 +35,9 @@ path = "../ireq"
 features = [ "proxy" ]
 
 [dependencies.expire_cache]
-version = "0.1.9"
+version = "0.1.12"
 path = "../expire_cache"
-features = [ "dashmap" ]
+features = [ "dashmap", "get_or_init_async" ]
 optional = true
 
 [dependencies.dashmap]

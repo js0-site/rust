@@ -1,33 +1,43 @@
-# expire_cache : 高效双缓冲过期缓存
+# expire_cache
 
-## 目录
-- 简介
-- 特性
-- 使用演示
-- 设计思路
-- 技术堆栈
-- 目录结构
-- API 参考
-- 历史小故事
+高效的双缓冲过期缓存。
 
-## 简介
-`expire_cache` 实现了高性能、并发安全的自动过期缓存。它采用双缓冲策略管理对象生命周期，确保内存使用高效，并在访问时实现零成本的过期检查。
+`expire_cache` 实现了一种基于“双缓冲”（或分代）策略的高性能缓存。它不追踪单个条目的过期时间，而是维护两个数据桶（代）。这种方法显著降低了过期检查的内存开销和 CPU 使用率，非常适合对精确过期时间要求不高但追求高吞吐量的场景。
 
 ## 特性
-- **高性能**：基于 `dashmap` 或 `dashset` 实现并发访问。
-- **低开销**：双缓冲机制消除了逐项检查时间戳的开销。
-- **内存高效**：内部状态使用单次分配；批量清理过期项。
-- **线程安全**：利用原子操作和 `unsafe` 优化指针访问，全线程安全。
-- **异步支持**：基于 Tokio 运行时的后台定时任务处理过期。
 
-## 使用演示
+- **高性能**：使用双缓冲策略，每条目的过期开销为摊销 O(1)。无需后台扫描所有条目。
+- **并发安全**：基于 `DashMap` 构建，支持高并发访问。
+- **异步支持**：支持 `get_or_init_async` 进行异步值初始化。
+- **灵活**：支持键值缓存 (`DashMap`) 和集合缓存 (`DashSet`)。
+- **简单 API**：易于使用的 `get`, `insert`, `get_or_init` 接口。
+
+## 安装
+
 在 `Cargo.toml` 中添加：
+
 ```toml
 [dependencies]
 expire_cache = "0.1"
 ```
 
-示例代码：
+启用特定特性：
+
+```toml
+[dependencies]
+expire_cache = { version = "0.1", features = ["dashmap", "get_or_init_async"] }
+```
+
+可用特性：
+- `dashmap`: 启用 `DashMap` 支持（默认）。
+- `dashset`: 启用 `DashSet` 支持。
+- `get_or_init`: 启用同步 `get_or_init`。
+- `get_or_init_async`: 启用异步 `get_or_init_async`。
+
+## 使用方法
+
+### 基本用法 (Map)
+
 ```rust
 use std::time::Duration;
 use expire_cache::Expire;
@@ -35,69 +45,73 @@ use dashmap::DashMap;
 
 #[tokio::main]
 async fn main() {
-    // 初始化缓存，过期时间 5 秒
-    let cache: Expire<DashMap<String, String>> = Expire::new(5);
+    // 创建一个过期周期为 60 秒的缓存
+    let cache: Expire<DashMap<String, String>> = Expire::new(60);
 
-    cache.insert(&"key".to_string(), "value".to_string());
+    cache.insert("key".to_string(), "value".to_string());
 
-    if let Some(val) = cache.get(&"key".to_string()) {
-        println!("Found: {}", val);
+    if let Some(val) = cache.get("key") {
+        println!("Found: {}", *val);
     }
-
-    tokio::time::sleep(Duration::from_secs(6)).await;
-
-    // 项目已过期
-    assert!(cache.get(&"key".to_string()).is_none());
 }
 ```
 
-## 设计思路
-核心机制依赖于两个底层 Map（缓冲区）和一个原子索引。
+### 异步初始化 (`get_or_init_async`)
 
-1.  **结构**：`Inner` 结构体持有 `[T; 2]`（两个 Map）和 `AtomicUsize`（索引）。
-2.  **写入**：总是写入由原子索引指向的当前活跃缓冲区。
-3.  **读取**：优先检查活跃缓冲区；若未命中，检查非活跃缓冲区。这保证了数据至少在一个完整的过期周期内可用。
-4.  **过期**：后台 Tokio 任务每隔 `expire` 秒唤醒一次。它切换原子索引，实质上交换了活跃/非活跃缓冲区，并清空新的活跃缓冲区（其中包含最旧的数据）。
+```rust
+use expire_cache::Expire;
+use dashmap::DashMap;
 
-## 技术堆栈
-- **Rust**：核心语言。
-- **Tokio**：用于后台过期任务的异步运行时。
-- **DashMap**：高性能并发哈希表。
-- **Atomic/Unsafe**：用于无锁状态管理和优化的内存布局。
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let cache: Expire<DashMap<String, String>> = Expire::new(60);
 
-## 目录结构
-```
-.
-├── Cargo.toml
-├── readme
-│   ├── en.md
-│   └── zh.md
-├── src
-│   ├── lib.rs      # 核心逻辑及 Expire 结构体
-│   ├── map.rs      # DashMap 的 Map trait 实现
-│   ├── set.rs      # DashSet 的 Map trait 实现
-└── tests
-    └── main.rs     # 集成测试
+    let val = cache
+        .get_or_init_async("key", |_key| async {
+            // 模拟异步工作，例如数据库查询
+            Ok("computed_value".to_string())
+        })
+        .await?;
+
+    println!("Value: {}", *val);
+    Ok(())
+}
 ```
 
-## API 参考
+### 集合用法 (Set)
 
-### `Expire<T>`
-管理缓存状态的主结构体。`T` 必须实现 `Map` trait。
+```rust
+use expire_cache::Expire;
+use dashmap::DashSet;
 
-#### `new(expire: u64) -> Self`
-创建新缓存实例。`expire` 指定轮转间隔（秒）。
+#[tokio::main]
+async fn main() {
+    let set: Expire<DashSet<String>> = Expire::new(60);
 
-#### `insert(&self, key: T::Key, val: T::Val)`
-将键值对插入活跃缓存。
+    set.insert("item".to_string(), ());
 
-#### `get(&self, key: impl Borrow<T::Key>) -> Option<T::RefVal<'_>>`
-获取值。先检查活跃缓存，后检查非活跃缓存。返回引用守卫。
+    if set.get("item").is_some() {
+        println!("Item exists");
+    }
+}
+```
 
-### `Map` Trait
-底层存储（如 `DashMap`, `DashSet`）的抽象接口。
+## 工作原理
+
+1.  **双缓冲**：缓存内部维护两个底层容器（例如 `DashMap`），我们称之为 `A` 和 `B`。
+2.  **活跃与被动**：在任何时候，其中一个是“活跃”的（接收新插入），另一个是“被动”的（只读，包含较旧的数据）。
+3.  **读取**：`get` 操作首先检查活跃容器。如果未找到，再检查被动容器。
+4.  **写入**：`insert` 总是写入活跃容器。
+5.  **轮转**：每隔 `expire` 秒，后台任务会清空被动容器，并交换 `A` 和 `B` 的角色。之前的活跃容器变为被动容器（将其数据保留一个周期），而被清空的容器变为新的活跃容器。
+
+这意味着一个条目的存活时间至少为 `expire` 秒，至多为 `2 * expire` 秒。
 
 ## 历史小故事
+
 “分代缓存”或“缓存轮转”的概念与硬件设计及垃圾回收策略中的智慧不谋而合。早期的主机系统如 IBM System/360 引入缓存以弥合 CPU 与内存的速度差异。随着时间推移，策略从简单的 LRU（最近最少使用）演变为更复杂的分代方法。
 
 在硬件领域，“缓存衰减（Cache Decay）”技术通过关闭长时间（一个“代”）未被访问的缓存行来降低功耗。与之类似，`expire_cache` 将时间区间视为“代”。通过批量丢弃整代数据，它避免了追踪单个项目时间戳的巨大开销——这一技术让人联想到分代垃圾回收器，它们假设“年轻”对象往往早夭，因此可以批量回收。这种方法牺牲了绝对的精度（精确的过期时间），换取了巨大的吞吐量提升和内存碎片减少。
+
+## 许可证
+
+MulanPSL-2.0

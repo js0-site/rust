@@ -1,33 +1,43 @@
-# expire_cache : Efficient double-buffered expiration cache
+# expire_cache
 
-## Table of Contents
-- Introduction
-- Features
-- Usage
-- Design
-- Tech Stack
-- Directory Structure
-- API Reference
-- Historical Context
+Efficient double-buffered expiration cache.
 
-## Introduction
-`expire_cache` implements high-performance, concurrent cache with automatic expiration. It utilizes double-buffering strategy to manage object lifecycles, ensuring efficient memory usage and zero-cost expiration checks during access.
+`expire_cache` implements a high-performance cache with expiration based on a "double-buffer" (or generational) strategy. Instead of tracking the expiration time of each individual item, it maintains two buckets (generations) of data. This approach significantly reduces memory overhead and CPU usage for expiration checks, making it ideal for high-throughput scenarios where precise expiration timing is not critical.
 
 ## Features
-- **High Performance**: Uses `dashmap` or `dashset` for concurrent access.
-- **Low Overhead**: Double-buffering eliminates need for per-item timestamp checks.
-- **Memory Efficient**: Single allocation for internal state; bulk deallocation of expired items.
-- **Thread Safe**: Fully thread-safe using atomic operations and `unsafe` optimizations for raw pointer access.
-- **Async Support**: Background timer for expiration runs on Tokio runtime.
 
-## Usage
-Add to `Cargo.toml`:
+- **High Performance**: Uses a double-buffer strategy for O(1) expiration overhead per item (amortized). No background scanning of all items.
+- **Concurrent**: Built on top of `DashMap` for high concurrency.
+- **Async Support**: Supports `get_or_init_async` for asynchronous value initialization.
+- **Flexible**: Supports both Key-Value cache (`DashMap`) and Set cache (`DashSet`).
+- **Simple API**: Easy to use `get`, `insert`, `get_or_init`.
+
+## Installation
+
+Add this to your `Cargo.toml`:
+
 ```toml
 [dependencies]
 expire_cache = "0.1"
 ```
 
-Example:
+To enable specific features:
+
+```toml
+[dependencies]
+expire_cache = { version = "0.1", features = ["dashmap", "get_or_init_async"] }
+```
+
+Available features:
+- `dashmap`: Enable `DashMap` support (default).
+- `dashset`: Enable `DashSet` support.
+- `get_or_init`: Enable synchronous `get_or_init`.
+- `get_or_init_async`: Enable asynchronous `get_or_init_async`.
+
+## Usage
+
+### Basic Usage (Map)
+
 ```rust
 use std::time::Duration;
 use expire_cache::Expire;
@@ -35,69 +45,67 @@ use dashmap::DashMap;
 
 #[tokio::main]
 async fn main() {
-    // Initialize cache with 5 seconds expiration
-    let cache: Expire<DashMap<String, String>> = Expire::new(5);
+    // Create a cache with a 60-second expiration cycle
+    let cache: Expire<DashMap<String, String>> = Expire::new(60);
 
-    cache.insert(&"key".to_string(), "value".to_string());
+    cache.insert("key".to_string(), "value".to_string());
 
-    if let Some(val) = cache.get(&"key".to_string()) {
-        println!("Found: {}", val);
+    if let Some(val) = cache.get("key") {
+        println!("Found: {}", *val);
     }
-
-    tokio::time::sleep(Duration::from_secs(6)).await;
-
-    // Item expired
-    assert!(cache.get(&"key".to_string()).is_none());
 }
 ```
 
-## Design
-Core mechanism relies on two underlying maps (buffers) and an atomic index.
+### Async Initialization (`get_or_init_async`)
 
-1.  **Structure**: `Inner` struct holds `[T; 2]` (two maps) and `AtomicUsize` (index).
-2.  **Insertion**: Always writes to active buffer determined by atomic index.
-3.  **Retrieval**: Checks active buffer first; if missing, checks inactive buffer. This ensures items remain accessible for at least one full expiration cycle.
-4.  **Expiration**: Background Tokio task wakes up every `expire` seconds. It toggles atomic index, effectively swapping active/inactive buffers, and clears the new active buffer (which holds oldest data).
+```rust
+use expire_cache::Expire;
+use dashmap::DashMap;
 
-## Tech Stack
-- **Rust**: Core language.
-- **Tokio**: Async runtime for background expiration task.
-- **DashMap**: High-performance concurrent hash map.
-- **Atomic/Unsafe**: For lock-free state management and optimized memory layout.
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let cache: Expire<DashMap<String, String>> = Expire::new(60);
 
-## Directory Structure
-```
-.
-├── Cargo.toml
-├── readme
-│   ├── en.md
-│   └── zh.md
-├── src
-│   ├── lib.rs      # Core logic and Expire struct
-│   ├── map.rs      # Map trait implementation for DashMap
-│   └── set.rs      # Map trait implementation for DashSet
-└── tests
-    └── main.rs     # Integration tests
+    let val = cache
+        .get_or_init_async("key", |_key| async {
+            // Simulate async work, e.g., database query
+            Ok("computed_value".to_string())
+        })
+        .await?;
+
+    println!("Value: {}", *val);
+    Ok(())
+}
 ```
 
-## API Reference
+### Set Usage
 
-### `Expire<T>`
-Main struct managing cache state. `T` must implement `Map` trait.
+```rust
+use expire_cache::Expire;
+use dashmap::DashSet;
 
-#### `new(expire: u64) -> Self`
-Creates new cache instance. `expire` specifies rotation interval in seconds.
+#[tokio::main]
+async fn main() {
+    let set: Expire<DashSet<String>> = Expire::new(60);
 
-#### `insert(&self, key: T::Key, val: T::Val)`
-Inserts key-value pair into active cache.
+    set.insert("item".to_string(), ());
 
-#### `get(&self, key: impl Borrow<T::Key>) -> Option<T::RefVal<'_>>`
-Retrieves value. Checks active cache first, then inactive cache. Returns a reference guard.
+    if set.get("item").is_some() {
+        println!("Item exists");
+    }
+}
+```
 
-### `Map` Trait
-Abstraction over underlying storage (e.g., `DashMap`, `DashSet`).
+## How it Works
 
-## Historical Context
-Concept of "generational caching" or "cache rotation" mirrors strategies found in hardware design and garbage collection. Early mainframe systems like IBM System/360 introduced caching to bridge CPU-memory speed gaps. Over time, strategies evolved from simple LRU (Least Recently Used) to more complex generational approaches.
+1.  **Double Buffering**: The cache maintains two underlying containers (e.g., `DashMap`), let's call them `A` and `B`.
+2.  **Active & Passive**: At any time, one is "active" (receiving new inserts) and the other is "passive" (read-only, containing older data).
+3.  **Reads**: `get` checks the active container first. If not found, it checks the passive container.
+4.  **Writes**: `insert` always writes to the active container.
+5.  **Rotation**: Every `expire` seconds, a background task clears the passive container and swaps the roles of `A` and `B`. The previously active container becomes passive (preserving its data for one more cycle), and the cleared container becomes the new active one.
 
-In hardware, "cache decay" reduces power consumption by turning off cache lines that haven't been accessed for a "generation". Similarly, `expire_cache` treats time intervals as generations. By bulk-discarding entire generations of data, it avoids overhead of tracking individual item timestamps—a technique reminiscent of generational garbage collectors which assume "young" objects die young and can be collected in bulk. This approach trades absolute precision (exact expiration time) for significant throughput gains and reduced memory fragmentation.
+This means an item will live for at least `expire` seconds and at most `2 * expire` seconds.
+
+## License
+
+MulanPSL-2.0

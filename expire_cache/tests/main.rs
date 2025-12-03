@@ -26,6 +26,16 @@ async fn test_map() -> Void {
 }
 
 #[tokio::test]
+async fn test_get_or_init() -> Void {
+  let cache: Expire<DashMap<_, _>> = Expire::new(1);
+  let val = cache
+    .get_or_init_async("key", |_: &&str| Box::pin(async { Ok("val") }))
+    .await?;
+  assert_eq!(&*val, &"val");
+  OK
+}
+
+#[tokio::test]
 async fn test_set() -> Void {
   let cache: Expire<DashSet<_>> = Expire::new(1);
   cache.insert("key", ());

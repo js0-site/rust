@@ -26,6 +26,16 @@ pub trait Map: Default + Send + Sync {
   fn get<'a>(&'a self, key: &Self::Key) -> Option<Self::RefVal<'a>>;
 }
 
+#[cfg(feature = "get_or_init_async")]
+mod get_or_init_async;
+#[cfg(feature = "get_or_init_async")]
+pub use get_or_init_async::GetOrInitAsync;
+
+#[cfg(feature = "get_or_init")]
+mod get_or_init;
+#[cfg(feature = "get_or_init")]
+pub use get_or_init::GetOrInit;
+
 struct Inner<T> {
   pos: AtomicUsize,
   cache: [T; 2],
@@ -42,22 +52,18 @@ unsafe impl<T: Map> Sync for Expire<T> {}
 impl<T: Map + 'static> Expire<T> {
   pub fn get<'a>(&'a self, key: impl Borrow<T::Key>) -> Option<T::RefVal<'a>> {
     let key = key.borrow();
-    unsafe {
-      let inner = &*self.inner;
-      let pos = inner.pos.load(Ordering::Relaxed);
-      if let Some(v) = inner.cache[pos].get(key) {
-        return Some(v);
-      }
-      inner.cache[1 - pos].get(key)
+    let inner = unsafe { &*self.inner };
+    let pos = inner.pos.load(Ordering::Relaxed);
+    if let Some(v) = inner.cache[pos].get(key) {
+      return Some(v);
     }
+    inner.cache[1 - pos].get(key)
   }
 
   pub fn insert(&self, key: T::Key, val: T::Val) {
-    unsafe {
-      let inner = &*self.inner;
-      let idx = inner.pos.load(Ordering::Acquire);
-      inner.cache[idx].insert(key, val)
-    }
+    let inner = unsafe { &*self.inner };
+    let idx = inner.pos.load(Ordering::Acquire);
+    inner.cache[idx].insert(key, val)
   }
 
   pub fn new(expire: u64) -> Self {

@@ -1,6 +1,6 @@
 use aok::{OK, Void};
 use dashmap::DashMap;
-use expire_cache::Expire;
+use expire_cache::{Expire, map::RefVal};
 use idoh::{MxLookup, mx::cache::Cache};
 use mail_send::{
   SmtpClientBuilder,
@@ -31,7 +31,11 @@ pub async fn send_mx<'a>(
   Ok(smtp.send_signed(mail, dkim_signer).await?)
 }
 
-fn dkim_signer(selector: &str, sender_domain: &str, sk: &Sk) -> DkimSigner<Ed25519Key, Done> {
+fn dkim_signer(
+  selector: &str,
+  sender_domain: &str,
+  sk: &Sk,
+) -> RefVal<(String, DkimSigner<Ed25519Key, Done>)> {
   let cache_key = format!("{selector}.{sender_domain}");
 
   if let Some(signer) = DKIM_CACHE.get(&cache_key) {
@@ -67,7 +71,7 @@ pub async fn send(mail: Mail, _retry: u64, selector: &str, sk: &Sk) -> Void {
     None => return OK,
   };
 
-  let dkim_signer = dkim_signer(selector, sender_domain, sk)?;
+  let dkim_signer = dkim_signer(selector, sender_domain, sk);
 
   // let mut failed = Vec::new();
   'out: for DomainMail { domain, mail } in mail.domain_mail() {
