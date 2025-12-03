@@ -12,32 +12,36 @@ pub async fn send_mx<'a>(server: &str, mail: Message<'a>) -> Void {
   Ok(smtp.send(mail).await?)
 }
 
-pub async fn send(mail: Mail) -> Void {
-  for DomainMail { domain, mail } in mail.domain_mail() {
+pub async fn send(mail: Mail, retry: u64) -> Void {
+  let mut failed = Vec::new();
+  'out: for DomainMail { domain, mail } in mail.domain_mail() {
     match Cache.mx(&domain).await {
       Ok(mx_li) => {
         if let Some(mx_li) = mx_li {
-          'out: {
-            for mx in mx_li.iter() {
-              match send_mx(&mx.server, mail.clone()).await {
-                Ok(_) => {
-                  break 'out;
-                }
-                Err(e) => {
-                  log::error!("❌ {domain} → {}:25 : {e}", mx.server);
-                }
+          let mut err_li = Vec::new();
+          for mx in mx_li.iter() {
+            match send_mx(&mx.server, mail.clone()).await {
+              Ok(_) => {
+                continue 'out;
+              }
+              Err(e) => {
+                let e = e.to_string();
+                log::error!("❌ {domain} → {}:25 : {e}", mx.server);
+                err_li.push((mx.server.clone(), e));
               }
             }
-            log::error!("❌ {domain} all mx failed");
           }
+          log::error!("❌ {domain} all MX send failed");
         } else {
-          log::error!("{domain} DNS NO MX");
+          log::error!("{domain} no MX dns");
         }
       }
       Err(e) => {
         log::error!("{domain} MX lookup failed: {e}");
-        continue;
       }
+    }
+    for i in mail.rcpt_to {
+      failed.push(i.email);
     }
   }
 

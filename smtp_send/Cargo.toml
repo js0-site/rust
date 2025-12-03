@@ -63,7 +63,7 @@ version = "0.1.48"
 features = [ "v3" ]
 
 [dependencies.msgq]
-version = "0.1.8"
+version = "0.1.9"
 path = "../msgq"
 
 [dependencies.tokio]

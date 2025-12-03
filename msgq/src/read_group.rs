@@ -71,7 +71,7 @@ impl<P: Parse + Clone + Send + Sync + 'static> ReadGroup<P> {
             id,
             retry,
             kv.clone(),
-            tokio::spawn(async move { parser.run(&kv).await }),
+            tokio::spawn(async move { parser.run(&kv, retry).await }),
           ));
         }
 

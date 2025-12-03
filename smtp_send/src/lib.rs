@@ -27,6 +27,7 @@ impl msgq::Parse for MailParse {
     }
     OK
   }
+
   async fn on_error(&self, kv: Kv, error: String) -> Void {
     for (user_id, mail) in kv {
       let user_id = intbin::bin_u64(user_id);

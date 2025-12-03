@@ -1,3 +1,4 @@
+use bytes::Bytes;
 use fred::prelude::Value;
 
 use crate::StreamItem;
@@ -14,18 +15,33 @@ pub fn parse_stream(val: Value) -> Vec<StreamItem> {
           let retry = retry as u64;
           if let Some(Value::Integer(idle_ms)) = li.pop() {
             let idle_ms = idle_ms as u64;
-            let mut len = li.len() - 1;
-            let mut kv = Vec::with_capacity(len);
-            while len > 0 {
-              len -= 1;
-              if let Some(Value::Array(mut key_val)) = li.pop()
-                && let Some(Value::Bytes(val)) = key_val.pop()
-                && let Some(Value::String(key)) = key_val.pop()
-              {
-                let key = key.into_inner();
-                kv.push((key, val));
+            
+            // Parse kv pairs - expecting Array([field, value, field, value, ...])
+            let kv = if let Some(Value::Array(kv_array)) = li.pop() {
+              let mut result = Vec::new();
+              let mut iter = kv_array.into_iter();
+              while let Some(key) = iter.next() {
+                if let Some(val) = iter.next() {
+                  // Convert key to Bytes
+                  let key_bytes = match key {
+                    Value::String(s) => Bytes::from(s.into_inner()),
+                    Value::Bytes(b) => b,
+                    _ => continue,
+                  };
+                  // Convert value to Bytes
+                  let val_bytes = match val {
+                    Value::String(s) => s.into_inner().into(),
+                    Value::Bytes(b) => b,
+                    _ => continue,
+                  };
+                  result.push((key_bytes, val_bytes));
+                }
               }
-            }
+              result
+            } else {
+              Vec::new()
+            };
+            
             if let Some(Value::String(stream_id)) = li.pop() {
               res.push(StreamItem {
                 id: stream_id.to_string(),

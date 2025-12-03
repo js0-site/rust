@@ -22,6 +22,6 @@ pub struct StreamItem {
 }
 
 pub trait Parse {
-  fn run(&self, kv: &Kv) -> impl Future<Output = aok::Void> + Send;
+  fn run(&self, kv: &Kv, retry: u64) -> impl Future<Output = aok::Void> + Send;
   fn on_error(&self, kv: Kv, error: String) -> impl Future<Output = aok::Void> + Send;
 }
