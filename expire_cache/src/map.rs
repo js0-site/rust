@@ -31,8 +31,8 @@ impl<'a, K, V> Deref for RefVal<'a, K, V> {
 use crate::Map;
 impl<K, V> Map for DashMap<K, V>
 where
-  K: Eq + Hash + Clone + Send + Sync + 'static,
-  V: Clone + Send + Sync + 'static,
+  K: Eq + Hash + Send + Sync + 'static,
+  V: Send + Sync + 'static,
 {
   type Key = K;
   type Val = V;

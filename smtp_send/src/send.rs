@@ -1,10 +1,22 @@
 use aok::{OK, Void};
-use idoh::{mx::cache::Cache, MxLookup};
-use mail_send::mail_auth::common::crypto::Ed25519Key;
-use mail_send::mail_auth::dkim::{Done, DkimSigner};
-use mail_send::{smtp::message::Message, SmtpClientBuilder};
+use dashmap::DashMap;
+use expire_cache::Expire;
+use idoh::{MxLookup, mx::cache::Cache};
+use mail_send::{
+  SmtpClientBuilder,
+  mail_auth::{
+    common::crypto::Ed25519Key,
+    dkim::{DkimSigner, Done},
+  },
+  smtp::message::Message,
+};
 use mail_struct::{DomainMail, Mail};
 use sk_dkim::Sk;
+
+/// 全局 DKIM signer 缓存，TTL 600 秒
+/// Global DKIM signer cache with 600 seconds TTL
+#[static_init::dynamic]
+static DKIM_CACHE: Expire<DashMap<String, DkimSigner<Ed25519Key, Done>>> = Expire::new(600);
 
 pub async fn send_mx<'a>(
   server: &str,
@@ -19,12 +31,17 @@ pub async fn send_mx<'a>(
   Ok(smtp.send_signed(mail, dkim_signer).await?)
 }
 
-pub async fn send(mail: Mail, _retry: u64, selector: &str, sk: &Sk, sender_domain: &str) -> Void {
-  // Generate DKIM signer
-  let dkim_obj = sk.dkim(selector, sender_domain);
-  let seed = dkim_obj.to_bytes();
-  let public_key = dkim_obj.verifying_key().to_bytes();
-  let ed25519_key = Ed25519Key::from_seed_and_public_key(&seed, &public_key)?;
+fn dkim_signer(selector: &str, sender_domain: &str, sk: &Sk) -> DkimSigner<Ed25519Key, Done> {
+  let cache_key = format!("{selector}.{sender_domain}");
+
+  if let Some(signer) = DKIM_CACHE.get(&cache_key) {
+    return signer;
+  }
+
+  let dkim = sk.dkim(selector, sender_domain);
+  let seed = dkim.to_bytes();
+  let public_key = dkim.verifying_key().to_bytes();
+  let ed25519_key = Ed25519Key::from_seed_and_public_key(&seed, &public_key).unwrap();
   let dkim_signer = DkimSigner::from_key(ed25519_key)
     .domain(sender_domain)
     .selector(selector)
@@ -38,6 +55,19 @@ pub async fn send(mail: Mail, _retry: u64, selector: &str, sk: &Sk, sender_domai
      * Example: From appears 1 time, sign it 2 times, attackers cannot inject a 2nd From header
      */
     .headers(["From", "From", "Subject", "Subject", "Date", "Date", "To", "To", "Cc", "Cc"]);
+
+  DKIM_CACHE.insert(cache_key, dkim_signer);
+
+  dkim_signer
+}
+
+pub async fn send(mail: Mail, _retry: u64, selector: &str, sk: &Sk) -> Void {
+  let sender_domain = match mail.sender.split_once("@").map(|(_, domain)| domain) {
+    Some(domain) => domain,
+    None => return OK,
+  };
+
+  let dkim_signer = dkim_signer(selector, sender_domain, sk)?;
 
   // let mut failed = Vec::new();
   'out: for DomainMail { domain, mail } in mail.domain_mail() {

@@ -21,6 +21,7 @@ aok = "0.1.18"
 bitcode = "0.6.7"
 bytes = "1.11.0"
 bytes-utils = "0.1.4"
+dashmap = "6.1.0"
 fred = "10.1.0"
 genv = "0.1.18"
 intbin = "0.2.3"
@@ -31,6 +32,11 @@ static_init = "1.0.4"
 thiserror = "2.0.17"
 xboot = "0.1.29"
 xerr = "0.1.16"
+
+[dependencies.expire_cache]
+version = "0.1.9"
+path = "../expire_cache"
+features = [ "dashmap" ]
 
 [dependencies.sk_dkim]
 version = "0.1.5"

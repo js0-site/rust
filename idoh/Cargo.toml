@@ -35,7 +35,7 @@ path = "../ireq"
 features = [ "proxy" ]
 
 [dependencies.expire_cache]
-version = "0.1.8"
+version = "0.1.9"
 path = "../expire_cache"
 features = [ "dashmap" ]
 optional = true

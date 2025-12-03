@@ -16,11 +16,8 @@ impl msgq::Parse for MailParse {
     for (user_id, mail) in kv {
       let user_id = intbin::bin_u64(user_id);
       let mail: Mail = bitcode::decode(mail)?;
-      if let Some((_, domain)) = mail.sender.split_once("@") {
-        let domain = domain.to_string();
-        info!("{user_id} {} → {}", mail.sender, mail.to_li.join(" / "));
-        send(mail, retry, &self.selector, &self.sk, &domain).await?;
-      }
+      info!("{user_id} {} → {}", mail.sender, mail.to_li.join(" / "));
+      send(mail, retry, &self.selector, &self.sk).await?;
     }
     OK
   }
