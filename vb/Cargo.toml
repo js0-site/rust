@@ -1,0 +1,19 @@
+[package]
+name = "vb"
+version = "0.2.5"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/vb"
+description = "Variable byte encoding library / 变长字节编码库"
+keywords = ["vbyte", "varint", "compression", "integer", "delta"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+diff = []
+
+[dependencies]
+thiserror = "2.0.17"

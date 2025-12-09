@@ -1,0 +1,23 @@
+[package]
+name = "xmail"
+version = "0.1.16"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/xmaile"
+description = "Normalize and parse email addresses, support Punycode decoding and TLD extraction. / 邮件地址标准化与解析，支持 Punycode 解码和 TLD 提取。"
+keywords = ["email", "parser", "punycode", "normalization", "tld"]
+
+[features]
+default = []
+tld = ["dep:xtld"]
+
+[dependencies]
+punycode = "0.4.1"
+
+[dependencies.xstr]
+version = "0.1.11"
+
+[dependencies.xtld]
+version = "0.1.6"
+optional = true
