@@ -1,0 +1,35 @@
+[package]
+name = "kvid"
+version = "0.1.1"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/kvid"
+description = "Global unique ID generator based on Redis/Kvrocks, ensuring absolute uniqueness and trend-increasing IDs. / 基于 Redis/Kvrocks 的全局唯一 ID 生成器，确保绝对唯一且趋势递增。"
+keywords = ["redis", "kvrocks", "unique-id", "generator", "distributed"]
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+fred = "10.1.0"
+parking_lot = "0.12.5"
+static_init = "1.0.4"
+tokio = { version = "1.48.0", features = ["sync"] }
+ts_ = { version = "0.1.1", path = "../ts_", features = ["sec"] }
+xboot = "0.1.29"
+xkv = { version = "0.1.51", features = ["r"] }
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.32"
+static_init = "1.0.4"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]

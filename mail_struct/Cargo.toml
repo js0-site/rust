@@ -1,0 +1,35 @@
+[package]
+name = "mail_struct"
+version = "0.1.18"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/mail_struct"
+description = "A minimalist Rust email structure library with optional support for encoding, decoding, and sending via SMTP. / 一个极简的 Rust 邮件结构库，支持可选的编码、解码及 SMTP 发送功能。"
+keywords = ["email", "smtp", "struct", "mail", "bitcode"]
+
+[features]
+default = []
+encode = []
+decode = []
+send = ["dep:mail-send"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+bitcode = "0.6.7"
+log = "0.4.29"
+mail-send = { version = "0.5.2", optional = true }
+xmail = { version = "0.1.16", path = "../xmail" }
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.32"
+static_init = "1.0.4"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
