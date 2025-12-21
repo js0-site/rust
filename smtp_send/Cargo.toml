@@ -1,0 +1,89 @@
+[package]
+name = "smtp_send"
+version = "0.1.28"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/smtp_send"
+description = "SMTP email sending library with built-in DKIM signing and MX lookup support. / 支持内置 DKIM 签名和 MX 记录查询的 SMTP 邮件发送库。"
+keywords = [ "smtp", "dkim", "email", "mx", "mailer" ]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+bitcode = "0.6.9"
+genv = "0.1.18"
+jiff = "0.2.16"
+log = "0.4.29"
+log_init = "0.1.34"
+mail-parser = "0.11.1"
+mail-send = "0.5.2"
+papaya = "0.2.3"
+rsa = "0.10.0-rc.10"
+serde_yaml_bw = "2.5.1"
+tar = "0.4"
+tokio-rustls = "0.26.4"
+zstd = "0.13"
+
+[dependencies.idot]
+version = "0.1.1"
+path = "../idot"
+
+[dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
+
+[dependencies.idns]
+version = "0.2.13"
+path = "../idns"
+features = [ "mx", "cache" ]
+
+[dependencies.async-scoped]
+version = "0.9"
+features = [ "use-tokio" ]
+
+[dependencies.serde]
+version = "1.0"
+features = [ "derive" ]
+
+[dependencies.smtp-proto]
+version = "0.2.0"
+features = [ "serde" ]
+
+[dependencies.sk_dkim]
+version = "0.1.7"
+path = "../sk_dkim"
+
+[dependencies.mail_struct]
+version = "0.1.20"
+path = "../mail_struct"
+features = [ "encode", "send" ]
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "rt-multi-thread" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+jiff = "0.2.16"
+log = "0.4.29"
+log_init = "0.1.34"
+rustls = "0.23.35"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
+
+[dev-dependencies.sk_dkim]
+path = "../sk_dkim"
+features = [ "pk" ]
+version = "0.1.7"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]

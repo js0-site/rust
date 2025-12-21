@@ -1,0 +1,55 @@
+[package]
+name = "pick_fast"
+version = "0.1.22"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/pick_fast"
+description = "High-performance weighted random load balancer for selecting low-latency nodes with smooth weight updates. / 高性能加权随机负载均衡器，用于选择低延迟节点，支持权重平滑更新。"
+keywords = [
+"load-balancer",
+"weighted",
+"lock-free",
+"performance",
+"network"
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ "iter" ]
+iter = [ "dep:citer" ]
+
+[dependencies]
+fastrand = "2.3.0"
+
+[dependencies.citer]
+version = "0.1.15"
+path = "../citer"
+optional = true
+
+[dev-dependencies]
+aok = "0.1.18"
+charts = "0.3.0"
+futures = "0.3"
+hickory-resolver = "0.25.2"
+log_init = "0.1.34"
+plotters = "0.3.7"
+plotters-svg = "0.3.7"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+svg = "0.18.0"
+
+[dev-dependencies.ts_]
+path = "../ts_"
+features = [ "milli" ]
+version = "0.1.3"
+
+[dev-dependencies.race]
+path = "../race"
+version = "0.1.14"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync", "net" ]

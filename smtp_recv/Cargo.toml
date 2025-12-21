@@ -1,0 +1,110 @@
+[package]
+name = "smtp_recv"
+version = "0.1.63"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/smtp_recv"
+description = "Dual-port SMTP server: Secure submission (465) & Inbound forwarding (25) / 双端口 SMTP 服务：安全提交 (465) 与入站转发 (25)"
+keywords = [ "smtp", "server", "tls", "forwarding", "email" ]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ "send", "forward" ]
+send = [ "dep:auth_trait" ]
+forward = [ "dep:mail_forward" ]
+kill_port = [ "socket_port/kill_port" ]
+
+[dependencies]
+anyhow = "1.0.100"
+aok = "0.1.18"
+base64 = "0.22.1"
+drop = "0.1.4"
+email_address = "0.2.9"
+log = "0.4.29"
+thiserror = "2.0.17"
+tokio-rustls = "0.26.4"
+tokio-util = "0.7.17"
+xboot = "0.1.29"
+xmail = "0.1.16"
+
+[dependencies.idns]
+version = "0.2.13"
+path = "../idns"
+features = [ "cache", "spf" ]
+
+[dependencies.idot]
+version = "0.1.1"
+path = "../idot"
+features = [ "static" ]
+
+[dependencies.auth_trait]
+version = "0.1.6"
+path = "../auth_trait"
+optional = true
+
+[dependencies.mail_forward]
+version = "0.1.9"
+path = "../mail_forward"
+optional = true
+
+[dependencies.graceful_restart]
+version = "0.1.6"
+path = "../graceful_restart"
+
+[dependencies.sys_notify]
+version = "0.1.5"
+path = "../sys_notify"
+
+[dependencies.socket_port]
+version = "0.1.29"
+path = "../socket_port"
+
+[dependencies.mail_struct]
+version = "0.1.20"
+path = "../mail_struct"
+
+[dependencies.ssl_trait]
+version = "0.1.3"
+path = "../ssl_trait"
+
+[dependencies.rustls]
+version = "0.23.35"
+features = [ "ring" ]
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync", "full" ]
+
+[dev-dependencies]
+mail-parser = "0.11.1"
+aok = "0.1.18"
+log_init = "0.1.34"
+serde_yaml_bw = "2.5.1"
+webpki-roots = "1.0.4"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
+
+[dev-dependencies.cert_by_host]
+path = "../cert_by_host"
+version = "0.1.8"
+
+[dev-dependencies.serde]
+version = "1.0"
+features = [ "derive" ]
+
+[dev-dependencies.lettre]
+version = "0.11.19"
+features = [
+"tokio1",
+"rustls-tls",
+"builder",
+"tokio1-rustls-tls",
+"smtp-transport"
+]
+default-features = false
