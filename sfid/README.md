@@ -175,17 +175,33 @@ This ensures ID uniqueness even under NTP adjustments or VM migrations.
 
 ## Process ID Allocation
 
-### Redis Key Format
+Process ID allocation uses a two-layer mechanism to ensure uniqueness and support fast restarts:
+
+### Local Identity
+
+1. Get machine unique ID via `machine_uid`
+2. Try to lock `/tmp/sfid/{app}/{seq}` file (seq = 0, 1, 2, ...)
+3. First successful lock determines local sequence number
+4. Identity = `{machine_id}:{local_seq}`
+
+This ensures:
+- Same machine restarting gets same identity (if same local_seq available)
+- Multiple processes on same machine get different identities
+- Process crash releases file lock immediately
+
+### Redis Registration
+
+Uses identity as Redis value for distributed coordination:
 
 ```
-sfid:{app}:{pid_le_bytes}
+sfid:{app}:{pid_le_bytes} -> {machine_id}:{local_seq}
 ```
 
 ### Heartbeat
 
 - Interval: 3 minutes
 - Expiration: 10 minutes
-- Auto-release on process exit (Drop trait)
+- Auto-release on process exit (Drop trait + file lock release)
 
 ## Tech Stack
 
@@ -194,7 +210,8 @@ sfid:{app}:{pid_le_bytes}
 | coarsetime | Fast timestamp retrieval |
 | fred | Redis client |
 | tokio | Async runtime |
-| uuid | Unique identifier generation |
+| machine-uid | Machine unique ID |
+| fs4 | File locking |
 | thiserror | Error handling |
 | tracing | Logging |
 
@@ -384,17 +401,33 @@ let parsed = parse_with::<MyLayout>(id);
 
 ## 进程号分配
 
-### Redis 键格式
+进程号分配采用双层机制，确保唯一性并支持快速重启：
+
+### 本地标识
+
+1. 通过 `machine_uid` 获取机器唯一 ID
+2. 尝试锁定 `/tmp/sfid/{app}/{seq}` 文件（seq = 0, 1, 2, ...）
+3. 首个成功锁定的决定本地序号
+4. 标识 = `{machine_id}:{local_seq}`
+
+这确保：
+- 同一机器重启后获得相同标识（如果相同 local_seq 可用）
+- 同一机器多进程获得不同标识
+- 进程崩溃立即释放文件锁
+
+### Redis 注册
+
+使用标识作为 Redis value 进行分布式协调：
 
 ```
-sfid:{app}:{pid_le_bytes}
+sfid:{app}:{pid_le_bytes} -> {machine_id}:{local_seq}
 ```
 
 ### 心跳
 
 - 间隔：3 分钟
 - 过期：10 分钟
-- 进程退出自动释放 (Drop trait)
+- 进程退出自动释放（Drop trait + 文件锁释放）
 
 ## 技术栈
 
@@ -403,7 +436,8 @@ sfid:{app}:{pid_le_bytes}
 | coarsetime | 快速时间戳获取 |
 | fred | Redis 客户端 |
 | tokio | 异步运行时 |
-| uuid | 唯一标识生成 |
+| machine-uid | 机器唯一 ID |
+| fs4 | 文件锁 |
 | thiserror | 错误处理 |
 | tracing | 日志 |
 

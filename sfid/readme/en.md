@@ -169,17 +169,33 @@ This ensures ID uniqueness even under NTP adjustments or VM migrations.
 
 ## Process ID Allocation
 
-### Redis Key Format
+Process ID allocation uses a two-layer mechanism to ensure uniqueness and support fast restarts:
+
+### Local Identity
+
+1. Get machine unique ID via `machine_uid`
+2. Try to lock `/tmp/sfid/{app}/{seq}` file (seq = 0, 1, 2, ...)
+3. First successful lock determines local sequence number
+4. Identity = `{machine_id}:{local_seq}`
+
+This ensures:
+- Same machine restarting gets same identity (if same local_seq available)
+- Multiple processes on same machine get different identities
+- Process crash releases file lock immediately
+
+### Redis Registration
+
+Uses identity as Redis value for distributed coordination:
 
 ```
-sfid:{app}:{pid_le_bytes}
+sfid:{app}:{pid_le_bytes} -> {machine_id}:{local_seq}
 ```
 
 ### Heartbeat
 
 - Interval: 3 minutes
 - Expiration: 10 minutes
-- Auto-release on process exit (Drop trait)
+- Auto-release on process exit (Drop trait + file lock release)
 
 ## Tech Stack
 
@@ -188,6 +204,7 @@ sfid:{app}:{pid_le_bytes}
 | coarsetime | Fast timestamp retrieval |
 | fred | Redis client |
 | tokio | Async runtime |
-| uuid | Unique identifier generation |
+| machine-uid | Machine unique ID |
+| fs4 | File locking |
 | thiserror | Error handling |
 | tracing | Logging |

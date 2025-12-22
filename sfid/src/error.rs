@@ -1,3 +1,5 @@
+use std::io;
+
 use thiserror::Error;
 
 pub type Result<T, E = Error> = std::result::Result<T, E>;
@@ -5,10 +7,18 @@ pub type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(Debug, Error)]
 pub enum Error {
   #[cfg(feature = "auto_pid")]
-  #[error("Redis error: {0}")]
+  #[error("Redis: {0}")]
   Redis(#[from] fred::error::Error),
 
   #[cfg(feature = "auto_pid")]
-  #[error("No available process ID, all {0} slots are occupied")]
+  #[error("No available PID, all {0} slots occupied")]
   NoAvailablePid(u32),
+
+  #[cfg(feature = "auto_pid")]
+  #[error("Machine ID: {0}")]
+  MachineId(String),
+
+  #[cfg(feature = "auto_pid")]
+  #[error("Lock file: {0}")]
+  LockFile(io::Error),
 }
