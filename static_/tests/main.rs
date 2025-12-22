@@ -8,6 +8,6 @@ extern "C" fn init() {
 
 #[tokio::test]
 async fn test() -> Result<()> {
-  static_::init().await?;
+  xboot::init().await?;
   OK
 }

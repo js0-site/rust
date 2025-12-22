@@ -23,7 +23,7 @@ genv = "0.1.18"
 log = "0.4.29"
 rustls = "0.23.35"
 xbin = "0.1.9"
-xboot = "0.1.29"
+xboot = "0.1.32"
 
 [dependencies.static_init]
 version = "1.0.4"

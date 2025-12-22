@@ -3,10 +3,10 @@ name = "sfid"
 version = "0.1.0"
 edition = "2024"
 license = "MulanPSL-2.0"
-repository = "https://github.com/js0/rust.git"
-homepage = "https://github.com/js0/rust/tree/main/sfid"
-description = "sfid"
-keywords = [ ]
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/sfid"
+description = "Snowflake ID generator with Redis-based machine ID allocation / 基于 Redis 自动分配机器号的雪花 ID 生成器"
+keywords = [ "snowflake", "id-generator", "distributed", "redis" ]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -15,16 +15,43 @@ rustdoc-args = [ "--cfg", "docsrs" ]
 [features]
 default = [ ]
 
+[dependencies]
+coarsetime = "0.1.36"
+fred = "10.1.0"
+linkme = "0.3.35"
+log = "0.4.29"
+machine-uid = "0.5.4"
+rand = "0.9"
+thiserror = "2.0.17"
+
+[dependencies.uuid]
+version = "1.19"
+features = [ "v4" ]
+
+[dependencies.static_]
+version = "0.1.19"
+path = "../static_"
+
+[dependencies.xboot]
+version = "0.1.33"
+path = "../xboot"
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "sync", "time" ]
+
+[dependencies.xkv]
+version = "0.1.51"
+features = [ "r" ]
+
 [dev-dependencies]
 aok = "0.1.18"
-log = "0.4.29"
 log_init = "0.1.34"
-static_init = "1.0.4"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
 
 [dev-dependencies.tokio]
 version = "1.48.0"
 features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]
-
-[dependencies.xboot]
-version = "0.1.31"
-path = "../xboot"

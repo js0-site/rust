@@ -16,14 +16,14 @@ pub async fn connect() -> Result<Client> {
   Ok(Client {})
 }
 
-static_::init!(CLIENT: Client {
+xboot::init!(CLIENT: Client {
   connect().await
 });
 
 #[tokio::main]
 async fn main() -> Result<()> {
   log_init::init();
-  static_::init().await?;
+  xboot::init().await?;
   info!("inited");
   CLIENT.test().await;
   OK

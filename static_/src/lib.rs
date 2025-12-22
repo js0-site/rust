@@ -1,6 +1,6 @@
 pub use async_wrap::{OnceCell, Wrap};
 pub use log;
-pub use xboot::{self, init};
+pub use xboot;
 
 #[macro_export]
 macro_rules! init {

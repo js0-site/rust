@@ -21,7 +21,7 @@ parking_lot = "0.12.5"
 smol_str = "0.3.4"
 static_init = { version = "1.0.4", features = ["parking_lot"] }
 thiserror = "2.0.17"
-xboot = "0.1.29"
+xboot = "0.1.32"
 
 [dependencies.tokio]
 version = "1.48.0"

@@ -59,14 +59,14 @@ pub async fn connect() -> Result<Client> {
 }
 
 // Register async initialization
-static_::init!(CLIENT: Client {
+xboot::init!(CLIENT: Client {
   connect().await
 });
 
 #[tokio::main]
 async fn main() -> Result<()> {
   // Execute all registered initializations
-  static_::init().await?;
+  xboot::init().await?;
   info!("inited");
   CLIENT.test().await;
   OK

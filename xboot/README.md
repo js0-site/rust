@@ -65,14 +65,14 @@ pub async fn connect() -> Result<Client> {
 }
 
 // Register async initialization
-static_::init!(CLIENT: Client {
+xboot::init!(CLIENT: Client {
   connect().await
 });
 
 #[tokio::main]
 async fn main() -> Result<()> {
   // Execute all registered initializations
-  static_::init().await?;
+  xboot::init().await?;
   info!("inited");
   CLIENT.test().await;
   OK
@@ -249,14 +249,14 @@ pub async fn connect() -> Result<Client> {
 }
 
 // 注册异步初始化
-static_::init!(CLIENT: Client {
+xboot::init!(CLIENT: Client {
   connect().await
 });
 
 #[tokio::main]
 async fn main() -> Result<()> {
   // 执行所有注册的初始化
-  static_::init().await?;
+  xboot::init().await?;
   info!("inited");
   CLIENT.test().await;
   OK

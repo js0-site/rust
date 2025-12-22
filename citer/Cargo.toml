@@ -7,11 +7,11 @@ optional = true
 
 [package]
 name = "citer"
-version = "0.1.15"
+version = "0.1.16"
 edition = "2024"
 license = "MulanPSL-2.0"
-repository = "https://github.com/i18n-site/rust.git"
-homepage = "https://github.com/i18n-site/rust/tree/main/citer"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/citer"
 description = "citer"
 
 [package.metadata.docs.rs]

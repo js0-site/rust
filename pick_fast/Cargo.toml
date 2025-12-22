@@ -26,7 +26,7 @@ iter = [ "dep:citer" ]
 fastrand = "2.3.0"
 
 [dependencies.citer]
-version = "0.1.15"
+version = "0.1.16"
 path = "../citer"
 optional = true
 
@@ -38,8 +38,11 @@ hickory-resolver = "0.25.2"
 log_init = "0.1.34"
 plotters = "0.3.7"
 plotters-svg = "0.3.7"
-static_init = { version = "1.0.4", features = ["parking_lot"] }
 svg = "0.18.0"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
 
 [dev-dependencies.ts_]
 path = "../ts_"

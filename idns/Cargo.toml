@@ -53,7 +53,7 @@ path = "../ts_"
 features = [ "milli" ]
 
 [dependencies.ip_set]
-version = "0.1.6"
+version = "0.1.7"
 path = "../ip_set"
 
 [dependencies.pick_fast]

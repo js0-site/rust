@@ -1,10 +1,10 @@
 [package]
 name = "xboot"
-version = "0.1.31"
+version = "0.1.33"
 edition = "2024"
 license = "MulanPSL-2.0"
-repository = "https://github.com/i18n-site/rust.git"
-homepage = "https://github.com/i18n-site/rust/tree/main/xboot"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/xboot"
 description = "Async static initialization before main. / 主函数前异步初始化静态变量。"
 keywords = ["async", "static", "initialization", "linkme", "tokio"]
 

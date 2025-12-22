@@ -28,7 +28,7 @@ log = "0.4.29"
 thiserror = "2.0.17"
 tokio-rustls = "0.26.4"
 tokio-util = "0.7.17"
-xboot = "0.1.29"
+xboot = "0.1.32"
 xmail = "0.1.16"
 
 [dependencies.idns]

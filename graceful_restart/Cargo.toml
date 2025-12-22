@@ -34,7 +34,7 @@ parking_lot = { version = "0.12.5", features = ["send_guard"] }
 static_init = { version = "1.0.4", features = ["parking_lot"] }
 tokio = { version = "1.48.0", features = ["rt"] }
 tokio-util = "0.7.17"
-xboot = "0.1.29"
+xboot = "0.1.32"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sys_notify = { version = "0.1.4", path = "../sys_notify" }
