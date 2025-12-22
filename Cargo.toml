@@ -25,6 +25,7 @@ members = [
   "to_mysql",
   "tosql_meta",
   "tosql_static_meta",
+  "static_",
   "code_turn",
   "tosql_linkme",
   "ipbin",
@@ -62,7 +63,10 @@ members = [
   "idns",
   "idot",
   "dns_parse",
-  "ip_set", "sfid",
+  "ip_set",
+  "sfid",
+  "xboot",
+  "xboot/tests",
 ]
 exclude = ["sh/_tmpl"]
 

@@ -66,6 +66,8 @@ impl KvId {
     Self {
       name: SmolStr::new_inline(name),
       fast: Fast::new(),
+      // RawMutex::INIT 是初始状态值，非共享实例
+      // RawMutex::INIT is init state value, not shared instance
       slow: Mutex::const_new(RawMutex::INIT, Slow::new()),
     }
   }

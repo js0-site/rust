@@ -53,7 +53,7 @@ version = "0.2.5"
 version = "0.2.6"
 
 [dependencies.idns]
-version = "0.2.12"
+version = "0.2.13"
 
 [dependencies.riter]
 version = "0.1.1"
