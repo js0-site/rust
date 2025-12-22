@@ -15,10 +15,6 @@ pub enum Error {
   NoAvailablePid(u32),
 
   #[cfg(feature = "auto_pid")]
-  #[error("Machine ID: {0}")]
-  MachineId(String),
-
-  #[cfg(feature = "auto_pid")]
   #[error("Lock file: {0}")]
   LockFile(io::Error),
 }

@@ -20,7 +20,7 @@ impl std::ops::Deref for MachineId {
 /// Get unique identifier for this machine
 /// 获取本机唯一标识
 fn local_id() -> String {
-  machine_uid::get().unwrap_or_else(|_| uuid::Uuid::new_v4().to_string())
+  osid::get().unwrap_or_else(|_| uuid::Uuid::new_v4().to_string()).to_owned()
 }
 
 // Async initialized machine ID

@@ -6,7 +6,7 @@ use std::{
 use coarsetime::Clock;
 use tracing::warn;
 
-use crate::{Layout, DefaultLayout};
+use crate::{DefaultLayout, Layout};
 
 /// Clock backward threshold in seconds
 /// 时钟回拨告警阈值（秒）

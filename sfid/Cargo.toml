@@ -1,36 +1,78 @@
 [package]
 name = "sfid"
-version = "0.1.4"
+version = "0.1.7"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
 homepage = "https://github.com/js0-site/rust/tree/main/sfid"
 description = "Distributed Snowflake ID generator with Redis-based auto machine ID allocation / 基于 Redis 自动分配机器号的分布式雪花 ID 生成器"
-keywords = ["snowflake", "id-generator", "distributed", "redis", "unique-id"]
+keywords = [
+"snowflake",
+"id-generator",
+"distributed",
+"redis",
+"unique-id"
+]
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = [ "--cfg", "docsrs" ]
 
 [features]
-default = ["snowflake", "auto_pid"]
-snowflake = ["dep:coarsetime"]
-auto_pid = ["snowflake", "dep:fred", "dep:xkv", "dep:uuid", "dep:tokio", "dep:xbin", "dep:rand", "dep:log"]
-parse = []
+default = [ "snowflake", "auto_pid" ]
+snowflake = [ "dep:coarsetime" ]
+auto_pid = [
+"snowflake",
+"dep:fred",
+"dep:xkv",
+"dep:tokio",
+"dep:xbin",
+"dep:rand",
+"dep:log"
+]
+parse = [ ]
 
 [dependencies]
-coarsetime = { version = "0.1.36", optional = true }
-fred = { version = "10.1.0", optional = true }
-fs4 = { version = "0.13.1", features = ["tokio"] }
-log = { version = "0.4", optional = true }
-machine-uid = "0.5.4"
-rand = { version = "0.9", optional = true }
 thiserror = "2.0.17"
-tokio = { version = "1.48.0", features = ["rt", "time"], optional = true }
 tracing = "0.1.44"
-uuid = { version = "1", features = ["v4"], optional = true }
-xbin = { version = "0.1.9", optional = true }
-xkv = { version = "0.1", features = ["r"], optional = true }
+
+[dependencies.coarsetime]
+version = "0.1.36"
+optional = true
+
+[dependencies.fred]
+version = "10.1.0"
+optional = true
+
+[dependencies.fs4]
+version = "0.13.1"
+features = [ "tokio" ]
+
+[dependencies.log]
+version = "0.4"
+optional = true
+
+[dependencies.osid]
+version = "0.1.1"
+path = "../osid"
+
+[dependencies.rand]
+version = "0.9"
+optional = true
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "rt", "time" ]
+optional = true
+
+[dependencies.xbin]
+version = "0.1.9"
+optional = true
+
+[dependencies.xkv]
+version = "0.1"
+features = [ "r" ]
+optional = true
 
 [dev-dependencies]
 aok = "0.1.18"

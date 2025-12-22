@@ -19,9 +19,11 @@ use crate::{Error, Layout, Result};
 /// Redis 键前缀，用于进程号分配
 const PREFIX: &[u8] = b"sfid:";
 
-/// Lock file directory
-/// 锁文件目录
-const LOCK_DIR: &str = "/tmp/sfid";
+/// Get lock directory path
+/// 获取锁目录路径
+fn lock_dir() -> PathBuf {
+  osid::dir().join("sfid")
+}
 
 /// Heartbeat interval (3 minutes)
 /// 心跳间隔，3分钟
@@ -52,12 +54,12 @@ impl Drop for Pid {
   }
 }
 
-/// Get local identity: machine_uid + local_seq
+/// Get local identity: machine_id + local_seq
 /// 获取本地标识：机器ID + 本地序号
 fn local_identity(app: &[u8], max_pid: u32) -> Result<(Box<[u8]>, u16, File)> {
-  let machine_id = machine_uid::get().map_err(|e| Error::MachineId(e.to_string()))?;
+  let machine_id = osid::get().map_err(Error::LockFile)?;
 
-  let dir: PathBuf = [LOCK_DIR, &String::from_utf8_lossy(app)].iter().collect();
+  let dir = lock_dir().join(String::from_utf8_lossy(app).as_ref());
   create_dir_all(&dir).map_err(Error::LockFile)?;
 
   for seq in 0..max_pid {
@@ -151,5 +153,9 @@ fn start_heartbeat(key: Box<[u8]>, local: Box<[u8]>, expire: Expiration, lock_fi
     }
   });
 
-  Pid { id, cancel, _lock: lock_file }
+  Pid {
+    id,
+    cancel,
+    _lock: lock_file,
+  }
 }

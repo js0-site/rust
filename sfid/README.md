@@ -175,19 +175,25 @@ This ensures ID uniqueness even under NTP adjustments or VM migrations.
 
 ## Process ID Allocation
 
-Process ID allocation uses a two-layer mechanism to ensure uniqueness and support fast restarts:
+Process ID allocation uses a two-layer mechanism to ensure uniqueness and prevent ID exhaustion from rapid restarts.
+
+### Why This Design?
+
+Traditional snowflake implementations generate a new random identifier on each startup. This causes a problem: if a process crashes and restarts repeatedly, it gets a new identifier each time, consuming global process IDs rapidly. With only 2048 slots, frequent restarts could exhaust all available IDs.
+
+Our solution: **persistent machine identity + file locks**. Same machine restarting gets the same identity, so it reclaims its previous Redis slot instead of consuming a new one.
 
 ### Local Identity
 
-1. Get machine unique ID via `machine_uid`
+1. Get or create machine ID (`hostname-random`, stored in `/tmp/sfid/machine_id`)
 2. Try to lock `/tmp/sfid/{app}/{seq}` file (seq = 0, 1, 2, ...)
 3. First successful lock determines local sequence number
 4. Identity = `{machine_id}:{local_seq}`
 
 This ensures:
-- Same machine restarting gets same identity (if same local_seq available)
-- Multiple processes on same machine get different identities
-- Process crash releases file lock immediately
+- Same machine restarting gets same identity → reclaims previous Redis slot
+- Multiple processes on same machine get different local_seq → different identities
+- Process crash releases file lock immediately → slot available for restart
 
 ### Redis Registration
 
@@ -210,7 +216,7 @@ sfid:{app}:{pid_le_bytes} -> {machine_id}:{local_seq}
 | coarsetime | Fast timestamp retrieval |
 | fred | Redis client |
 | tokio | Async runtime |
-| machine-uid | Machine unique ID |
+| hostname | Get hostname |
 | fs4 | File locking |
 | thiserror | Error handling |
 | tracing | Logging |
@@ -401,19 +407,25 @@ let parsed = parse_with::<MyLayout>(id);
 
 ## 进程号分配
 
-进程号分配采用双层机制，确保唯一性并支持快速重启：
+进程号分配采用双层机制，确保唯一性并防止快速重启导致 ID 耗尽。
+
+### 为何这样设计？
+
+传统雪花实现每次启动都生成新的随机标识。这会导致问题：如果进程反复崩溃重启，每次都获得新标识，快速消耗全局进程号。只有 2048 个槽位，频繁重启可能耗尽所有可用 ID。
+
+我们的方案：**持久化机器标识 + 文件锁**。同一机器重启后获得相同标识，因此会回收之前的 Redis 槽位，而不是消耗新的。
 
 ### 本地标识
 
-1. 通过 `machine_uid` 获取机器唯一 ID
+1. 获取或创建机器 ID（`主机名-随机数`，存储在 `/tmp/sfid/machine_id`）
 2. 尝试锁定 `/tmp/sfid/{app}/{seq}` 文件（seq = 0, 1, 2, ...）
 3. 首个成功锁定的决定本地序号
 4. 标识 = `{machine_id}:{local_seq}`
 
 这确保：
-- 同一机器重启后获得相同标识（如果相同 local_seq 可用）
-- 同一机器多进程获得不同标识
-- 进程崩溃立即释放文件锁
+- 同一机器重启后获得相同标识 → 回收之前的 Redis 槽位
+- 同一机器多进程获得不同 local_seq → 不同标识
+- 进程崩溃立即释放文件锁 → 槽位可供重启使用
 
 ### Redis 注册
 
@@ -436,7 +448,7 @@ sfid:{app}:{pid_le_bytes} -> {machine_id}:{local_seq}
 | coarsetime | 快速时间戳获取 |
 | fred | Redis 客户端 |
 | tokio | 异步运行时 |
-| machine-uid | 机器唯一 ID |
+| hostname | 获取主机名 |
 | fs4 | 文件锁 |
 | thiserror | 错误处理 |
 | tracing | 日志 |

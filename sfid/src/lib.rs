@@ -1,10 +1,12 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod bits;
-pub use bits::{Layout, DefaultLayout};
+pub use bits::{DefaultLayout, Layout};
 
 mod error;
 pub use error::{Error, Result};
+
+pub use osid::get as mid;
 
 #[cfg(feature = "auto_pid")]
 mod pid;

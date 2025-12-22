@@ -9,7 +9,7 @@
 - Heartbeat mechanism with auto-release on crash
 - Clock drift tolerance (sequence borrowing + warning log)
 - Sequence exhaustion handling (timestamp advance)
-- Configurable epoch
+- Cross-platform persistent lock directory
 
 ## Installation
 
@@ -169,19 +169,30 @@ This ensures ID uniqueness even under NTP adjustments or VM migrations.
 
 ## Process ID Allocation
 
-Process ID allocation uses a two-layer mechanism to ensure uniqueness and support fast restarts:
+Process ID allocation uses a two-layer mechanism to ensure uniqueness and prevent ID exhaustion from rapid restarts.
+
+### Why This Design?
+
+Traditional snowflake implementations generate a new random identifier on each startup. This causes a problem: if a process crashes and restarts repeatedly, it gets a new identifier each time, consuming global process IDs rapidly. With only 2048 slots, frequent restarts could exhaust all available IDs.
+
+Our solution: **persistent machine identity + file locks**. Same machine restarting gets the same identity, so it reclaims its previous Redis slot instead of consuming a new one.
 
 ### Local Identity
 
-1. Get machine unique ID via `machine_uid`
-2. Try to lock `/tmp/sfid/{app}/{seq}` file (seq = 0, 1, 2, ...)
+1. Get or create machine ID (`hostname:random`, stored persistently)
+2. Try to lock `{data_dir}/sfid/{app}/{seq}` file (seq = 0, 1, 2, ...)
 3. First successful lock determines local sequence number
 4. Identity = `{machine_id}:{local_seq}`
 
+Lock directory is cross-platform persistent:
+- Linux: `~/.local/share/sfid`
+- macOS: `~/Library/Application Support/sfid`
+- Windows: `C:\Users\<User>\AppData\Local\sfid`
+
 This ensures:
-- Same machine restarting gets same identity (if same local_seq available)
-- Multiple processes on same machine get different identities
-- Process crash releases file lock immediately
+- Same machine restarting gets same identity → reclaims previous Redis slot
+- Multiple processes on same machine get different local_seq → different identities
+- Process crash releases file lock immediately → slot available for restart
 
 ### Redis Registration
 
@@ -204,7 +215,8 @@ sfid:{app}:{pid_le_bytes} -> {machine_id}:{local_seq}
 | coarsetime | Fast timestamp retrieval |
 | fred | Redis client |
 | tokio | Async runtime |
-| machine-uid | Machine unique ID |
+| hostname | Get hostname |
 | fs4 | File locking |
+| dirs | Cross-platform directories |
 | thiserror | Error handling |
 | tracing | Logging |

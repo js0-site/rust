@@ -65,7 +65,7 @@ members = [
   "idot",
   "dns_parse",
   "ip_set",
-  "sfid",
+  "sfid", "osid",
 ]
 exclude = ["sh/_tmpl"]
 
