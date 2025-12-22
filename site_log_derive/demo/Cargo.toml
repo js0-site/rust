@@ -11,7 +11,7 @@ version = "0.1.4"
 path = ".."
 
 [dependencies.site_log]
-version = "0.1.10"
+version = "0.1.11"
 path = "../../site_log"
 
 [dependencies.tokio]

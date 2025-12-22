@@ -11,7 +11,7 @@ mod ctx;
 pub use ctx::Ctx;
 pub use tokio::spawn;
 
-pub static SITE_LOG_ID: KvId = KvId::new("siteLog");
+pub static SITE_LOG_ID: KvId = KvId::const_new("siteLog");
 
 pub struct Site {
   pub ctx: Arc<ctx::Ctx>,

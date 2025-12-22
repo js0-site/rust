@@ -1,184 +1,261 @@
-# kvid : Global Unique ID Generator Based on Redis/Kvrocks
+# kvid : Distributed ID Generator with Dual-Segment Preloading
 
 - [Introduction](#introduction)
+- [Features](#features)
 - [Usage](#usage)
-- [Design and Implementation](#design-and-implementation)
+- [API Reference](#api-reference)
+- [Design](#design)
 - [Tech Stack](#tech-stack)
 - [Directory Structure](#directory-structure)
 - [Competitors](#competitors)
-- [Comparison of ID Generation Algorithms](#comparison-of-id-generation-algorithms)
+- [ID Generation Algorithms](#id-generation-algorithms)
 - [History](#history)
 
 ## Introduction
 
-`kvid` is a distributed unique ID generator based on Redis or Kvrocks. It guarantees globally unique IDs that are trend-increasing. It is designed to be robust, high-performance, and easy to integrate into Rust projects.
+kvid is a distributed unique ID generator based on Redis/Kvrocks. It uses dual-segment preloading with lock-free fast path to achieve high throughput and low latency.
 
-Key features include:
-- **Global Uniqueness**: Ensures no duplicate IDs are generated across the distributed system.
-- **Trend Increasing**: IDs are generated in an increasing order, which is beneficial for database indexing.
-- **High Performance**: Utilizes batch fetching (step-based) to minimize network round-trips to Redis/Kvrocks.
-- **Dynamic Step Adjustment**: Automatically adjusts the batch size based on consumption rate to balance performance and ID continuity.
-- **Static Global Variable Support**: Can be directly declared as a `static` global variable in Rust, simplifying usage across the application.
+## Features
+
+- **Global Uniqueness**: Atomic `HINCRBY` ensures no duplicate IDs across distributed nodes
+- **Trend Increasing**: IDs increase monotonically within segments, friendly to database indexing
+- **Lock-Free Fast Path**: CAS-based ID allocation, most requests bypass mutex entirely
+- **Dual-Segment Preloading**: Background prefetch ensures seamless segment switching
+- **Dynamic Step Adjustment**: Auto-tunes batch size based on consumption rate
+- **Static Global Support**: Can be declared as `static` variable with `const_new`
 
 ## Usage
 
-Add `kvid` to `Cargo.toml`.
-
-### Basic Example
-
-`kvid` allows declaring the generator as a static global variable, making it accessible throughout the application without passing instances around.
-
 ```rust
-use std::time::Duration;
-use aok::{OK, Void};
 use kvid::KvId;
-use log::info;
 
-// Initialize logger (optional, depending on your setup)
-#[static_init::constructor(0)]
-extern "C" fn _log_init() {
-  log_init::init();
-}
+// declare as static global / 声明为静态全局变量
+static USER_ID: KvId = KvId::const_new("user");
 
-// Declare as a static global variable
-pub static KVID_TEST: KvId = KvId::new("test");
-
-#[tokio::test]
-async fn test() -> Void {
-  // Initialize global Redis/Kvrocks connection (Required for xkv to connect to Redis/Kvrocks)
+async fn create_user() -> kvid::Result<u64> {
   xboot::init().await?;
-
-  for i in 0..300 {
-    // Generate next ID
-    let id = KVID_TEST.next().await?;
-    info!("{}", id);
-
-    if i > 5 {
-      tokio::time::sleep(Duration::from_secs(1)).await;
-    }
-  }
-  OK
+  USER_ID.next().await
 }
 ```
 
-## Design and Implementation
+Concurrent usage:
 
-### Configuration & Constants
+```rust
+use std::time::Duration;
+use kvid::{KVID_KEY, KvId};
+use fred::interfaces::HashesInterface;
+use xkv::R;
 
-The following constants are defined in `src/lib.rs` and control the behavior of the generator:
+static KVID_TEST: KvId = KvId::const_new("test");
 
--   **`FETCH_DURATION` (Default: 600s / 10 minutes)**:
-    The target duration for a batch of IDs to last. The algorithm tries to adjust the `step` (batch size) so that a fetch request happens approximately every 10 minutes.
-    -   If IDs are consumed **faster** than this duration, the step size **doubles** (up to `STEP_MAX`) to reduce network frequency.
-    -   If IDs are consumed **slower** than this duration, the step size **halves** to prevent holding too many unused IDs during low traffic periods.
+async fn demo() -> kvid::Result<()> {
+  xboot::init().await?;
 
--   **`STEP_MAX` (Default: 1,000,000)**:
-    The maximum number of IDs that can be fetched in a single request. This prevents the step size from growing indefinitely.
+  let t1 = tokio::spawn(async {
+    for _ in 0..50 {
+      let id = KVID_TEST.next().await?;
+      println!("t1: {id}");
+      tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    Ok::<_, kvid::Error>(())
+  });
 
-### Core Logic
+  let t2 = tokio::spawn(async {
+    for _ in 0..50 {
+      let id = KVID_TEST.next().await?;
+      println!("t2: {id}");
+      tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    Ok::<_, kvid::Error>(())
+  });
 
-The core logic resides in the `KvId` struct. It maintains a local range of IDs and fetches a new range (step) from the Redis/Kvrocks backend when the local range is exhausted.
+  t1.await.unwrap()?;
+  t2.await.unwrap()?;
 
-1.  **Initialization**: `KvId` is initialized with a name (key).
-2.  **ID Generation (`next`)**:
-    - Checks if there are available IDs in the local buffer (`id < max`).
-    - If yes, increments the local `id` and returns it.
-    - If no, it triggers a fetch operation.
-3.  **Fetching from Backend**:
-    - Uses `HINCRBY` command on Redis/Kvrocks to atomically increment the maximum ID for the given key by `step`.
-    - Updates local `max` and `id` based on the response.
-4.  **Dynamic Step Adjustment**:
-    - The system calculates the time elapsed (`cost`) since the last fetch.
-    - **Increase Step**: If `cost <= FETCH_DURATION` (high load), `step = step * 2`.
-    - **Decrease Step**: If `cost > FETCH_DURATION` (low load), `step = max(1, step / 2)`.
-    - This self-tuning mechanism ensures high performance under load while minimizing waste during idle times.
+  // cleanup / 清理
+  R.hdel::<(), _, _>(KVID_KEY, "test").await?;
+  Ok(())
+}
+```
 
-### Data Structures (`lib.rs`)
+## API Reference
 
--   **`KvId`**: The main struct exposed to the user.
-    -   `name`: The key name used in Redis.
-    -   `inner`: A `Mutex` protected `Inner` state.
--   **`Inner`**: Internal state of the generator.
-    -   `id`: Current ID available for distribution.
-    -   `max`: The maximum ID in the current allocated range.
-    -   `step`: Current batch size to fetch from backend.
-    -   `ts`: Timestamp of the last fetch.
+### Constants
+
+| Constant | Value | Description |
+|----------|-------|-------------|
+| `PRELOAD_SEC` | 60 | Target duration (seconds) for segment |
+| `STEP_MIN` | 1 | Minimum step size |
+| `STEP_MAX` | 1,000,000 | Maximum step size |
+| `KVID_KEY` | "kvid" | Redis hash key |
+
+### KvId
+
+Main struct for ID generation.
+
+```rust
+// const initialization for static / 静态变量用 const 初始化
+pub const fn const_new(name: &'static str) -> Self
+
+// runtime initialization / 运行时初始化
+pub fn new(name: impl Into<SmolStr>) -> Self
+
+// generate next ID / 生成下个 ID
+pub async fn next(&'static self) -> Result<u64>
+```
+
+### Error
+
+```rust
+pub enum Error {
+  Empty,              // segment exhausted unexpectedly
+  StepOverflow(u64),  // step exceeds i64 range
+  Kv(fred::error::Error), // Redis/Kvrocks error
+}
+```
+
+## Design
+
+### Dual-Segment Architecture
+
+```mermaid
+graph TD
+    subgraph "KvId struct"
+        KvId["KvId { name, fast, slow }"]
+    end
+
+    subgraph "Fast (lock-free)"
+        Fast["Fast { id: AtomicU64, max: AtomicU64, lock: AtomicBool }"]
+    end
+
+    subgraph "Slow (Mutex protected)"
+        Slow["Slow { next: Option&lt;Seg&gt;, step: u64, ts: u64 }"]
+    end
+
+    KvId --> Fast
+    KvId --> Slow
+```
+
+### next() Flow
+
+```mermaid
+graph TD
+    A["next()"] --> B["try_next()"]
+    B --> C{"fast.id < fast.max?"}
+    C -->|Yes| D["CAS: fast.id += 1"]
+    D --> E["return Ok(id)"]
+    D --> F{"fast.lock == false?"}
+    F -->|Yes| G["spawn_fill()"]
+
+    C -->|No| H["slow.lock()"]
+    H --> I["retry try_next()"]
+    I -->|Success| E
+
+    I -->|Fail| J{"slow.next.is_some()?"}
+    J -->|Yes| K["set_seg(slow.next.take())"]
+    K --> L["try_next()"]
+    L --> M["spawn_fill()"]
+    M --> E
+
+    J -->|No| N["calc_step()"]
+    N --> O["fetch(step)"]
+    O --> P["HINCRBY kvid name step"]
+    P --> Q["set_seg(Seg{id, max})"]
+    Q --> R["update slow.step, slow.ts"]
+    R --> S["try_next()"]
+    S --> T["spawn_fill()"]
+    T --> E
+```
+
+### spawn_fill() Background Preload
+
+```mermaid
+graph TD
+    A["spawn_fill()"] --> B{"fast.lock.swap(true)?"}
+    B -->|Already locked| C["return"]
+    B -->|Got lock| D["tokio::spawn fill()"]
+
+    D --> E["calc_step()"]
+    E --> F["fetch(step)"]
+    F --> G{"slow.next.is_none()?"}
+    G -->|Yes| H["slow.next = Some(seg)"]
+    G -->|No| I["discard"]
+    H --> J["fast.lock = false"]
+    I --> J
+```
+
+### Data Structures
+
+**Fast** (lock-free):
+- `id: AtomicU64` - current allocated ID
+- `max: AtomicU64` - segment upper bound
+- `lock: AtomicBool` - fill lock to prevent duplicate prefetch
+
+**Slow** (mutex protected):
+- `next: Option<Seg>` - buffered segment
+- `step: u64` - current batch size
+- `ts: u64` - last fetch timestamp
+
+### Dynamic Step Algorithm
+
+```
+new_step = prev_step * PRELOAD_SEC / elapsed
+new_step = clamp(new_step, STEP_MIN, STEP_MAX)
+```
+
+High load → larger step → fewer network calls
+Low load → smaller step → less ID waste
+
+### Redis Storage
+
+```
+HSET kvid {name} {max_id}
+HINCRBY kvid {name} {step}
+```
 
 ## Tech Stack
 
--   **Rust**: Core language.
--   **Redis / Kvrocks**: Backend storage for atomic counters.
--   **fred**: Async Redis client.
--   **parking_lot**: Efficient Mutex implementation.
--   **tokio**: Async runtime.
+- **Rust 2024** - core language
+- **Redis / Kvrocks** - atomic counter backend
+- **fred** - async Redis client
+- **parking_lot** - efficient mutex
+- **tokio** - async runtime
+- **smol_str** - inline string optimization
 
 ## Directory Structure
 
 ```
 .
-├── Cargo.toml      # Project configuration
-├── README.mdt      # README template
-├── readme/         # Documentation files
-│   ├── en.md       # English README
-│   └── zh.md       # Chinese README
-├── src/            # Source code
-│   └── lib.rs      # Library entry point
-└── tests/          # Integration tests
-    └── main.rs     # Usage demonstration
+├── Cargo.toml
+├── src/
+│   ├── lib.rs      # public API, KvId struct
+│   ├── impl.rs     # core implementation
+│   └── error.rs    # error definitions
+└── tests/
+    └── main.rs     # integration tests
 ```
 
 ## Competitors
 
-Distributed ID generation is a common requirement. Here are some similar projects:
+- **Baidu Uidgenerator**: Java, Snowflake variant. High performance but clock-dependent
+- **Meituan Leaf**: Segment mode (DB) + Snowflake mode (ZooKeeper). Segment mode similar to kvid
+- **Didi TinyID**: Java, segment mode only. Focus on HA and multi-DB
 
--   **Baidu Uidgenerator**: Java-based, Snowflake algorithm variant. High performance but relies on Snowflake's time-dependency.
--   **Meituan Leaf**: Supports both Segment mode (database) and Snowflake mode (ZooKeeper). Segment mode is similar to `kvid`'s approach.
--   **Didi TinyID**: Java-based, Segment mode only. Focuses on high availability and multi-db support.
+kvid advantages: Rust implementation, lock-free fast path, dual-segment preloading, static global support.
 
-`kvid` distinguishes itself by being written in Rust, offering high performance with low footprint, and specifically optimizing for ease of use with static global variables.
+## ID Generation Algorithms
 
-## Comparison of ID Generation Algorithms
-
-To better understand `kvid`'s position, here is a comparison of common distributed ID generation algorithms:
-
-### 1. UUID (Universally Unique Identifier)
--   **Principle**: 128-bit identifier generated based on timestamp, random numbers, or MAC address.
--   **Pros**:
-    -   Simple to implement, no network interaction needed.
-    -   Globally unique without coordination.
--   **Cons**:
-    -   **Too long**: 128 bits (32 hex chars) is inefficient for storage and indexing.
-    -   **Not sortable**: Randomness (v4) causes page splitting in B+Tree indexes, hurting database performance.
-    -   **Information leakage**: v1 contains MAC address.
-
-### 2. Database Auto-increment
--   **Principle**: Rely on database's `AUTO_INCREMENT` feature.
--   **Pros**:
-    -   Simple, strictly increasing.
--   **Cons**:
-    -   **Single point of failure**: Database becomes the bottleneck.
-    -   **Hard to scale**: Difficult to merge data from multiple databases later.
-
-### 3. Snowflake (Twitter)
--   **Principle**: 64-bit integer: 1 bit sign + 41 bits timestamp + 10 bits machine ID + 12 bits sequence.
--   **Pros**:
-    -   High performance (millions of IDs/sec).
-    -   Time-ordered (roughly).
-    -   No network overhead (generated locally).
--   **Cons**:
-    -   **Clock dependency**: Strongly relies on system clock. Clock rollback can cause duplicate IDs or service unavailability.
-    -   **Machine ID management**: Requires a mechanism (like ZooKeeper) to assign unique machine IDs.
-
-### 4. Segment Mode (kvid / Meituan Leaf)
--   **Principle**: Pre-allocate a range (step) of IDs from a central store (Redis/DB) and issue them from memory.
--   **Pros**:
-    -   **High Performance**: Database is accessed only once per step (e.g., every 1000 IDs).
-    -   **No Clock Dependency**: Immune to clock rollback issues.
-    -   **Trend Increasing**: Friendly to database indexing.
--   **Cons**:
-    -   **ID Gaps**: If the service restarts, unused IDs in the current step are lost (but uniqueness is preserved).
-    -   **Central Dependency**: Relies on the availability of the central store (Redis/Kvrocks), though load is very low.
+| Algorithm | Pros | Cons |
+|-----------|------|------|
+| UUID | No coordination, simple | 128-bit, unordered, bad for indexing |
+| DB Auto-increment | Simple, strictly ordered | Single point failure, hard to scale |
+| Snowflake | High perf, time-ordered, local | Clock dependency, machine ID management |
+| Segment (kvid) | No clock dependency, trend increasing | ID gaps on restart, central store dependency |
 
 ## History
 
-The need for distributed unique IDs arose with the explosion of web-scale applications. Traditional database auto-increment keys became a bottleneck in sharded databases. Twitter's **Snowflake** (2010) was a pioneer, using time-based bit manipulation to generate IDs without coordination. However, Snowflake depends heavily on system clocks. Database-based "Segment" approaches (like Flickr's ticket server and later Meituan Leaf's segment mode) emerged to solve clock dependency issues by allocating blocks of IDs. `kvid` follows the Segment pattern, leveraging modern Redis/Kvrocks for speed and atomicity, combined with Rust's safety and concurrency features.
+Distributed ID generation emerged as web applications scaled beyond single databases. Twitter's Snowflake (2010) pioneered time-based ID generation but suffered from clock dependency. Flickr's Ticket Server introduced segment-based allocation, later refined by Meituan Leaf.
+
+The segment approach trades small ID gaps for clock independence. kvid advances this pattern with Rust's zero-cost abstractions: lock-free fast path handles most requests, while dual-segment preloading eliminates blocking waits. The result is microsecond-level latency with guaranteed uniqueness.
+
+Fun fact: Redis HINCRBY, the atomic operation kvid relies on, was added in Redis 2.0 (2010) - the same year Snowflake was released. Both solutions emerged from the same era of distributed systems challenges.

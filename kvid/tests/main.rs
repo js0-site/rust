@@ -1,25 +1,40 @@
 use std::time::Duration;
 
 use aok::{OK, Void};
-use kvid::KvId;
+use fred::interfaces::HashesInterface;
+use kvid::{KVID_KEY, KvId};
 use log::info;
+use xkv::R;
 
 #[static_init::constructor(0)]
 extern "C" fn _log_init() {
   log_init::init();
 }
 
-pub static KVID_TEST: KvId = KvId::new("test");
+static KVID_TEST: KvId = KvId::const_new("test");
 
 #[tokio::test]
 async fn test() -> Void {
   xboot::init().await?;
-  for i in 0..300 {
-    let id = KVID_TEST.next().await?;
-    info!("{}", id);
-    if i > 5 {
-      tokio::time::sleep(Duration::from_secs(1)).await;
+  let t1 = tokio::spawn(async {
+    for _ in 0..50 {
+      let id = KVID_TEST.next().await?;
+      info!("t1: {id}");
+      tokio::time::sleep(Duration::from_millis(10)).await;
     }
-  }
+    Ok::<_, kvid::Error>(())
+  });
+  let t2 = tokio::spawn(async {
+    for _ in 0..50 {
+      let id = KVID_TEST.next().await?;
+      info!("t2: {id}");
+      tokio::time::sleep(Duration::from_millis(10)).await;
+    }
+    Ok::<_, kvid::Error>(())
+  });
+  t1.await??;
+  t2.await??;
+  // 清理测试key / cleanup test key
+  R.hdel::<(), _, _>(KVID_KEY, "test").await?;
   OK
 }

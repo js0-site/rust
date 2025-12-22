@@ -1,72 +1,154 @@
-use fred::interfaces::HashesInterface;
-use parking_lot::{Mutex, lock_api::RawMutex};
-use xkv::R;
+mod error;
+mod r#impl;
 
-// 平均每10分钟请求请求一次kvrocks数据库
-pub const FETCH_DURATION: u64 = 600;
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+
+pub use error::{Error, Result};
+use parking_lot::{Mutex, RawMutex, lock_api::RawMutex as _};
+use smol_str::SmolStr;
+
+// 预加载时长（秒）/ preload duration in seconds
+pub const PRELOAD_SEC: u64 = 60;
+pub const STEP_MIN: u64 = 1;
 pub const STEP_MAX: u64 = 1000000;
+// Redis hash key / Redis 哈希键
+pub const KVID_KEY: &str = "kvid";
 
-#[derive(Debug, Default)]
-pub struct Inner {
-  pub id: u64,
-  pub max: u64,
-  pub time: u64,
-  pub step: u64,
-  pub ts: u64,
+#[cfg(debug_assertions)]
+static LAST_ID: AtomicU64 = AtomicU64::new(0);
+
+#[derive(Debug, Clone, Copy)]
+struct Seg {
+  id: u64,
+  max: u64,
+}
+
+#[derive(Debug)]
+struct Slow {
+  next: Option<Seg>,
+  step: u64,
+  ts: u64,
+}
+
+impl Slow {
+  const fn new() -> Self {
+    Self {
+      next: None,
+      step: STEP_MIN,
+      ts: 0,
+    }
+  }
+}
+
+#[derive(Debug)]
+struct Fast {
+  id: AtomicU64,
+  max: AtomicU64,
+  lock: AtomicBool,
+}
+
+impl Fast {
+  const fn new() -> Self {
+    Self {
+      id: AtomicU64::new(0),
+      max: AtomicU64::new(0),
+      lock: AtomicBool::new(false),
+    }
+  }
 }
 
 pub struct KvId {
-  pub name: &'static str,
-  inner: Mutex<Inner>,
+  pub name: SmolStr,
+  fast: Fast,
+  slow: Mutex<Slow>,
 }
 
 impl KvId {
-  pub async fn next(&self) -> fred::interfaces::FredResult<u64> {
-    let step;
-    let pre_ts;
-    {
-      let mut kvid = self.inner.lock();
-      if kvid.id > 0 && kvid.id < kvid.max {
-        kvid.id += 1;
-        return Ok(kvid.id);
-      }
-      step = kvid.step;
-      pre_ts = kvid.ts;
+  pub const fn const_new(name: &'static str) -> Self {
+    Self {
+      name: SmolStr::new_inline(name),
+      fast: Fast::new(),
+      slow: Mutex::const_new(RawMutex::INIT, Slow::new()),
     }
-    let now = ts_::sec();
-    let max = R.hincrby::<u64, _, _>("kvid", self.name, step as _).await?;
-    let mut kvid = self.inner.lock();
-    kvid.max = max;
-    kvid.id = max - step + 1;
-    if pre_ts > 0 && step < STEP_MAX {
-      if now <= pre_ts {
-        kvid.step = step * 2;
-      } else {
-        let cost = now - pre_ts;
-        if cost > FETCH_DURATION {
-          kvid.step = std::cmp::max(1, step / 2);
-        } else {
-          kvid.step = step * 2;
-        }
-      }
-    }
-    kvid.ts = now;
-    Ok(kvid.id)
   }
 
-  pub const fn new(name: &'static str) -> Self {
+  pub fn new(name: impl Into<SmolStr>) -> Self {
     Self {
-      inner: Mutex::const_new(
-        parking_lot::RawMutex::INIT,
-        Inner {
-          id: 0,
-          max: 0,
-          time: 0,
-          step: 1,
-          ts: 0,
-        },
-      ),
-      name,
+      name: name.into(),
+      fast: Fast::new(),
+      slow: Mutex::new(Slow::new()),
     }
+  }
+
+  // 后台填充 / background fill
+  fn spawn_fill(&'static self) {
+    if self.fast.lock.swap(true, Ordering::Acquire) {
+      return;
+    }
+    tokio::spawn(async move {
+      self.fill().await;
+    });
+  }
+
+  async fn fill(&self) {
+    let now = ts_::sec();
+    let step = {
+      let s = self.slow.lock();
+      if s.next.is_some() {
+        self.fast.lock.store(false, Ordering::Release);
+        return;
+      }
+      Self::calc_step(&s, now)
+    };
+    if let Ok(seg) = self.fetch(step).await {
+      let mut s = self.slow.lock();
+      if s.next.is_none() {
+        s.next = Some(seg);
+      }
+    }
+    self.fast.lock.store(false, Ordering::Release);
+  }
+
+  pub async fn next(&'static self) -> Result<u64> {
+    // 快速路径（完全无锁）/ fast path (lock-free)
+    if let Some(id) = self.try_next() {
+      // 后台预加载 / background preload
+      if !self.fast.lock.load(Ordering::Relaxed) {
+        self.spawn_fill();
+      }
+      return Ok(id);
+    }
+
+    // 慢路径 / slow path
+    {
+      let mut s = self.slow.lock();
+      if let Some(id) = self.try_next() {
+        return Ok(id);
+      }
+      if let Some(seg) = s.next.take() {
+        self.set_seg(seg);
+        // set_seg 后 try_next 必定成功 / try_next must succeed after set_seg
+        let id = self.try_next().ok_or(Error::Empty)?;
+        self.spawn_fill();
+        return Ok(id);
+      }
+    }
+
+    // 同步获取 / sync fetch
+    let now = ts_::sec();
+    let step = {
+      let s = self.slow.lock();
+      Self::calc_step(&s, now).max(s.step)
+    };
+    let seg = self.fetch(step).await?;
+    {
+      let mut s = self.slow.lock();
+      self.set_seg(seg);
+      s.step = step;
+      s.ts = now;
+    }
+    let id = self.try_next().ok_or(Error::Empty)?;
+    self.spawn_fill();
+    Ok(id)
   }
 }
