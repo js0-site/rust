@@ -1,35 +1,92 @@
-# smtp_srv : 基于 Redis / Kvrocks 自动热更新证书的 SMTPS 服务器
+# smtp_srv : 高性能自动热更新证书的 SMTPS 服务器
 
 ## 目录
 - [简介](#简介)
 - [功能特性](#功能特性)
+- [架构设计](#架构设计)
 - [使用演示](#使用演示)
-- [设计思路](#设计思路)
 - [API 接口](#api-接口)
 - [技术栈](#技术栈)
 - [目录结构](#目录结构)
 - [历史趣闻](#历史趣闻)
 
 ## 简介
-`smtp_srv` 是一款高性能、异步的 Rust SMTPS 服务器。它专为与 Redis 或 Kvrocks 配合使用而设计，用以动态管理邮件转发规则。该项目的核心亮点在于能够根据请求域名自动刷新 TLS 证书，确保证书时刻有效且安全。它是 `smtp_recv` 和 `smtp_send` 库的具体业务实现封装。
+
+`smtp_srv` 是基于 Rust 构建的异步 SMTPS 服务器，使用 Redis/Kvrocks 作为后端存储，专为高性能邮件处理设计。
+
+核心能力：
+- 25 端口：接收外部 MTA 邮件，按规则转发
+- 465 端口：用户通过隐式 TLS 认证登录后发送邮件
+
+服务器根据主机名 TLD 自动刷新 TLS 证书，确保服务安全且不中断。
 
 ## 功能特性
-- **证书自动热更新**：根据主机名 TLD 自动获取和更新证书。
-- **动态转发规则**：从 Redis/Kvrocks 实时查询转发配置。
-- **高性能架构**：基于 Tokio 运行时构建，处理大规模异步 I/O。
-- **DKIM 签名**：集成对发件的 DKIM 签名支持。
-- **优雅停机**：支持系统信号监听，实现安全停机。
+
+- **证书自动热更新**：根据主机名 TLD 自动获取和更新证书
+- **双端口架构**：25 端口收信/转发，465 端口认证发信
+- **动态转发规则**：从 Redis/Kvrocks 实时查询转发配置
+- **DKIM 签名**：集成发件 DKIM 签名支持
+- **优雅停机**：监听系统信号，安全终止服务
+- **高吞吐量**：基于 Tokio 异步运行时
+
+## 架构设计
+
+### 25 端口 - 收信与转发
+
+外部 MTA 连接 25 端口投递邮件，STARTTLS 可选。服务器从 Redis 查询转发规则后路由邮件。
+
+```mermaid
+graph TD
+  MTA[外部 MTA] -->|1. 25 端口| P25[smtp_srv :25]
+  P25 -->|2. STARTTLS 可选| TLS{TLS?}
+  TLS -->|是| Cert[Cert 证书模块]
+  Cert --> CBH[cert_by_host]
+  TLS -->|否| RCPT[RCPT TO]
+  CBH --> RCPT
+  RCPT -->|3. 查询| Fwd[Forward 转发模块]
+  Fwd -->|4. mailForward:host| DB[(Redis/Kvrocks)]
+  DB -->|5. 目标| DATA[DATA]
+  DATA -->|6. 转发| Mailer[Mailer 投递模块]
+  Mailer -->|7. smtp_send| Target[目标服务器]
+```
+
+### 465 端口 - 用户认证与发信
+
+用户通过 465 端口隐式 TLS 连接，经 SMTP AUTH 认证后发送邮件。
+
+```mermaid
+graph TD
+  User[邮件客户端] -->|1. 465 端口| P465[smtp_srv :465]
+  P465 -->|2. 隐式 TLS| Cert[Cert 证书模块]
+  Cert --> CBH[cert_by_host]
+  CBH -->|3. TLS 建立| Auth[AUTH LOGIN]
+  Auth -->|4. 验证| DB[(Redis/Kvrocks)]
+  DB -->|5. 认证通过| Data[DATA]
+  Data -->|6. 发送| Mailer[Mailer 投递模块]
+  Mailer -->|7. DKIM 签名| SMTP[smtp_send]
+  SMTP -->|8. 投递| Target[收件服务器]
+```
+
+### 转发规则查询
+
+Redis 以 Hash 格式存储转发规则：
+- Key：`mailForward:<域名>`
+- Field：用户名或 `*`（通配符）
+- Value：目标邮箱地址
+
+Lua 脚本（`mailForward`、`mailForwardSet`）处理单条和批量查询，支持通配符回退。
 
 ## 使用演示
 
-在 `Cargo.toml` 添加依赖：
+添加依赖：
 
 ```toml
 [dependencies]
-smtp_srv = "0.2.19"
+smtp_srv = "0.2.24"
 ```
 
-`src/main.rs` 入口文件示例：
+入口文件：
+
 ```rust
 use aok::{OK, Void};
 use mimalloc::MiMalloc;
@@ -51,67 +108,85 @@ async fn main() -> Void {
 }
 ```
 
-运行服务器：
+运行：
+
 ```bash
 cargo run --release
 ```
 
-## 设计思路
+发信测试（需设置环境变量 `SMTP_USER` 和 `SMTP_PASSWORD`）：
 
-服务器通过将具体实现注入到 `smtp_recv` 运行器来工作。核心协议逻辑由 `smtp_recv` 处理，而 `smtp_srv` 提供与存储和安全相关的业务逻辑。
+```javascript
+import nodemailer from "nodemailer";
 
-### 模块调用流程
+const SMTP = nodemailer.createTransport({
+  host: "127.0.0.1",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+  tls: {
+    servername: "smtp.example.com",
+  },
+});
 
-1.  **连接接收**：`smtp_recv` 接受客户端连接。
-2.  **证书匹配**：`Cert` 模块根据请求 Host 解析（提取 TLD）并提供对应证书。
-3.  **转发查询**：`Forward` 模块检查 Redis 中的 `mailForward:<host>` 键以确定转发目标。
-4.  **邮件投递**：`Mailer` 模块调用 `smtp_send` 将邮件发送至目标。
-
-```mermaid
-graph TD
-  User[用户 / MTA] -->|SMTP 连接| Server(smtp_srv)
-  Server -->|1. 握手| Cert[Cert 证书模块]
-  Cert -->| 获取 TLD 证书| CBH[cert_by_host]
-
-  Server -->|2. RCPT TO| Fwd[Forward 转发模块]
-  Fwd -->| 查询规则| DB[(Redis / Kvrocks)]
-  DB -->| 返回目标| Fwd
-
-  Server -->|3. DATA| Mailer[Mailer 投递模块]
-  Mailer -->| 发送/转发| SMTP_Send[smtp_send]
+await SMTP.sendMail({
+  from: '"发件人" <sender@example.com>',
+  to: "recipient@example.com",
+  subject: "测试",
+  text: "你好",
+});
 ```
 
 ## API 接口
 
-项目在 `src/lib.rs` 中导出了以下主要组件：
-
 ### 函数
--   `run()`: 异步主入口函数。它使用 `Forward`、`AuthEnv`、`Mailer` 和 `Cert` 的具体实现来初始化服务器，并等待停机信号。
+
+- `run()`：异步入口函数。使用 `Forward`、`AuthEnv`、`Mailer`、`Cert` 实现初始化服务器，等待停机信号。
 
 ### 数据结构
--   `Cert` (`src/cert.rs`): 实现 `ssl_trait::CertByHost`。通过将主机名规范化为顶级域（TLD）来解析证书。
--   `Forward` (`src/forward.rs`): 实现 `mail_forward::Forward`。使用 `xkv` 客户端连接 Redis/Kvrocks 后端以检索转发配置，支持单条和批量查询。
--   `Mailer` (`src/mailer.rs`): 实现 `smtp_recv::Mailer`。使用配置了 DKIM 密钥的 `smtp_send` 库处理邮件的最终投递。
+
+- `Cert`：实现 `ssl_trait::CertByHost`。将主机名规范化为 TLD 后解析证书。
+
+- `Mailer`：实现 `smtp_recv::Mailer`。通过 `smtp_send` 处理邮件投递，支持 DKIM 签名。提供 `send()` 处理认证用户发信，`forward()` 处理转发邮件。
+
+### 模块
+
+- `r`：Redis 函数名常量（`MAIL_FORWARD`、`MAIL_FORWARD_SET`）。
 
 ## 技术栈
 
--   **运行时**: [Tokio](https://tokio.rs/)
--   **编程语言**: Rust
--   **数据库**: Redis / Kvrocks (通过 [fred](https://github.com/aweinstock314/rust-fred))
--   **TLS**: [rustls](https://github.com/rustls/rustls)
--   **核心组件**: `smtp_recv`, `smtp_send`, `cert_by_host`
+| 组件 | 技术 |
+|------|------|
+| 运行时 | [Tokio](https://tokio.rs/) |
+| 编程语言 | Rust (Edition 2024) |
+| 数据库 | Redis / [Kvrocks](https://kvrocks.apache.org/) |
+| TLS | [rustls](https://github.com/rustls/rustls) |
+| Redis 客户端 | [fred](https://github.com/aembke/fred.rs) |
+| 内存分配器 | [mimalloc](https://github.com/microsoft/mimalloc) |
+| 核心组件 | `smtp_recv`, `smtp_send`, `cert_by_host` |
 
 ## 目录结构
 
 ```
-src/
-├── cert.rs       # TLS 证书解析逻辑
-├── forward.rs    # 邮件转发规则查询 (Redis/Kvrocks)
-├── lib.rs        # 库导出及运行函数
-├── mailer.rs     # 邮件发送实现
-└── main.rs       # 应用入口点
+smtp_srv/
+├── src/
+│   ├── lib.rs        # 库导出，run()
+│   ├── main.rs       # 应用入口
+│   ├── cert.rs       # TLS 证书解析
+│   ├── forward.rs    # 邮件转发逻辑
+│   ├── mailer.rs     # DKIM 签名发信
+│   └── r.rs          # Redis 函数常量
+├── lua/
+│   └── mailForward.lua  # Redis Lua 脚本
+└── test/
+    └── test_smtp.js     # SMTP 客户端测试
 ```
 
 ## 历史趣闻
 
-第一封电子邮件是由 Ray Tomlinson 在 1971 年发出的。他最初需要一种方法将用户名与计算机名区分开来，于是低头看了看键盘，寻找一个在名字中不常出现的符号。他选中了 **@** 符号。那封邮件的具体内容如今已无人记得，Tomlinson 回忆说那只是一些无关紧要的测试字符，很可能是 "QWERTYUIOP"。这个简单的分隔符选择，从根本上定义了我们要至今沿用的数字身份标识方式。
+电子邮件中的 `@` 符号由 Ray Tomlinson 于 1971 年选定，当时他在 ARPANET 上发送了第一封网络邮件。他需要找到能区分用户名和主机名的字符，且不会出现在人名中。看着 Model 33 电传打字机键盘，他选中了 `@` —— 当时鲜少使用的符号。那封邮件的内容可能只是 "QWERTYUIOP" 之类的测试字符。这个简单的选择成为了数字通信的通用标识。
+
+SMTP 协议由 Jonathan Postel 在 RFC 821（1982）中正式定义。协议历经多次 RFC 演进，465 端口最初于 1997 年分配给 SMTPS，后被废弃，又在 RFC 8314（2018）中重新标准化为隐式 TLS 提交端口。

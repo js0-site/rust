@@ -1,6 +1,6 @@
 [package]
 name = "smtp_srv"
-version = "0.2.24"
+version = "0.2.26"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"

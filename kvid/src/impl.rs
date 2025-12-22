@@ -3,17 +3,7 @@ use std::sync::atomic::Ordering;
 use fred::interfaces::HashesInterface;
 use xkv::R;
 
-#[cfg(debug_assertions)]
-use crate::LAST_ID;
 use crate::{Error, KVID_KEY, KvId, PRELOAD_SEC, Result, STEP_MAX, STEP_MIN, Seg, Slow};
-
-#[cfg(debug_assertions)]
-fn debug_check(id: u64) {
-  let last = LAST_ID.swap(id, Ordering::Relaxed);
-  if last > 0 && id != last + 1 {
-    dbg!("id not continuous", last, id);
-  }
-}
 
 impl KvId {
   #[inline]
@@ -31,8 +21,6 @@ impl KvId {
         .compare_exchange_weak(id, nid, Ordering::AcqRel, Ordering::Relaxed)
         .is_ok()
       {
-        #[cfg(debug_assertions)]
-        debug_check(nid);
         return Some(nid);
       }
     }
@@ -46,8 +34,13 @@ impl KvId {
     }
     let elapsed = now.saturating_sub(slow.ts);
     if elapsed == 0 {
-      // 间隔为0说明消费极快，步长翻倍 / zero elapsed means high load, double step
-      return (slow.step * 2).min(STEP_MAX);
+      // 间隔为0说明消费极快，快速增长 / zero elapsed means high load, grow fast
+      // 1→64 then double / 1→64 然后翻倍
+      return if slow.step < 64 {
+        64
+      } else {
+        (slow.step * 2).min(STEP_MAX)
+      };
     }
     (slow.step * PRELOAD_SEC / elapsed).clamp(STEP_MIN, STEP_MAX)
   }
@@ -57,8 +50,6 @@ impl KvId {
     let max = R
       .hincrby::<u64, _, _>(KVID_KEY, self.name.as_str(), incr)
       .await?;
-    #[cfg(debug_assertions)]
-    dbg!(&self.name, step, max);
     Ok(Seg {
       id: max - step,
       max,

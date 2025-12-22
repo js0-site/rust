@@ -14,9 +14,6 @@ pub const STEP_MAX: u64 = 1000000;
 // Redis hash key / Redis 哈希键
 pub const KVID_KEY: &str = "kvid";
 
-#[cfg(debug_assertions)]
-static LAST_ID: AtomicU64 = AtomicU64::new(0);
-
 #[derive(Debug, Clone, Copy)]
 struct Seg {
   id: u64,
@@ -35,6 +32,7 @@ impl Slow {
     Self {
       next: None,
       step: STEP_MIN,
+      // 0 表示从未获取过 / 0 means never fetched
       ts: 0,
     }
   }

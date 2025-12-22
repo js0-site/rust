@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use aok::{OK, Void};
 use fred::interfaces::HashesInterface;
-use kvid::{KVID_KEY, KvId};
+use sfid::{KVID_KEY, KvId};
 use xkv::R;
 
 #[static_init::constructor(0)]
@@ -21,7 +21,7 @@ async fn test() -> Void {
       println!("t1: {id}");
       tokio::time::sleep(Duration::from_millis(10)).await;
     }
-    Ok::<_, kvid::Error>(())
+    Ok::<_, sfid::Error>(())
   });
   let t2 = tokio::spawn(async {
     for _ in 0..50 {
@@ -29,7 +29,7 @@ async fn test() -> Void {
       println!("t2: {id}");
       tokio::time::sleep(Duration::from_millis(10)).await;
     }
-    Ok::<_, kvid::Error>(())
+    Ok::<_, sfid::Error>(())
   });
   t1.await??;
   t2.await??;
