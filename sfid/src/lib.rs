@@ -1,7 +1,7 @@
 #![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod bits;
-pub use bits::{MAX_PID, PID_BITS};
+pub use bits::{Layout, DefaultLayout};
 
 mod error;
 pub use error::{Error, Result};
@@ -22,4 +22,4 @@ pub use snowflake::{EPOCH, Snowflake};
 mod parse;
 #[cfg(feature = "parse")]
 #[cfg_attr(docsrs, doc(cfg(feature = "parse")))]
-pub use parse::{ParsedId, parse};
+pub use parse::{ParsedId, parse, parse_with};

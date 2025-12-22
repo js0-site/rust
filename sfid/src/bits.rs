@@ -1,13 +1,29 @@
-pub const SEQ_BITS: u32 = 12;
-pub const PID_BITS: u32 = 10;
-pub const SEQ_MASK: u64 = (1 << SEQ_BITS) - 1;
-pub const PID_MASK: u64 = (1 << PID_BITS) - 1;
-pub const TS_SHIFT: u32 = SEQ_BITS + PID_BITS;
+/// Bit layout configuration trait
+/// 位布局配置 trait
+pub trait Layout {
+  const SEQ_BITS: u32;
+  const PID_BITS: u32;
+  const TS_BITS: u32;
 
-/// Timestamp mask (41 bits)
-/// 时间戳掩码（41位）
-pub const TS_MASK: u64 = (1 << 41) - 1;
+  const SEQ_MASK: u64 = (1 << Self::SEQ_BITS) - 1;
+  const PID_MASK: u64 = (1 << Self::PID_BITS) - 1;
+  const TS_MASK: u64 = (1 << Self::TS_BITS) - 1;
+  const TS_SHIFT: u32 = Self::SEQ_BITS + Self::PID_BITS;
+  const MAX_PID: u32 = 1 << Self::PID_BITS;
+}
 
-/// Maximum process ID count (10 bits = 1024)
-/// 进程号数量上限（10位 = 1024）
-pub const MAX_PID: u32 = 1 << PID_BITS;
+/// Default layout: 36-bit timestamp (seconds), 11-bit process ID, 17-bit sequence
+/// 默认布局：36位时间戳（秒）、11位进程号、17位序列号
+pub struct DefaultLayout;
+
+impl Layout for DefaultLayout {
+  /// 36 bits = ~2177 years
+  /// 36位 ≈ 2177年
+  const TS_BITS: u32 = 36;
+  /// 11 bits = 2048 processes
+  /// 11位 = 2048进程
+  const PID_BITS: u32 = 11;
+  /// 17 bits = 131072/sec
+  /// 17位 = 131072/秒
+  const SEQ_BITS: u32 = 17;
+}
