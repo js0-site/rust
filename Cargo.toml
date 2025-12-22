@@ -1,6 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
+  "xkv",
+  "xkv/tests",
   "log_init",
   "listen_signal",
   "ver_from_txt",
@@ -25,7 +27,6 @@ members = [
   "to_mysql",
   "tosql_meta",
   "tosql_static_meta",
-  "static_",
   "code_turn",
   "tosql_linkme",
   "ipbin",
@@ -65,8 +66,6 @@ members = [
   "dns_parse",
   "ip_set",
   "sfid",
-  "xboot",
-  "xboot/tests",
 ]
 exclude = ["sh/_tmpl"]
 

@@ -1,41 +1,33 @@
 use std::collections::HashSet;
 
 use aok::{OK, Void};
-use sfid::{MACHINE_ID, Snowflake};
+use sfid::Snowflake;
 
-static SF: Snowflake = Snowflake::new();
-
-fn test_machine_id() {
-  let id = **MACHINE_ID;
-  println!("machine_id: {id}");
-  assert!(id < 1024);
-}
-
-fn test_snowflake() {
+fn test_snowflake(sf: &Snowflake) {
   let mut ids = HashSet::new();
   for _ in 0..10000 {
-    let id = SF.next().unwrap();
+    let id = sf.next();
     assert!(ids.insert(id), "duplicate id: {id}");
   }
   println!("generated {} unique ids", ids.len());
 }
 
-async fn test_concurrent() {
+async fn test_concurrent(sf: &'static Snowflake) {
   let handles: Vec<_> = (0..4)
     .map(|_| {
-      tokio::spawn(async {
+      tokio::spawn(async move {
         let mut ids = Vec::with_capacity(1000);
         for _ in 0..1000 {
-          ids.push(SF.next()?);
+          ids.push(sf.next());
         }
-        Ok::<_, sfid::Error>(ids)
+        ids
       })
     })
     .collect();
 
   let mut all_ids = HashSet::new();
   for h in handles {
-    let ids = h.await.unwrap().unwrap();
+    let ids = h.await.unwrap();
     for id in ids {
       assert!(all_ids.insert(id), "duplicate id: {id}");
     }
@@ -43,15 +35,14 @@ async fn test_concurrent() {
   println!("concurrent: {} unique ids", all_ids.len());
 }
 
-#[tokio::test]
+#[tokio::test(flavor = "multi_thread")]
 async fn test() -> Void {
-  // Init MACHINE_ID directly
-  // 直接初始化 MACHINE_ID
-  MACHINE_ID.init().await?;
+  xboot::init().await?;
 
-  test_machine_id();
-  test_snowflake();
-  test_concurrent().await;
+  let sf = Box::leak(Box::new(Snowflake::auto("test", sfid::EPOCH).await?));
+
+  test_snowflake(sf);
+  test_concurrent(sf).await;
 
   OK
 }

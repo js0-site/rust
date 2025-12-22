@@ -1,109 +1,100 @@
-use std::sync::atomic::{AtomicI64, AtomicU16, Ordering};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 use coarsetime::Clock;
+use tracing::warn;
 
-use crate::{Error, Result, machine_id};
+use crate::bits::{PID_MASK, SEQ_BITS, SEQ_MASK, TS_MASK, TS_SHIFT};
 
-/// Custom epoch: 2020-01-01 00:00:00 UTC
-/// 自定义纪元：2020-01-01 00:00:00 UTC
-const EPOCH: u64 = 1577836800000;
+/// Clock backward threshold in ms (1 second)
+/// 时钟回拨告警阈值（1秒）
+const CLOCK_BACKWARD_WARN_MS: u64 = 1000;
 
-/// Bit allocations
-/// 位分配
-const SEQUENCE_BITS: u8 = 12;
-const MACHINE_BITS: u8 = 10;
-
-const MAX_SEQUENCE: u16 = (1 << SEQUENCE_BITS) - 1;
-
-const MACHINE_SHIFT: u8 = SEQUENCE_BITS;
-const TIMESTAMP_SHIFT: u8 = SEQUENCE_BITS + MACHINE_BITS;
-
-/// Max clock backwards tolerance in ms (100ms)
-/// 最大时钟回拨容忍值（100毫秒）
-const MAX_BACKWARDS_MS: u64 = 100;
+/// Default epoch: 2025-12-22 00:00:00 UTC
+/// 默认纪元：2025-12-22 00:00:00 UTC
+pub const EPOCH: u64 = 1766361600000;
 
 /// Snowflake ID generator
 /// 雪花 ID 生成器
 pub struct Snowflake {
-  last_ts: AtomicI64,
-  sequence: AtomicU16,
+  epoch: u64,
+  pid: u64,
+  /// Packed state: high bits = timestamp, low 12 bits = sequence
+  /// 打包状态：高位=时间戳，低12位=序列号
+  state: AtomicU64,
+  /// Hold Pid to stop heartbeat on drop
+  /// 持有 Pid 以便 drop 时停止心跳
+  #[cfg(feature = "auto_pid")]
+  _pid_handle: Option<crate::Pid>,
 }
 
 impl Snowflake {
-  pub const fn new() -> Self {
+  pub const fn new(epoch: u64, pid: u16) -> Self {
     Self {
-      last_ts: AtomicI64::new(-1),
-      sequence: AtomicU16::new(0),
+      epoch,
+      // Mask to 10 bits to prevent overflow
+      // 掩码为10位防止溢出
+      pid: (pid as u64) & PID_MASK,
+      state: AtomicU64::new(0),
+      #[cfg(feature = "auto_pid")]
+      _pid_handle: None,
     }
   }
 
   /// Generate next snowflake ID
   /// 生成下一个雪花 ID
-  pub fn next(&self) -> Result<i64> {
-    let machine = machine_id() as i64;
-    let mut ts = Self::current_ms();
-
+  pub fn next(&self) -> i64 {
     loop {
-      let last = self.last_ts.load(Ordering::Acquire);
+      let ts = self.current_ms();
+      let old = self.state.load(Ordering::Acquire);
+      let old_ts = old >> SEQ_BITS;
+      let old_seq = old & SEQ_MASK;
 
-      if ts < last {
-        let diff = (last - ts) as u64;
-        if diff > MAX_BACKWARDS_MS {
-          // Clock moved backwards too much, reject
-          // 时钟回拨过大，拒绝
-          return Err(Error::ClockMovedBackwards(diff));
+      let (new_ts, new_seq) = if ts > old_ts {
+        (ts, 0)
+      } else if old_seq < SEQ_MASK {
+        // Same ts or clock backwards: borrow sequence
+        // 同一毫秒或时钟回拨：借用序列号
+        let backward = old_ts - ts;
+        if backward > CLOCK_BACKWARD_WARN_MS {
+          warn!("Clock backward {backward}ms detected");
         }
-        // Small backwards, wait it out
-        // 小幅回拨，等待
-        std::thread::sleep(std::time::Duration::from_millis(diff));
-        ts = Self::current_ms();
-        if ts < last {
-          return Err(Error::ClockMovedBackwards((last - ts) as u64));
-        }
-      }
+        (old_ts, old_seq + 1)
+      } else {
+        // Sequence exhausted, advance timestamp
+        // 序列号耗尽，时间戳+1
+        (old_ts + 1, 0)
+      };
 
-      if ts == last {
-        // Same millisecond, increment sequence
-        // 同一毫秒，递增序列号
-        let seq = self.sequence.fetch_add(1, Ordering::AcqRel);
-        if seq <= MAX_SEQUENCE {
-          return Ok(Self::compose(ts, machine, seq as i64));
-        }
-
-        // Sequence overflow, wait for next millisecond
-        // 序列号溢出，等待下一毫秒
-        while Self::current_ms() == ts {
-          std::hint::spin_loop();
-        }
-        ts = Self::current_ms();
-      }
-
-      // New millisecond, try to update timestamp
-      // 新毫秒，尝试更新时间戳
+      let new_state = (new_ts << SEQ_BITS) | new_seq;
       if self
-        .last_ts
-        .compare_exchange_weak(last, ts, Ordering::AcqRel, Ordering::Relaxed)
+        .state
+        .compare_exchange_weak(old, new_state, Ordering::Release, Ordering::Relaxed)
         .is_ok()
       {
-        self.sequence.store(1, Ordering::Release);
-        return Ok(Self::compose(ts, machine, 0));
+        // Mask ts to 41 bits to prevent overflow into sign bit
+        // 掩码时间戳为41位，防止溢出到符号位
+        return (((new_ts & TS_MASK) << TS_SHIFT) | (self.pid << SEQ_BITS) | new_seq) as i64;
       }
     }
   }
 
   #[inline]
-  fn current_ms() -> i64 {
-    (Clock::now_since_epoch().as_millis() - EPOCH) as i64
-  }
-
-  #[inline]
-  fn compose(ts: i64, machine: i64, seq: i64) -> i64 {
-    (ts << TIMESTAMP_SHIFT) | (machine << MACHINE_SHIFT) | seq
+  fn current_ms(&self) -> u64 {
+    Clock::now_since_epoch()
+      .as_millis()
+      .saturating_sub(self.epoch)
   }
 }
 
-impl Default for Snowflake {
-  fn default() -> Self {
-    Self::new()
+impl Snowflake {
+  /// Create with Redis-allocated process ID
+  /// 使用 Redis 分配的进程号创建
+  #[cfg(feature = "auto_pid")]
+  #[cfg_attr(docsrs, doc(cfg(feature = "auto_pid")))]
+  pub async fn auto(app: impl AsRef<[u8]>, epoch: u64) -> crate::Result<Self> {
+    let pid_handle = crate::allocate(app).await?;
+    let mut sf = Self::new(epoch, pid_handle.id());
+    sf._pid_handle = Some(pid_handle);
+    Ok(sf)
   }
 }

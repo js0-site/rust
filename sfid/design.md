@@ -10,7 +10,7 @@
 ├─────────────────────────────────────────────────────────────┤
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────────┐  │
 │  │  Snowflake  │───▶│  machine_id │───▶│  MACHINE_ID     │  │
-│  │  Generator  │    │  ()         │    │  (xboot::init)│  │
+│  │  Generator  │    │  ()         │    │  (xboot::auto)│  │
 │  └─────────────┘    └─────────────┘    └────────┬────────┘  │
 │                                                  │           │
 │                                                  ▼           │
@@ -155,7 +155,7 @@ static SF: Snowflake = Snowflake::new();
 #[tokio::main]
 async fn main() -> Result<()> {
   // 初始化机器号
-  xboot::init().await?;
+  xboot::auto().await?;
   
   println!("machine_id: {}", **MACHINE_ID);
   
