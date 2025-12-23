@@ -1,0 +1,26 @@
+[package]
+name = "sendptr"
+version = "0.1.2"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/sendptr"
+description = "Convenient cross-thread raw pointer usage / 方便跨线程用裸指针"
+keywords = ["pointer", "send", "sync", "thread", "unsafe"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]

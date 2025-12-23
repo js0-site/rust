@@ -1,0 +1,47 @@
+[package]
+name = "kvid"
+version = "0.1.5"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/kvid"
+description = "Distributed ID generator with dual-segment preloading and lock-free fast path / 双号段预加载、无锁快速路径的分布式 ID 生成器"
+keywords = ["id-generator", "distributed", "redis", "lock-free", "segment"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+fred = "10.1.0"
+parking_lot = "0.12.5"
+hipstr = "0.6"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+thiserror = "2.0.17"
+xboot = "0.1.35"
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "sync" ]
+
+[dependencies.ts_]
+version = "0.1.3"
+path = "../ts_"
+features = [ "sec" ]
+
+[dependencies.xkv]
+version = "0.1.51"
+features = [ "r" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]
