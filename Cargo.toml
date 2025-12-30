@@ -1,0 +1,87 @@
+[workspace]
+resolver = "2"
+members = [
+  "xkv",
+  "xkv/tests",
+  "log_init",
+  "listen_signal",
+  "ver_from_txt",
+  "down",
+  "uper",
+  "uper/test",
+  "idoh",
+  "add_space",
+  "cert_by_host",
+  "expire_set",
+  "http_grpc",
+  "kind2sql",
+  "kv2db",
+  "kvid",
+  "site_log",
+  "smtp_recv",
+  "tosql_derive",
+  "sqle",
+  "tosql",
+  "ts_",
+  "vb",
+  "to_mysql",
+  "tosql_meta",
+  "tosql_static_meta",
+  "code_turn",
+  "tosql_linkme",
+  "ipbin",
+  "password_",
+  "site_log_derive/demo",
+  "site_log_derive",
+  "tosql_macro",
+  "auth_trait",
+  "auth_env",
+  "ssl_trait",
+  "mail_struct",
+  "smtp_srv",
+  "smtp_send",
+  "host",
+  "global_str",
+  "msgq",
+  "sk_dkim",
+  "expire_cache",
+  "xmail",
+  "clap_args",
+  "ireq",
+  "sendptr",
+  "set_timer",
+  "socket_port",
+  "forking",
+  "sys_notify",
+  "graceful_restart",
+  "self_cmd",
+  "kill_port",
+  "mail_forward",
+  "pick_fast",
+  "citer",
+  "idoq",
+  "race",
+  "idns",
+  "idot",
+  "dns_parse",
+  "ip_set",
+  "sfid", "osid", "idpath", "ider", "u64_2",
+]
+exclude = ["sh/_tmpl"]
+
+[profile.release]
+lto = true
+opt-level = 3
+incremental = true
+codegen-units = 1
+overflow-checks = false
+debug-assertions = false
+# panic = 'abort'
+# strip = false
+
+[profile.dev]
+split-debuginfo = "unpacked"
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

@@ -1,0 +1,31 @@
+[package]
+name = "listen_signal"
+version = "0.1.15"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/dev/listen_signal"
+description = "A simple, cross-platform utility to gracefully handle process termination signals (SIGTERM, SIGINT, SIGQUIT). 一个简洁、跨平台的工具库，用于优雅地处理进程终止信号 (SIGTERM, SIGINT, SIGQUIT)。"
+keywords = ["signal", "shutdown", "graceful", "termination", "process"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dependencies]
+signal-hook = "0.4.1"
+signal-hook-tokio = { version = "0.3.1", features = ["futures-v0_3"] }
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies]
+aok = "0.1.18"
+futures = "0.3"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+tokio = { version = "1.48.0", features = ["rt-multi-thread", "macros", "time"] }
+tokio-test = "0.4"
+libc = "0.2"
