@@ -6,8 +6,8 @@ Comparing u64_2 (pair encoding) with vb (varint) using 100,000 integers (mixed d
 
 | Library | Encode (M/s) | Decode (M/s) |
 |---------|--------------|--------------|
-| u64_2 | 2858.5 | 2311.1 |
-| vb | 191.0 | 275.7 |
+| u64_2 | 2727.6 | 2258.2 |
+| vb | 199.5 | 288.3 |
 
 ### Environment
 

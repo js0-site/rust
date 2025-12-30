@@ -1,3 +1,5 @@
+![u64_2 中文标志](https://raw.githubusercontent.com/js0-site/rust/refs/heads/main/u64_2/svg/zh.svg)
+
 # u64_2
 
 u64_2 是一种高度定制化的变长编码方案，专为**同时存储两个 `u64` 整数**而设计。

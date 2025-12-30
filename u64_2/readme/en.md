@@ -1,3 +1,5 @@
+![u64_2 English Logo](https://raw.githubusercontent.com/js0-site/rust/refs/heads/main/u64_2/svg/en.svg)
+
 # u64_2
 
 u64_2 is a highly customized variable-length encoding scheme specifically designed for **simultaneously storing two `u64` integers**.
