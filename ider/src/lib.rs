@@ -21,12 +21,16 @@ use coarsetime::Clock;
 pub struct Ider {
   ts: u64,
   n: u32,
+  offset: u64,
 }
 
 // Constants for ID generation / ID生成常量
 const POS_BITS: u32 = 20;
 const POS_MAX: u32 = (1 << POS_BITS) - 1; // 0xFFFFF (~1M)
 const MICROS_PER_SEC: u64 = 1_000_000;
+
+// Default offset: 2026-01-01 00:00:00 UTC / 默认偏移量：2026-01-01 00:00:00 UTC
+const DEFAULT_OFFSET: u64 = 1735689600;
 
 impl Ider {
   /// Create new generator with microsecond-based initialization / 创建新生成器，基于微秒初始化
@@ -35,11 +39,24 @@ impl Ider {
   /// 使用秒内微秒作为初始位置，避免重启后冲突
   #[inline(always)]
   pub fn new() -> Self {
+    Self::with_offset(DEFAULT_OFFSET)
+  }
+
+  /// Create new generator with custom offset / 创建带自定义偏移量的生成器
+  ///
+  /// # Arguments / 参数
+  /// * `offset` - Timestamp offset in seconds / 时间戳偏移量（秒）
+  ///
+  /// Uses microseconds within second as initial n to avoid collision after restart
+  /// 使用秒内微秒作为初始位置，避免重启后冲突
+  #[inline(always)]
+  pub fn with_offset(offset: u64) -> Self {
     let now = Clock::now_since_epoch();
     let micros = now.as_micros() % MICROS_PER_SEC;
     Self {
-      ts: now.as_secs(),
+      ts: now.as_secs() - offset,
       n: micros as u32,
+      offset,
     }
   }
 
@@ -77,7 +94,7 @@ impl Ider {
   /// O(1) time complexity, no heap allocation / O(1)时间复杂度，无堆分配
   #[inline(always)]
   pub fn get(&mut self) -> u64 {
-    let now = Clock::now_since_epoch().as_secs();
+    let now = Clock::now_since_epoch().as_secs() - self.offset;
 
     // Handle clock backward and n overflow / 处理时钟回拨和位置溢出
     if now > self.ts {
@@ -109,4 +126,29 @@ impl Default for Ider {
   fn default() -> Self {
     Self::new()
   }
+}
+
+/// Extract timestamp (seconds) from ID using default offset / 从ID提取时间戳（秒），使用默认偏移量
+///
+/// # Arguments / 参数
+/// * `id` - The ID to parse / 要解析的ID
+///
+/// # Returns / 返回值
+/// Timestamp in seconds since epoch / 自纪元以来的秒级时间戳
+#[inline(always)]
+pub fn id_to_ts(id: u64) -> u64 {
+  (id >> POS_BITS) + DEFAULT_OFFSET
+}
+
+/// Extract timestamp (seconds) from ID with custom offset / 从ID提取时间戳（秒），使用自定义偏移量
+///
+/// # Arguments / 参数
+/// * `id` - The ID to parse / 要解析的ID
+/// * `offset` - Timestamp offset in seconds / 时间戳偏移量（秒）
+///
+/// # Returns / 返回值
+/// Timestamp in seconds since epoch / 自纪元以来的秒级时间戳
+#[inline(always)]
+pub fn id_to_ts_with_offset(id: u64, offset: u64) -> u64 {
+  (id >> POS_BITS) + offset
 }

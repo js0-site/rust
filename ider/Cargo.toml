@@ -1,11 +1,11 @@
 [package]
 name = "ider"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
 homepage = "https://github.com/js0-site/rust/tree/main/ider"
-description = "高性能时间戳ID生成器 / High-performance time-based ID generator"
+description = "高性能时间戳ID生成器 / High-performance timestamp ID generator"
 keywords = ["id", "generator", "timestamp", "unique", "performance"]
 
 [features]
