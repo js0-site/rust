@@ -1,0 +1,24 @@
+[package]
+name = "ireq"
+version = "0.1.33"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/ireq"
+description = "Effortless HTTP requests for Rust / Rust 极简 HTTP 请求库"
+keywords = ["http", "client", "request", "reqwest", "simple"]
+categories = ["web-programming", "network-programming", "asynchronous", "api-bindings", "development-tools"]
+
+[dependencies]
+bytes = "1.11.0"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+thiserror = "2.0.17"
+
+[dependencies.reqwest]
+version = "0.13.0"
+default-features = false
+features = ["rustls-native-certs", "zstd", "stream"]
+
+[features]
+default = []
+proxy = ["reqwest/socks"]

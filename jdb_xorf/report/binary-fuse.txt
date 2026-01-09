@@ -1,0 +1,101 @@
+
+running 28 tests
+test bfuse16::test::test_bits_per_entry ... ignored
+test bfuse16::test::test_dma_roundtrip ... ignored
+test bfuse16::test::test_dma_unaligned_fingerprints - should panic ... ignored
+test bfuse16::test::test_dma_unaligned_fingerprints_len - should panic ... ignored
+test bfuse16::test::test_false_positives ... ignored
+test bfuse16::test::test_initialization ... ignored
+test bfuse32::test::test_bits_per_entry ... ignored
+test bfuse32::test::test_dma_roundtrip ... ignored
+test bfuse32::test::test_dma_unaligned_fingerprints - should panic ... ignored
+test bfuse32::test::test_dma_unaligned_fingerprints_len - should panic ... ignored
+test bfuse32::test::test_false_positives ... ignored
+test bfuse32::test::test_initialization ... ignored
+test bfuse8::test::test_bits_per_entry ... ignored
+test bfuse8::test::test_build_failure_with_subtraction_overflow ... ignored
+test bfuse8::test::test_dma_roundtrip ... ignored
+test bfuse8::test::test_false_positives ... ignored
+test bfuse8::test::test_initialization ... ignored
+test hash_proxy::test::test_borrow_query ... ignored
+test hash_proxy::test::test_initialization_from ... ignored
+test xor16::test::test_bits_per_entry ... ignored
+test xor16::test::test_false_positives ... ignored
+test xor16::test::test_initialization ... ignored
+test xor32::test::test_bits_per_entry ... ignored
+test xor32::test::test_false_positives ... ignored
+test xor32::test::test_initialization ... ignored
+test xor8::test::test_bits_per_entry ... ignored
+test xor8::test::test_false_positives ... ignored
+test xor8::test::test_initialization ... ignored
+
+test result: ok. 0 passed; 0 failed; 28 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+BinaryFuse16/from/500000
+                        time:   [10.236 ms 11.061 ms 11.528 ms]
+                        change: [−6.7781% −1.6701% +4.3768%] (p = 0.57 > 0.05)
+                        No change in performance detected.
+
+BinaryFuse16/contains/500000
+                        time:   [656.15 ps 660.84 ps 666.10 ps]
+                        change: [−5.6911% −3.6203% −1.1865%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 4 outliers among 100 measurements (4.00%)
+  2 (2.00%) high mild
+  2 (2.00%) high severe
+
+BinaryFuse32/from/500000
+                        time:   [9.9974 ms 10.078 ms 10.160 ms]
+                        change: [−12.689% −8.0488% −3.4449%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+
+BinaryFuse32/contains/500000
+                        time:   [657.90 ps 662.57 ps 667.69 ps]
+                        change: [−9.5315% −7.3058% −5.1100%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 9 outliers among 100 measurements (9.00%)
+  4 (4.00%) low mild
+  4 (4.00%) high mild
+  1 (1.00%) high severe
+
+Xor16/from/500000       time:   [10.817 ms 11.479 ms 12.205 ms]
+                        change: [−15.485% −7.1568% +1.5842%] (p = 0.18 > 0.05)
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+Xor16/contains/500000   time:   [683.38 ps 688.47 ps 696.04 ps]
+                        change: [−6.5868% −4.4391% −2.4388%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 16 outliers among 100 measurements (16.00%)
+  4 (4.00%) low severe
+  5 (5.00%) low mild
+  2 (2.00%) high mild
+  5 (5.00%) high severe
+
+Xor32/from/500000       time:   [11.348 ms 11.898 ms 12.666 ms]
+                        change: [−7.7662% −1.9286% +5.0642%] (p = 0.61 > 0.05)
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+Xor32/contains/500000   time:   [689.45 ps 693.79 ps 698.43 ps]
+                        change: [+1.8468% +3.2077% +4.8143%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 17 outliers among 100 measurements (17.00%)
+  8 (8.00%) high mild
+  9 (9.00%) high severe
+
+Xor8/from/500000        time:   [10.951 ms 11.217 ms 11.553 ms]
+                        change: [−5.4738% −0.3696% +5.0573%] (p = 0.89 > 0.05)
+                        No change in performance detected.
+
+Xor8/contains/500000    time:   [678.71 ps 682.17 ps 685.65 ps]
+                        change: [−5.1653% −3.5043% −1.9298%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 3 outliers among 100 measurements (3.00%)
+  1 (1.00%) low mild
+  2 (2.00%) high mild
+

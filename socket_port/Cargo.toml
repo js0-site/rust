@@ -1,0 +1,44 @@
+[package]
+name = "socket_port"
+version = "0.1.29"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/socket_port"
+description = "Zero-downtime TCP listener with hot restart / 支持热重启的零停机 TCP 监听器"
+keywords = [ "tcp", "systemd", "hot-restart", "socket", "listener" ]
+categories = ["network-programming", "os", "asynchronous", "concurrency", "development-tools"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+kill_port = [ "dep:kill_port" ]
+
+[dependencies]
+log = "0.4.29"
+
+[dependencies.kill_port]
+version = "0.1.4"
+path = "../kill_port"
+optional = true
+
+[dependencies.socket2]
+version = "0.6.1"
+features = [ "all" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]
+
+[target."cfg(target_os = \"linux\")".dependencies]
+libc = "0.2.178"
+once_cell = "1.21"

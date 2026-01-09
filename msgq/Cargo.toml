@@ -1,0 +1,46 @@
+[package]
+name = "msgq"
+version = "0.1.13"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/msgq"
+description = "Robust Redis Stream based message queue with auto-claim and retry handling / 基于 Redis Stream 的健壮消息队列，支持自动认领和重试处理"
+keywords = [ "redis", "stream", "queue", "async", "consumer" ]
+categories = ["asynchronous", "database", "concurrency", "development-tools", "caching"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+aok = "0.1.18"
+bytes = "1.11.0"
+fred = "10.1.0"
+log = "0.4.29"
+
+[dependencies.async-scoped]
+version = "0.9.0"
+features = [ "use-tokio" ]
+
+[dependencies.tokio]
+version = "1.48.0"
+features = [ "time" ]
+
+[dependencies.xkv]
+version = "0.1.51"
+features = [ "r" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+xboot = "0.1.35"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]
