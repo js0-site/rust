@@ -2,14 +2,14 @@
 [package]
 name = "autoscale_cuckoo_filter"
 edition = "2024"
-version = "0.5.13"
+version = "0.5.17"
 authors = ["js0-site <jssite@googlegroups.com>"]
 description = "Fastest auto-scaling Cuckoo Filter in Rust / 最快的 Rust 自动扩容布谷鸟过滤器"
 homepage = "https://github.com/js0-site/rust/tree/main/autoscale_cuckoo_filter"
 repository = "https://github.com/js0-site/rust"
 readme = "README.md"
 keywords = ["cuckoo-filter", "bloom-filter", "probabilistic", "set", "filter"]
-categories = ["data-structures", "algorithms", "caching-implementations", "database"]
+categories = ["data-structures", "algorithms", "database"]
 license = "MulanPSL-2.0"
 
 [dependencies]

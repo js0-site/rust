@@ -1,6 +1,4 @@
-size_lru
-autoscale_cuckoo_filter
-jdb_lru
-jdb_pgm
 jdb_xorf
 shared_prefix_len
+autoscale_cuckoo_filter
+jdb_lru

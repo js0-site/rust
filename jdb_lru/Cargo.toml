@@ -1,13 +1,13 @@
 [package]
 name = "jdb_lru"
-version = "0.1.6"
+version = "0.1.8"
 edition = "2024"
 license = "MulanPSL-2.0"
 repository = "https://github.com/js0-site/rust.git"
 homepage = "https://github.com/js0-site/rust/tree/main/jdb_lru"
 description = "Efficient LRU cache with zero-allocation alternatives / 高效LRU缓存与零分配替代方案"
 keywords = ["lru", "cache", "memory", "performance", "rust"]
-categories = ["caching-implementations", "algorithms", "data-structures", "database"]
+categories = ["algorithms", "data-structures", "database"]
 readme = "README.md"
 
 [features]

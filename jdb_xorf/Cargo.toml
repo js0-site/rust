@@ -1,6 +1,6 @@
 [package]
 authors = ["jssite@googlegroups.com", "ayazhafiz <ayaz.hafiz.1@gmail.com>"]
-categories = ["algorithms", "data-structures", "compression", "database", "caching-implementations"]
+categories = ["algorithms", "data-structures", "compression", "database"]
 description = """
 Library implementing xor filters - faster and smaller than bloom and cuckoo filters.
 """
@@ -11,7 +11,7 @@ license = "MIT"
 name = "jdb_xorf"
 readme = "README.md"
 repository = "https://github.com/js0-site/rust"
-version = "0.12.2"
+version = "0.12.4"
 
 [badges.is-it-maintained-issue-resolution]
 repository = "ayazhafiz/xorf"

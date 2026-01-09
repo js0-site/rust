@@ -1,6 +1,6 @@
 [package]
 name = "jdb_pgm"
-version = "0.3.12"
+version = "0.3.13"
 edition = "2024"
 description = "Ultra-fast learned index for sorted keys / 面向排序键的超快学习型索引"
 license = "MIT"
