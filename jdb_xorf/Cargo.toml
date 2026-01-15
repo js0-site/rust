@@ -1,0 +1,40 @@
+[package]
+authors = ["jssite@googlegroups.com", "ayazhafiz <ayaz.hafiz.1@gmail.com>"]
+categories = ["algorithms", "data-structures", "compression", "database", "no-std"]
+description = "Ultra-fast Xor and Binary Fuse filters for Rust / 极致性能的 Rust Xor 与 Binary Fuse 过滤器"
+edition = "2024"
+homepage = "https://github.com/js0-site/rust/tree/main/jdb_xorf"
+keywords = ["xor", "filter", "hash", "hashing", "fuse"]
+license = "MIT"
+name = "jdb_xorf"
+readme = "README.md"
+repository = "https://github.com/js0-site/rust"
+version = "0.12.6"
+
+[dependencies]
+libm = { version = "0.2.15", optional = true }
+bitcode = { version = "0.6", optional = true }
+fastrand = { version = "2", optional = true }
+rapidhash = { version = "4.2", default-features = false }
+
+[dev-dependencies]
+criterion = "0.8.1"
+criterion-macro = "0.4.0"
+rand = "0.9"
+xorf = "0.12.0"
+
+[[bench]]
+name = "bench"
+harness = false
+
+[features]
+default = ["uniform-random", "binary-fuse"]
+uniform-random = ["fastrand"]
+binary-fuse = ["libm"]
+bitcode = ["dep:bitcode"]
+
+# Benchmark features
+# 评测特性
+bench-jdb = ["binary-fuse","bitcode"]
+bench-xorf = []
+bench-all = ["bench-jdb", "bench-xorf"]

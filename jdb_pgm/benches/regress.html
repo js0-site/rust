@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pgm-Index Regression</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: -apple-system, sans-serif; margin: 20px; background: #1a1a2e; color: #eee; }
+    h1 { color: #10b981; }
+    .chart-container { width: 100%; max-width: 900px; margin: 20px 0; }
+    .latest { background: #16213e; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    .latest h3 { margin-top: 0; color: #10b981; }
+    .metric { display: inline-block; margin-right: 30px; }
+    .metric .value { font-size: 24px; font-weight: bold; color: #0f0; }
+    .metric .label { font-size: 12px; color: #888; }
+  </style>
+</head>
+<body>
+  <h1>Pgm-Index Regression Test</h1>
+
+  <div class="latest">
+    <h3>Latest: 56412ec (dev) - 2026-01-05_14:57:19</h3>
+    <div class="metric">
+      <div class="value">55.83 M/s</div>
+      <div class="label">Throughput</div>
+    </div>
+    <div class="metric">
+      <div class="value">17.9 ns</div>
+      <div class="label">Mean Time</div>
+    </div>
+    <div class="metric">
+      <div class="value">56.7 ns</div>
+      <div class="label">Std Dev</div>
+    </div>
+    <div class="metric">
+      <div class="value">1,000,000</div>
+      <div class="label">Data Size</div>
+    </div>
+  </div>
+
+  <div class="chart-container"><canvas id="throughputChart"></canvas></div>
+  <div class="chart-container"><canvas id="timeChart"></canvas></div>
+  <div class="chart-container"><canvas id="stdDevChart"></canvas></div>
+
+  <script>
+    const data = [{"date":"2026-01-05_04:59:44","commit":"1bff1fe","branch":"dev","data_size":1000000,"mean_ns":19.074437333333332,"std_dev_ns":93.70485643989662,"throughput":52.42618602712126},{"date":"2026-01-05_05:01:31","commit":"1bff1fe","branch":"dev","data_size":1000000,"mean_ns":16.446194,"std_dev_ns":35.71536466172843,"throughput":60.80434172185979},{"date":"2026-01-05_05:01:39","commit":"1bff1fe","branch":"dev","data_size":1000000,"mean_ns":16.227508,"std_dev_ns":51.80086080470918,"throughput":61.623756401783936},{"date":"2026-01-05_05:05:56","commit":"80a7cc6","branch":"dev","data_size":1000000,"mean_ns":16.441105333333333,"std_dev_ns":50.488443886506175,"throughput":60.823161200272914},{"date":"2026-01-05_05:15:51","commit":"61c1451","branch":"dev","data_size":1000000,"mean_ns":20.607617333333334,"std_dev_ns":130.75055930479377,"throughput":48.52574578733443},{"date":"2026-01-05_05:16:24","commit":"c8f329f","branch":"dev","data_size":1000000,"mean_ns":18.641336666666668,"std_dev_ns":54.193572828726744,"throughput":53.64422186463381},{"date":"2026-01-05_05:18:57","commit":"871b53e","branch":"dev","data_size":1000000,"mean_ns":16.730912,"std_dev_ns":53.09097538807175,"throughput":59.76960490856685},{"date":"2026-01-05_05:19:03","commit":"871b53e","branch":"dev","data_size":1000000,"mean_ns":17.034172,"std_dev_ns":56.228432525498874,"throughput":58.70552440118603},{"date":"2026-01-05_05:19:12","commit":"871b53e","branch":"dev","data_size":1000000,"mean_ns":16.565884,"std_dev_ns":29.350934964648673,"throughput":60.365024890914356},{"date":"2026-01-05_05:21:33","commit":"871b53e","branch":"dev","data_size":1000000,"mean_ns":21.321040666666665,"std_dev_ns":103.98850653271474,"throughput":46.902025826694334},{"date":"2026-01-05_05:21:41","commit":"871b53e","branch":"dev","data_size":1000000,"mean_ns":17.468686666666667,"std_dev_ns":65.28125479402297,"throughput":57.24528804493221},{"date":"2026-01-05_05:21:46","commit":"871b53e","branch":"dev","data_size":1000000,"mean_ns":16.919982,"std_dev_ns":56.36263422208076,"throughput":59.10171772050348},{"date":"2026-01-05_14:28:01","commit":"2446116","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:32:06","commit":"2446116","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:36:10","commit":"14ce874","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:40:41","commit":"5ae4fcd","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:45:15","commit":"b45fe4f","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:49:12","commit":"b45fe4f","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:53:55","commit":"56412ec","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347},{"date":"2026-01-05_14:57:19","commit":"56412ec","branch":"dev","data_size":1000000,"mean_ns":17.912517333333334,"std_dev_ns":56.67497077296102,"throughput":55.82688247503347}];
+    const labels = data.map(d => d.commit);
+
+    const chartOpts = {
+      responsive: true,
+      plugins: { legend: { labels: { color: '#eee' } } },
+      scales: {
+        x: { ticks: { color: '#888' }, grid: { color: '#333' } },
+        y: { ticks: { color: '#888' }, grid: { color: '#333' } }
+      }
+    };
+
+    new Chart(document.getElementById('throughputChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Throughput (M/s)',
+          data: data.map(d => d.throughput),
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16,185,129,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: 'Throughput', color: '#eee' } } }
+    });
+
+    new Chart(document.getElementById('timeChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Mean Time (ns)',
+          data: data.map(d => d.mean_ns),
+          borderColor: '#3b82f6',
+          backgroundColor: 'rgba(59,130,246,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: 'Mean Query Time', color: '#eee' } } }
+    });
+
+    new Chart(document.getElementById('stdDevChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Std Dev (ns)',
+          data: data.map(d => d.std_dev_ns),
+          borderColor: '#f97316',
+          backgroundColor: 'rgba(249,115,22,0.1)',
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: { ...chartOpts, plugins: { ...chartOpts.plugins, title: { display: true, text: 'Standard Deviation', color: '#eee' } } }
+    });
+  </script>
+</body>
+</html>
