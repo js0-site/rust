@@ -1,0 +1,17 @@
+[package]
+name = "xorf-analysis"
+version = "0.0.0"
+authors = []
+publish = false
+edition = "2021"
+readme = "README.md"
+categories = ["development-tools", "data-structures", "algorithms", "database", "profiling"]
+
+[[bin]]
+name = "zeroes"
+path = "src/zeroes.rs"
+
+[dependencies]
+rand = "0.7.3"
+# default-features = false
+# features = ["binary-fuse"]

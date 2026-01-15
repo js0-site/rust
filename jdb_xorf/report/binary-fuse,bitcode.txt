@@ -1,0 +1,78 @@
+
+running 19 tests
+test bfuse16::test::test_bits_per_entry ... ignored
+test bfuse16::test::test_dma_roundtrip ... ignored
+test bfuse16::test::test_dma_unaligned_fingerprints - should panic ... ignored
+test bfuse16::test::test_dma_unaligned_fingerprints_len - should panic ... ignored
+test bfuse16::test::test_false_positives ... ignored
+test bfuse16::test::test_initialization ... ignored
+test bfuse32::test::test_bits_per_entry ... ignored
+test bfuse32::test::test_dma_roundtrip ... ignored
+test bfuse32::test::test_dma_unaligned_fingerprints - should panic ... ignored
+test bfuse32::test::test_dma_unaligned_fingerprints_len - should panic ... ignored
+test bfuse32::test::test_false_positives ... ignored
+test bfuse32::test::test_initialization ... ignored
+test bfuse8::test::test_bits_per_entry ... ignored
+test bfuse8::test::test_build_failure_with_subtraction_overflow ... ignored
+test bfuse8::test::test_dma_roundtrip ... ignored
+test bfuse8::test::test_false_positives ... ignored
+test bfuse8::test::test_initialization ... ignored
+test hash_proxy::test::test_borrow_query ... ignored
+test hash_proxy::test::test_initialization_from ... ignored
+
+test result: ok. 0 passed; 0 failed; 19 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+BinaryFuse16/from/500000
+                        time:   [9.8751 ms 10.016 ms 10.196 ms]
+                        change: [−11.050% −8.3581% −5.6191%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+BinaryFuse16/contains/500000
+                        time:   [668.76 ps 672.76 ps 677.05 ps]
+                        change: [−2.8718% −1.6551% −0.4285%] (p = 0.01 < 0.05)
+                        Change within noise threshold.
+
+BinaryFuse32/from/500000
+                        time:   [10.628 ms 10.861 ms 11.117 ms]
+                        change: [+5.2883% +6.9728% +8.2057%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) low severe
+
+BinaryFuse32/contains/500000
+                        time:   [667.01 ps 674.66 ps 683.46 ps]
+                        change: [−0.6128% +0.4983% +1.5796%] (p = 0.39 > 0.05)
+                        No change in performance detected.
+Found 3 outliers among 100 measurements (3.00%)
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+
+BinaryFuse8/bitcode-serialize/500000
+                        time:   [24.892 µs 25.072 µs 25.294 µs]
+                        change: [−1.6028% −0.3627% +0.8797%] (p = 0.64 > 0.05)
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+BinaryFuse8/bitcode-deserialize/500000
+                        time:   [9.8932 µs 10.042 µs 10.270 µs]
+                        change: [−0.5381% +1.4491% +3.8045%] (p = 0.28 > 0.05)
+                        No change in performance detected.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high mild
+
+BinaryFuse8/from/500000 time:   [10.087 ms 10.140 ms 10.243 ms]
+                        change: [−14.180% −9.5249% −5.2078%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 1 outliers among 10 measurements (10.00%)
+  1 (10.00%) high severe
+
+BinaryFuse8/contains/500000
+                        time:   [659.66 ps 666.16 ps 673.20 ps]
+                        change: [−4.5060% −3.3777% −2.1915%] (p = 0.00 < 0.05)
+                        Performance has improved.
+Found 4 outliers among 100 measurements (4.00%)
+  3 (3.00%) high mild
+  1 (1.00%) high severe
+

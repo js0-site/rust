@@ -1,0 +1,31 @@
+{
+  "items": 100000,
+  "capacity": 200000,
+  "target_fpp": 0.01,
+  "results": [
+    {
+      "lib": "autoscale_cuckoo_filter",
+      "add_mops": 33.04146704113663,
+      "contains_mops": 101.0072995369387,
+      "remove_mops": 70.38139678920068,
+      "memory_kb": 353.0,
+      "fpp": 0.0017
+    },
+    {
+      "lib": "cuckoo_filter",
+      "add_mops": 11.0752703058159,
+      "contains_mops": 18.388487225586882,
+      "remove_mops": 18.223234624145785,
+      "memory_kb": 353.0,
+      "fpp": 0.00154
+    },
+    {
+      "lib": "cuckoofilter",
+      "add_mops": 21.666514639955608,
+      "contains_mops": 21.996481497810816,
+      "remove_mops": 17.99370220422852,
+      "memory_kb": 1024.0234375,
+      "fpp": 0.00265
+    }
+  ]
+}

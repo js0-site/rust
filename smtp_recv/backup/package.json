@@ -1,0 +1,8 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@3-/coffee_plus": "^0.1.29",
+    "@3-/loader": "^0.0.2",
+    "coffeescript": "^2.7.0"
+  }
+}
