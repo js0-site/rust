@@ -1,0 +1,33 @@
+
+running 27 tests
+test bfuse16::test::test_bits_per_entry ... ignored
+test bfuse16::test::test_dma_roundtrip ... ignored
+test bfuse16::test::test_dma_unaligned_fingerprints - should panic ... ignored
+test bfuse16::test::test_dma_unaligned_fingerprints_len - should panic ... ignored
+test bfuse16::test::test_false_positives ... ignored
+test bfuse16::test::test_initialization ... ignored
+test bfuse32::test::test_bits_per_entry ... ignored
+test bfuse32::test::test_dma_roundtrip ... ignored
+test bfuse32::test::test_dma_unaligned_fingerprints - should panic ... ignored
+test bfuse32::test::test_dma_unaligned_fingerprints_len - should panic ... ignored
+test bfuse32::test::test_false_positives ... ignored
+test bfuse32::test::test_initialization ... ignored
+test bfuse8::test::test_bits_per_entry ... ignored
+test bfuse8::test::test_build_failure_with_subtraction_overflow ... ignored
+test bfuse8::test::test_dma_roundtrip ... ignored
+test bfuse8::test::test_false_positives ... ignored
+test bfuse8::test::test_initialization ... ignored
+test hash_proxy::test::test_initialization_from ... ignored
+test xor16::test::test_bits_per_entry ... ignored
+test xor16::test::test_false_positives ... ignored
+test xor16::test::test_initialization ... ignored
+test xor32::test::test_bits_per_entry ... ignored
+test xor32::test::test_false_positives ... ignored
+test xor32::test::test_initialization ... ignored
+test xor8::test::test_bits_per_entry ... ignored
+test xor8::test::test_false_positives ... ignored
+test xor8::test::test_initialization ... ignored
+
+test result: ok. 0 passed; 0 failed; 27 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+
