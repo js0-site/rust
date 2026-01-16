@@ -1,0 +1,232 @@
+#!/usr/bin/env node
+import { writeFileSync, mkdirSync } from "fs";
+import { getTargetDir, parseCriterion } from "./lib.js";
+
+const LANGS = [
+  { 
+    code: "en", 
+    titles: {
+      main: "Benchmark Results (100K keys)",
+      build: "Build Time",
+      query: "Query Time",
+      memory: "Memory Usage",
+      accuracy: "False Positive Rate"
+    }
+  },
+  { 
+    code: "zh", 
+    titles: {
+      main: "基准测试结果 (10万个键)",
+      build: "构建时间",
+      query: "查询时间",
+      memory: "内存占用",
+      accuracy: "假阳率"
+    }
+  },
+];
+
+const COLORS = {
+  jdb: "#DC2626",    // 橙红色 (red-600)
+  xorf: "#1E40AF"    // 深蓝色 (blue-800)
+};
+
+const genSvg = (results, titles) => {
+  const width = 1000;
+  const height = 1400;
+  const padding = 40;
+  
+  // Four charts vertically stacked
+  // 四个图表垂直堆叠
+  const chartWidth = width - padding * 2;
+  const chartHeight = (height - padding * 5) / 4;
+  
+  let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
+  svg += `<rect width="${width}" height="${height}" fill="white"/>`;
+  
+  // Main title
+  // 主标题
+  svg += `<text x="${width / 2}" y="30" text-anchor="middle" font-size="20" font-weight="bold">${titles.main}</text>`;
+  
+  const filters = [];
+  for (const [lib, libFilters] of Object.entries(results)) {
+    for (const [filter, sizes] of Object.entries(libFilters)) {
+      for (const [size, metrics] of Object.entries(sizes)) {
+        filters.push({
+          lib,
+          filter,
+          name: `${lib}_${filter}`,
+          build: metrics.build?.mean_ns || 0,
+          query: metrics.contains?.mean_ns || 0,
+          memory: metrics.memory?.bytes || 0,
+          fpRate: metrics.false_positive?.rate || 0,
+        });
+      }
+    }
+  }
+  
+  // Sort by filter type (8, 16, 32) then by lib name
+  // 按过滤器类型（8, 16, 32）然后按库名排序
+  const filterOrder = { 'BinaryFuse8': 0, 'BinaryFuse16': 1, 'BinaryFuse32': 2 };
+  filters.sort((a, b) => {
+    const orderA = filterOrder[a.filter] ?? 999;
+    const orderB = filterOrder[b.filter] ?? 999;
+    if (orderA !== orderB) return orderA - orderB;
+    return a.lib.localeCompare(b.lib);
+  });
+  
+  if (filters.length === 0) {
+    svg += `<text x="${width / 2}" y="${height / 2}" text-anchor="middle" font-size="16">No data</text>`;
+    svg += `</svg>`;
+    return svg;
+  }
+  
+  // Chart 1: Build Time
+  // 图表1：构建时间
+  svg += genBarChart(filters, padding, padding + 50, chartWidth, chartHeight, titles.build, "build", "μs", 1000);
+  
+  // Chart 2: Query Time
+  // 图表2：查询时间
+  svg += genBarChart(filters, padding, padding + 50 + chartHeight + padding, chartWidth, chartHeight, titles.query, "query", "μs", 1000);
+  
+  // Chart 3: Memory
+  // 图表3：内存
+  svg += genBarChart(filters, padding, padding + 50 + (chartHeight + padding) * 2, chartWidth, chartHeight, titles.memory, "memory", "KB", 1024);
+  
+  // Chart 4: Accuracy
+  // 图表4：准确率
+  svg += genBarChart(filters, padding, padding + 50 + (chartHeight + padding) * 3, chartWidth, chartHeight, titles.accuracy, "fpRate", "%", 1);
+  
+  svg += `</svg>`;
+  return svg;
+};
+
+const genBarChart = (filters, x, y, w, h, title, metric, unit, divisor) => {
+  let svg = `<g transform="translate(${x}, ${y})">`;
+  
+  // Title
+  // 标题
+  svg += `<text x="${w / 2}" y="0" text-anchor="middle" font-size="16" font-weight="bold">${title}</text>`;
+  
+  const maxValue = Math.max(...filters.map(f => f[metric]), 1);
+  const barWidth = w / (filters.length * 1.5);
+  const chartH = h - 80;
+  
+  // Axis
+  // 坐标轴
+  svg += `<line x1="0" y1="30" x2="0" y2="${chartH + 30}" stroke="#333" stroke-width="2"/>`;
+  svg += `<line x1="0" y1="${chartH + 30}" x2="${w}" y2="${chartH + 30}" stroke="#333" stroke-width="2"/>`;
+  svg += `<text x="-5" y="25" text-anchor="end" font-size="12">${unit}</text>`;
+  
+  // Group by filter type for comparison
+  // 按过滤器类型分组以便对比
+  const filterTypes = ['BinaryFuse8', 'BinaryFuse16', 'BinaryFuse32'];
+  const libs = [...new Set(filters.map(f => f.lib))].sort();
+  
+  let groupX = 20;
+  const groupWidth = (w - 40) / filterTypes.length;
+  const barWidthInGroup = groupWidth / (libs.length + 1);
+  
+  filterTypes.forEach((filterType, typeIdx) => {
+    const groupFilters = filters.filter(f => f.filter === filterType);
+    
+    // Find best performer in this group (lower is better for time/rate, higher for memory is worse)
+    // 找到该组中性能最好的（时间/率越低越好，内存越高越差）
+    let bestFilter = null;
+    if (groupFilters.length > 0) {
+      if (metric === "memory") {
+        // For memory, lower is better
+        // 内存越低越好
+        bestFilter = groupFilters.reduce((best, curr) => 
+          curr[metric] < best[metric] ? curr : best
+        );
+      } else {
+        // For time and rate, lower is better
+        // 时间和率越低越好
+        bestFilter = groupFilters.reduce((best, curr) => 
+          curr[metric] < best[metric] ? curr : best
+        );
+      }
+    }
+    
+    groupFilters.forEach((filter, idx) => {
+      const bx = groupX + idx * barWidthInGroup;
+      const value = filter[metric];
+      const barH = (value / maxValue) * chartH;
+      const color = COLORS[filter.lib];
+      const isBest = bestFilter && filter.lib === bestFilter.lib && filter.filter === bestFilter.filter;
+      
+      // Check if there are different values in the group
+      // 检查组内是否有不同的值
+      const hasDistinctValues = groupFilters.length > 1 && 
+        groupFilters.some(f => f[metric] !== bestFilter[metric]);
+      
+      // Bar
+      // 柱状图
+      svg += `<rect x="${bx}" y="${chartH + 30 - barH}" width="${barWidthInGroup * 0.85}" height="${barH}" fill="${color}" rx="2"/>`;
+      
+      // Value label
+      // 数值标签
+      const displayValue = metric === "fpRate" ? value.toFixed(3) : (value / divisor).toFixed(metric === "memory" ? 1 : 0);
+      svg += `<text x="${bx + barWidthInGroup * 0.425}" y="${chartH + 30 - barH - 3}" text-anchor="middle" font-size="10" font-weight="bold">${displayValue}${unit}</text>`;
+      
+      // Star for best performer (only if values are different)
+      // 性能最好的标注五角星（仅当值不同时）
+      if (isBest && hasDistinctValues) {
+        const starX = bx + barWidthInGroup * 0.425;
+        const starY = chartH + 30 - barH - 38;
+        svg += `<path d="M ${starX} ${starY} L ${starX + 4} ${starY + 8} L ${starX + 12} ${starY + 8} L ${starX + 6} ${starY + 13} L ${starX + 8} ${starY + 21} L ${starX} ${starY + 16} L ${starX - 8} ${starY + 21} L ${starX - 6} ${starY + 13} L ${starX - 12} ${starY + 8} L ${starX - 4} ${starY + 8} Z" fill="#EF4444" stroke="#DC2626" stroke-width="0.5"/>`;
+      }
+      
+      // Lib name label on bar
+      // 柱子上的库名标签
+      if (barH > 20) {
+        svg += `<text x="${bx + barWidthInGroup * 0.425}" y="${chartH + 30 - barH / 2}" text-anchor="middle" font-size="9" fill="white" font-weight="bold">${filter.lib}</text>`;
+      }
+    });
+    
+    // Filter type label
+    // 过滤器类型标签
+    svg += `<text x="${groupX + groupWidth / 2}" y="${chartH + 50}" text-anchor="middle" font-size="12" font-weight="bold">${filterType}</text>`;
+    
+    groupX += groupWidth;
+  });
+  
+  // Legend
+  // 图例
+  const legendX = w - 100;
+  const legendY = 40;
+  libs.forEach((lib, idx) => {
+    const ly = legendY + idx * 20;
+    svg += `<rect x="${legendX}" y="${ly}" width="15" height="15" fill="${COLORS[lib]}" rx="2"/>`;
+    svg += `<text x="${legendX + 20}" y="${ly + 12}" font-size="11" font-weight="bold">${lib}</text>`;
+  });
+  
+  // Star legend
+  // 五角星图例
+  const starLegendY = legendY + libs.length * 20 + 10;
+  svg += `<path d="M ${legendX + 7.5} ${starLegendY} L ${legendX + 9.5} ${starLegendY + 4} L ${legendX + 13.5} ${starLegendY + 4} L ${legendX + 10.5} ${starLegendY + 6.5} L ${legendX + 11.5} ${starLegendY + 10.5} L ${legendX + 7.5} ${starLegendY + 8} L ${legendX + 3.5} ${starLegendY + 10.5} L ${legendX + 4.5} ${starLegendY + 6.5} L ${legendX + 1.5} ${starLegendY + 4} L ${legendX + 5.5} ${starLegendY + 4} Z" fill="#EF4444" stroke="#DC2626" stroke-width="0.5"/>`;
+  svg += `<text x="${legendX + 20}" y="${starLegendY + 8}" font-size="10">Best</text>`;
+  
+  svg += `</g>`;
+  return svg;
+};
+
+const main = async () => {
+  const target_dir = await getTargetDir();
+  const results = parseCriterion(target_dir);
+
+  mkdirSync("readme", { recursive: true });
+
+  await Promise.all(
+    LANGS.map(({ code, titles }) => {
+      const svg = genSvg(results, titles);
+      const path = `readme/${code}.bench.svg`;
+      writeFileSync(path, svg);
+      console.log(`  ${path}`);
+    })
+  );
+
+  console.log("Generated benchmark SVG charts");
+};
+
+main();

@@ -1,0 +1,134 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "**.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/*"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "**.rs"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - ".github/workflows/*"
+
+jobs:
+  fmt:
+    name: Source formatting check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1.0.7
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+          components: rustfmt
+
+      - name: Check formatting
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: fmt
+          args: -- --check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - nightly
+        features:
+          - "--all-features"
+          - "--no-default-features"
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+      - name: Restore cargo cache
+        uses: actions/cache@v4
+        env:
+          cache-name: ci
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+          key: ${{ matrix.os }}-${{ env.cache-name }}-${{ matrix.rust }}-${{ hashFiles('Cargo.lock') }}
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1.0.7
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: Build (debug)
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: ${{ matrix.features }}
+      - name: Build (release)
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release ${{ matrix.features }}
+
+  test:
+    name: Lint and test check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        rust:
+          - stable
+          - nightly
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Restore cargo cache
+        uses: actions/cache@v4
+        env:
+          cache-name: ci
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            ~/.cargo/bin
+            target
+          key: ${{ matrix.os }}-${{ env.cache-name }}-${{ matrix.rust }}-${{ hashFiles('Cargo.lock') }}
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1.0.7
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+          components: clippy
+
+      - name: Run lints
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: clippy
+          args: -- -D warnings
+
+      - name: Run tests (no default features)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --no-default-features
+
+      - name: Run tests
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: test
