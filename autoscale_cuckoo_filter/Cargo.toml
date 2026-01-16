@@ -1,0 +1,31 @@
+
+[package]
+name = "autoscale_cuckoo_filter"
+edition = "2024"
+version = "0.5.19"
+authors = ["js0-site <jssite@googlegroups.com>"]
+description = "Fastest auto-scaling Cuckoo Filter in Rust / 最快的 Rust 自动扩容布谷鸟过滤器"
+homepage = "https://github.com/js0-site/rust/tree/main/autoscale_cuckoo_filter"
+repository = "https://github.com/js0-site/rust"
+readme = "README.md"
+keywords = ["cuckoo-filter", "bloom-filter", "probabilistic", "set", "filter"]
+categories = ["data-structures", "algorithms", "database"]
+license = "MulanPSL-2.0"
+
+[dependencies]
+rapidhash = "1"
+fastrand = "2.3.0"
+bitcode = { version = "0.6.9", features = ["derive"] }
+
+[dev-dependencies]
+criterion = "0.8"
+mimalloc = { version = "0.1", default-features = false }
+sonic-rs = "0.5"
+serde = { version = "1.0", features = ["derive"] }
+farmhash = "1.1"
+cuckoofilter = { version = "0.5", features = ["farmhash"] }
+scalable_cuckoo_filter = "0.5.1"
+
+[[bench]]
+name = "comparison"
+harness = false
