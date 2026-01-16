@@ -1,0 +1,27 @@
+## Performance Benchmark
+
+| Library | Filter | Bf Ops | Query Ops | Memory | Speedup |
+| --- | --- | --- | --- | --- | --- |
+| jdb | BinaryFuse8 | 4815.38 | 87659.01 | 116.04 KB | 1.67x |
+| xorf | BinaryFuse8 | 3991.98 | 52533.11 | 116.04 KB | - |
+| jdb | BinaryFuse16 | 4791.46 | 76409.67 | 232.04 KB | 1.56x |
+| xorf | BinaryFuse16 | 3998.35 | 49094.75 | 232.04 KB | - |
+| jdb | BinaryFuse32 | 4715.07 | 67206.33 | 464.04 KB | 1.37x |
+| xorf | BinaryFuse32 | 4001.25 | 48930.47 | 464.04 KB | - |
+| jdb | Bf16 | 4744.40 | 76351.50 | 232.04 KB | - |
+| jdb | Bf32 | 4760.83 | 67093.34 | 464.04 KB | - |
+| jdb | Bf8 | 4804.30 | 87904.43 | 116.04 KB | - |
+
+## Accuracy
+
+| Library | Filter | False Positive Rate | False Negative Rate |
+| --- | --- | --- | --- |
+| jdb | BinaryFuse8 | 0.39232% | 0 |
+| xorf | BinaryFuse8 | 0.39010% | 0 |
+| jdb | BinaryFuse16 | 0.00184% | 0 |
+| xorf | BinaryFuse16 | 0.00152% | 0 |
+| jdb | BinaryFuse32 | 0.00000% | 0 |
+| xorf | BinaryFuse32 | 0.00000% | 0 |
+| jdb | Bf16 | 0.00154% | 0 |
+| jdb | Bf32 | 0.00000% | 0 |
+| jdb | Bf8 | 0.38771% | 0 |

@@ -1,0 +1,10 @@
+{
+  "name": "size_lru",
+  "type": "module",
+  "devDependencies": {},
+  "peerDependencies": {},
+  "dependencies": {
+    "cli-table3": "^0.6.5",
+    "svgo": "^4.0.0"
+  }
+}
