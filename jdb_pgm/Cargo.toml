@@ -1,0 +1,69 @@
+[package]
+name = "jdb_pgm"
+version = "0.3.13"
+edition = "2024"
+description = "Ultra-fast learned index for sorted keys / 面向排序键的超快学习型索引"
+license = "MIT"
+repository = "https://github.com/js0-site/rust.git"
+keywords = ["learned-index", "pgm-index", "search", "database", "performance"]
+categories = ["algorithms", "data-structures"]
+authors = ["jssite@googlegroups.com", "Andrei Riaskov <code@riaskov.com>"]
+readme = "README.md"
+homepage = "https://github.com/js0-site/rust"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+thiserror = "2.0.17"
+
+[dependencies.bitcode]
+version = "0.6.9"
+optional = true
+
+[dependencies.tikv-jemalloc-ctl]
+version = "0.6"
+features = ["stats"]
+
+[dependencies.tikv-jemallocator]
+version = "0.6"
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+rand = "0.9"
+static_init = "1.0.4"
+serde = "1.0"
+serde_json = "1.0"
+sonic-rs = "0.5"
+tikv-jemallocator = "0.6"
+
+[dev-dependencies.criterion]
+version = "0.8"
+features = ["html_reports"]
+
+# [dev-dependencies.pgm_index]
+# git = "https://github.com/i18nsite/pgm_index.git"
+# branch = "main"
+
+[features]
+default = ["data"]
+data = []
+key_to_u64 = []
+bitcode = ["dep:bitcode"]
+pk = []
+
+[[example]]
+name = "simple_benchmark"
+path = "examples/simple_benchmark.rs"
+
+[[example]]
+name = "test_bitcode"
+path = "examples/test_bitcode.rs"
+required-features = ["bitcode"]
+
+[[bench]]
+name = "main"
+harness = false

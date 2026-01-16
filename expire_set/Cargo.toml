@@ -1,0 +1,42 @@
+[package]
+name = "expire_set"
+version = "0.1.9"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/expire_set"
+description = "High-performance concurrent expiration set using unsafe raw pointers / 基于非安全原始指针的高性能并发过期集合"
+keywords = [ "cache", "expire", "unsafe", "concurrency", "performance" ]
+categories = ["data-structures", "concurrency", "caching", "algorithms", "development-tools"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+papaya = "0.2.3"
+
+[dependencies.expire_cache]
+version = "0.1.25"
+path = "../expire_cache"
+features = [ "hashset" ]
+
+[dependencies.tokio]
+version = "1.49.0"
+features = [ "time", "rt" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
+
+[dev-dependencies.tokio]
+version = "1.49.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]
