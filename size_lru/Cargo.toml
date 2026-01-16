@@ -1,0 +1,79 @@
+[package]
+name = "size_lru"
+version = "0.1.35"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/size_lru"
+description = "Fastest size-aware LRU cache with highest hit rate via LHD algorithm / 最快的大小感知 LRU 缓存，基于 LHD 算法实现最高命中率"
+keywords = ["cache", "lru", "lhd", "eviction", "size-aware"]
+categories = ["caching", "algorithms", "data-structures", "database"]
+autobenches = false
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+lhd = ["dep:fastrand", "dep:rapidhash"]
+no = []
+bench-size-lru = ["lhd"]
+bench-lru = []
+bench-moka = []
+bench-mini-moka = []
+bench-clru = []
+bench-hashlink = []
+bench-schnellru = []
+all = [
+  "bench-size-lru",
+  "bench-lru",
+  "bench-moka",
+  "bench-mini-moka",
+  "bench-clru",
+  "bench-hashlink",
+  "bench-schnellru",
+]
+
+[dev-dependencies]
+aok = "0.1.18"
+clru = "0.6.2"
+fastrand = "2.3.0"
+hashlink = "0.11.0"
+log = "0.4.29"
+log_init = "0.1.34"
+lru = "0.16.3"
+mini-moka = "0.10.3"
+rand = "0.9.2"
+schnellru = "0.2.4"
+sonic-rs = "0.5.6"
+static_init = "1.0.4"
+tempfile = "3.24.0"
+tikv-jemalloc-ctl = { version = "0.6.1", features = ["stats"] }
+tikv-jemallocator = "0.6.1"
+zipf = "7.0.2"
+
+[dev-dependencies.criterion]
+version = "0.8.1"
+features = ["html_reports"]
+
+[dev-dependencies.moka]
+version = "0.12.12"
+features = ["sync"]
+
+[dev-dependencies.serde]
+version = "1.0.228"
+features = ["derive"]
+
+[dependencies.fastrand]
+version = "2.3.0"
+optional = true
+
+[dependencies.rapidhash]
+version = "4.2.1"
+optional = true
+
+[[bench]]
+name = "bench"
+harness = false
