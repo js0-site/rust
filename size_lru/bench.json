@@ -1,0 +1,124 @@
+{
+  "config": {
+    "mem_budget": 67108864,
+    "read_ratio": 90,
+    "write_ratio": 9,
+    "delete_ratio": 1,
+    "real_miss_ratio": 5,
+    "zipf_s": 1.0,
+    "ops_per_loop": 0,
+    "loops": 0
+  },
+  "miss_latency_ns": 18000,
+  "miss_latency_method": "DapuStor X5900 PCIe 5.0 NVMe (18µs)",
+  "stats": {
+    "total_size_bytes": 187207490,
+    "item_count": 20000,
+    "avg_item_size": 9360,
+    "min_item_size": 66,
+    "max_item_size": 621189,
+    "mem_budget": 67108864,
+    "size_distribution": [
+      {
+        "label": "<100B",
+        "count": 7999,
+        "percent": 39.995000000000005,
+        "total_size_bytes": 560358,
+        "size_percent": 0.29932456228113524
+      },
+      {
+        "label": "100B-1KB",
+        "count": 7000,
+        "percent": 35.0,
+        "total_size_bytes": 4111222,
+        "size_percent": 2.1960777317189604
+      },
+      {
+        "label": "1-10KB",
+        "count": 4000,
+        "percent": 20.0,
+        "total_size_bytes": 22423388,
+        "size_percent": 11.977826314534743
+      },
+      {
+        "label": "10-100KB",
+        "count": 801,
+        "percent": 4.005,
+        "total_size_bytes": 44957154,
+        "size_percent": 24.014612876867268
+      },
+      {
+        "label": ">=100KB",
+        "count": 200,
+        "percent": 1.0,
+        "total_size_bytes": 115155368,
+        "size_percent": 61.51215851459789
+      }
+    ]
+  },
+  "results": [
+    {
+      "lib": "size_lru",
+      "hit_rate": 0.749838921104668,
+      "ops_per_second": 694380.5517895054,
+      "effective_ops": 168264.28217812523,
+      "memory_mb": 63.76563262939453,
+      "capacity": 55530947,
+      "scale_factor": 0.9937923283323897
+    },
+    {
+      "lib": "schnellru",
+      "hit_rate": 0.4415894598858006,
+      "ops_per_second": 989656.8488583689,
+      "effective_ops": 90400.86569009615,
+      "memory_mb": 64.04304504394531,
+      "capacity": 701,
+      "scale_factor": 0.9993182303628485
+    },
+    {
+      "lib": "lru",
+      "hit_rate": 0.4349352351751872,
+      "ops_per_second": 989704.5979201358,
+      "effective_ops": 89432.8931447838,
+      "memory_mb": 64.15033721923828,
+      "capacity": 662,
+      "scale_factor": 0.9976372647834476
+    },
+    {
+      "lib": "hashlink",
+      "hit_rate": 0.4246817303206025,
+      "ops_per_second": 903552.5427097993,
+      "effective_ops": 87241.22129483389,
+      "memory_mb": 66.52577209472656,
+      "capacity": 649,
+      "scale_factor": 0.9580263438149366
+    },
+    {
+      "lib": "clru",
+      "hit_rate": 0.41443933435535113,
+      "ops_per_second": 905846.6768625146,
+      "effective_ops": 85880.90771735032,
+      "memory_mb": 64.40328216552734,
+      "capacity": 55242197,
+      "scale_factor": 1.0034864679704905
+    },
+    {
+      "lib": "mini-moka",
+      "hit_rate": 0.5821946721766758,
+      "ops_per_second": 183282.68007943494,
+      "effective_ops": 77062.09213086,
+      "memory_mb": 64.10779571533203,
+      "capacity": 55864602,
+      "scale_factor": 1.000168232605005
+    },
+    {
+      "lib": "moka",
+      "hit_rate": 0.600790952920527,
+      "ops_per_second": 171994.5685009639,
+      "effective_ops": 76923.6690138443,
+      "memory_mb": 63.95318603515625,
+      "capacity": 52834880,
+      "scale_factor": 1.000193394861992
+    }
+  ]
+}
