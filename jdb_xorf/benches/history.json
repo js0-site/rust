@@ -1,0 +1,1147 @@
+[
+  {
+    "timestamp": "2026-01-16T03:48:06.777Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2160943.244
+            },
+            "contains": {
+              "mean_ns": 180234.09527251523
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00156
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2181113.6679999996
+            },
+            "contains": {
+              "mean_ns": 183764.2196803086
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2136937.9199999995
+            },
+            "contains": {
+              "mean_ns": 187014.23874551998
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39027
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      },
+      "xorf": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2605767.4975
+            },
+            "contains": {
+              "mean_ns": 203315.08939492592
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2521878.845
+            },
+            "contains": {
+              "mean_ns": 208845.69193855656
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2738065.9375
+            },
+            "contains": {
+              "mean_ns": 192101.03213582843
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T03:52:43.824Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2110754.7479999997
+            },
+            "contains": {
+              "mean_ns": 178446.47489042836
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00135
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2269405.825999999
+            },
+            "contains": {
+              "mean_ns": 185123.07367370964
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2102224.4340000004
+            },
+            "contains": {
+              "mean_ns": 164689.6615957036
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39035
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      },
+      "xorf": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2605767.4975
+            },
+            "contains": {
+              "mean_ns": 203315.08939492592
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2521878.845
+            },
+            "contains": {
+              "mean_ns": 208845.69193855656
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2738065.9375
+            },
+            "contains": {
+              "mean_ns": 192101.03213582843
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T03:56:34.570Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2155981.994000001
+            },
+            "contains": {
+              "mean_ns": 180802.43405496937
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00141
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2170895.75
+            },
+            "contains": {
+              "mean_ns": 185811.09207626476
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2172536.4179999996
+            },
+            "contains": {
+              "mean_ns": 166774.5658439277
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39357
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      },
+      "xorf": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2605767.4975
+            },
+            "contains": {
+              "mean_ns": 203315.08939492592
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2521878.845
+            },
+            "contains": {
+              "mean_ns": 208845.69193855656
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2738065.9375
+            },
+            "contains": {
+              "mean_ns": 192101.03213582843
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T03:57:06.797Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2189956.168
+            },
+            "contains": {
+              "mean_ns": 178832.4067258573
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00173
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2165612.0019999994
+            },
+            "contains": {
+              "mean_ns": 186474.94058015122
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2131846.6720000003
+            },
+            "contains": {
+              "mean_ns": 168978.15469405623
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.3935
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:00:21.129Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2080501.0040000007
+            },
+            "contains": {
+              "mean_ns": 176417.3403876814
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.0014
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2110886.26
+            },
+            "contains": {
+              "mean_ns": 183472.12877486247
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2026510.0616666665
+            },
+            "contains": {
+              "mean_ns": 162212.60372588647
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39292
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:02:00.935Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2129748.832
+            },
+            "contains": {
+              "mean_ns": 179781.57638409
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00141
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2205431.986
+            },
+            "contains": {
+              "mean_ns": 183182.78510772667
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2092613.9999999998
+            },
+            "contains": {
+              "mean_ns": 163906.92589881553
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39232
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:03:50.643Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2153808.414000001
+            },
+            "contains": {
+              "mean_ns": 166963.52010836257
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.0014
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2201467.0200000005
+            },
+            "contains": {
+              "mean_ns": 176763.91127311892
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2111936.5979999993
+            },
+            "contains": {
+              "mean_ns": 155229.25320042865
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39159
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:05:22.986Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2132553.9979999997
+            },
+            "contains": {
+              "mean_ns": 165607.00967046554
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00157
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2146770.3419999997
+            },
+            "contains": {
+              "mean_ns": 175057.8663079894
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2100085.5799999996
+            },
+            "contains": {
+              "mean_ns": 153985.07834084847
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.38957
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:10:01.559Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2114887.911999999
+            },
+            "contains": {
+              "mean_ns": 166633.33723240317
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00174
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2146005.178
+            },
+            "contains": {
+              "mean_ns": 174154.57271194796
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2111122.418
+            },
+            "contains": {
+              "mean_ns": 154851.61305225082
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.38883
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:12:21.254Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2142154.402
+            },
+            "contains": {
+              "mean_ns": 168077.90550955728
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00162
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2130139.57
+            },
+            "contains": {
+              "mean_ns": 175050.9354770115
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2071812.2380000001
+            },
+            "contains": {
+              "mean_ns": 153070.83560919127
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.38884
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:16:15.832Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2055066.8360000008
+            },
+            "contains": {
+              "mean_ns": 164292.8593231102
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00149
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2144846.1659999997
+            },
+            "contains": {
+              "mean_ns": 172073.78123041082
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2020518.3420000002
+            },
+            "contains": {
+              "mean_ns": 148625.5889636698
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39332
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:17:18.469Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2117331.04
+            },
+            "contains": {
+              "mean_ns": 168129.05296671033
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.0015
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2158670.5880000005
+            },
+            "contains": {
+              "mean_ns": 175312.5807097577
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2074670.6719999998
+            },
+            "contains": {
+              "mean_ns": 154875.4708829031
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39019
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:18:32.304Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2080710.502
+            },
+            "contains": {
+              "mean_ns": 139766.13905113228
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00153
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2117936.756
+            },
+            "contains": {
+              "mean_ns": 152870.60260788363
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2102182.66
+            },
+            "contains": {
+              "mean_ns": 126859.56087139124
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39216
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T04:40:58.076Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2217487.5120000006
+            },
+            "contains": {
+              "mean_ns": 132027.9926665751
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00172
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2121747.66
+            },
+            "contains": {
+              "mean_ns": 146470.57506293798
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2098989.43
+            },
+            "contains": {
+              "mean_ns": 116207.36248088627
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.3916
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      },
+      "xorf": {
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2553930.42
+            },
+            "contains": {
+              "mean_ns": 244885.43475828692
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "BinaryFuse16": {
+          "100000": {
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00139
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T05:01:37.413Z",
+    "results": {
+      "jdb": {
+        "BinaryFuse16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2041419.7459999996
+            },
+            "contains": {
+              "mean_ns": 131084.08509473893
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.0016
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "BinaryFuse32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2125981.5100000007
+            },
+            "contains": {
+              "mean_ns": 148587.81934176423
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2039674.2700000005
+            },
+            "contains": {
+              "mean_ns": 114024.49475188588
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.38904
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "timestamp": "2026-01-16T09:19:36.055Z",
+    "results": {
+      "jdb": {
+        "Bf16": {
+          "100000": {
+            "build": {
+              "mean_ns": 2178893.4159999997
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.00153
+            },
+            "memory": {
+              "bytes": 237608
+            }
+          }
+        },
+        "Bf32": {
+          "100000": {
+            "build": {
+              "mean_ns": 2255827.922000001
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0
+            },
+            "memory": {
+              "bytes": 475176
+            }
+          }
+        },
+        "Bf8": {
+          "100000": {
+            "build": {
+              "mean_ns": 2093552.4980000004
+            },
+            "false_negative": {
+              "rate": 0
+            },
+            "false_positive": {
+              "rate": 0.39256
+            },
+            "memory": {
+              "bytes": 118824
+            }
+          }
+        }
+      }
+    }
+  }
+]
