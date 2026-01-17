@@ -1,0 +1,31 @@
+CREATE TABLE IF NOT EXISTS `host` (
+`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`val` varchar(255) NOT NULL,
+PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,
+UNIQUE KEY `uk_val` (`val`)
+);
+CREATE TABLE IF NOT EXISTS `mail` (
+`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`prefix` varchar(255) NOT NULL,
+`host_id` bigint(20) unsigned NOT NULL,
+PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,
+UNIQUE KEY `uk_mail` (`prefix`,`host_id`)
+);
+CREATE TABLE IF NOT EXISTS `send` (
+`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`from_id` bigint(20) unsigned NOT NULL,
+`to_id_li` json NOT NULL,
+`title_txt_id` bigint(20) unsigned NOT NULL,
+`htm_txt_id` bigint(20) unsigned NOT NULL DEFAULT '0',
+`txt_txt_id` bigint(20) unsigned NOT NULL DEFAULT '0',
+`state` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0:未发, 1:已发, -1:失败',
+`ts` bigint(20) unsigned NOT NULL,
+PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */
+);
+CREATE TABLE IF NOT EXISTS `txt` (
+`id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+`hash` binary(32) NOT NULL,
+`val` longtext NOT NULL,
+PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */,
+UNIQUE KEY `uk_hash` (`hash`)
+);
