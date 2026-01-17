@@ -1,0 +1,234 @@
+{
+  "DE_params": {
+    "mutation_factor": 0.5,
+    "crossover_prob": 0.5,
+    "strategy": "rand1_bin",
+    "configspace": true,
+    "boundary_fix_type": "random",
+    "max_age": Infinity,
+    "dimensions": 2,
+    "output_path": "dehb_logs",
+    "async_strategy": "immediate"
+  },
+  "HB_params": {
+    "min_fidelity": 1,
+    "max_fidelity": 10,
+    "min_clip": null,
+    "max_clip": null,
+    "eta": 3
+  },
+  "internals": {
+    "initial_configs": [
+      {
+        "config_id": 0,
+        "config": [
+          0.25,
+          0.75
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 1,
+        "config": [
+          0.25,
+          0.0
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 2,
+        "config": [
+          0.0,
+          0.75
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 3,
+        "config": [
+          0.5,
+          0.0
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 4,
+        "config": [
+          0.0,
+          0.0
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 5,
+        "config": [
+          0.75,
+          0.0
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 6,
+        "config": [
+          0.25,
+          0.5
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 7,
+        "config": [
+          0.0,
+          0.75
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 8,
+        "config": [
+          0.25,
+          0.25
+        ],
+        "results": {
+          "1.1111111111111112": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 9,
+        "config": [
+          0.5,
+          0.5
+        ],
+        "results": {
+          "3.333333333333333": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 10,
+        "config": [
+          0.0,
+          0.75
+        ],
+        "results": {
+          "3.333333333333333": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 11,
+        "config": [
+          0.75,
+          0.75
+        ],
+        "results": {
+          "3.333333333333333": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 12,
+        "config": [
+          0.25,
+          0.75
+        ],
+        "results": {
+          "10.0": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 13,
+        "config": [
+          0.25,
+          0.75
+        ],
+        "results": {
+          "10.0": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      },
+      {
+        "config_id": 14,
+        "config": [
+          0.25,
+          0.25
+        ],
+        "results": {
+          "10.0": {
+            "score": Infinity,
+            "cost": -1,
+            "info": {}
+          }
+        }
+      }
+    ]
+  }
+}
