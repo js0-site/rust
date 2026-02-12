@@ -1,0 +1,19 @@
+[package]
+name = "uper_tests"
+version = "0.1.0"
+edition = "2024"
+categories = ["development-tools::testing", "development-tools", "asynchronous", "concurrency", "config"]
+
+[dependencies]
+aok = "0.1.18"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dependencies.tokio]
+version = "1.49.0"
+features = [ "rt", "macros", "rt-multi-thread" ]
+
+[dependencies.uper]
+version = "0.1.13"
+path = ".."
+features = [ "conf" ]
