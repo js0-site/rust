@@ -1,0 +1,71 @@
+[package]
+name = "compio_resolve"
+version = "0.1.0"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0/rust.git"
+homepage = "https://github.com/js0/rust/tree/main/compio_resolve"
+description = "A DNS resolver for compio, using cache and system configuration for zero-cost async resolution. / compio 的异步 DNS 解析器，支持缓存和系统配置。"
+keywords = [ "async", "dns", "resolver", "cache", "compio" ]
+categories = [ "network-programming", "asynchronous", "caching" ]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ "cache" ]
+cache = [ ]
+
+[dependencies]
+scc = "2"
+fastrand = "2.3"
+futures-util = "0.3"
+logos = "0.16"
+once_cell = "1"
+
+[dependencies.compio-net]
+version = "0.11.0"
+features = ["extern_resolve"]
+
+[dependencies.compio-buf]
+version = "0.8.0"
+
+[dependencies.compio-io]
+version = "0.9.0"
+
+[dependencies.compio-runtime]
+version = "0.11.0"
+features = ["event", "time"]
+
+[dependencies.zerocopy]
+version = "0.8"
+features = [ "derive" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = "1.0.4"
+
+[dev-dependencies.compio]
+version = "0.18.0"
+features = ["macros", "net", "time"]
+
+[dev-dependencies.compio-net]
+version = "0.11.0"
+features = ["extern_resolve"]
+
+[dev-dependencies.tokio]
+version = "1.49.0"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
+
+[package.metadata.patch.compio-net]
+version = "0.11.0"
+patches = [
+    "compio-net.patch"
+]
+
+[patch.crates-io]
+compio-net = { path = "./target/patch/compio-net-0.11.0" }
