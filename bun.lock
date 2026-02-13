@@ -1,0 +1,220 @@
+{
+  "lockfileVersion": 1,
+  "configVersion": 0,
+  "workspaces": {
+    "": {
+      "dependencies": {
+        "@3-/cargo_upgrade": "^0.1.3",
+        "@3-/coffee_plus": "^0.1.29",
+        "@3-/loader": "^0.0.2",
+        "cli-table3": "^0.6.5",
+        "coffeescript": "^2.7.0",
+        "eta": "^4.5.1",
+        "markdown-table": "^3.0.4",
+        "svgo": "^4.0.0",
+        "zx": "^8.8.5",
+      },
+    },
+  },
+  "packages": {
+    "@3-/cache": ["@3-/cache@0.1.3", "https://registry.npmmirror.com@3-/cache/-/cache-0.1.3.tgz", { "dependencies": { "@3-/jsmap": "^0.1.3", "@3-/msgpack": "^0.1.2" } }, ""],
+
+    "@3-/camel": ["@3-/camel@0.1.1", "https://registry.npmmirror.com@3-/camel/-/camel-0.1.1.tgz", {}, ""],
+
+    "@3-/cargo_upgrade": ["@3-/cargo_upgrade@0.1.3", "https://registry.npmmirror.com@3-/cargo_upgrade/-/cargo_upgrade-0.1.3.tgz", { "dependencies": { "@3-/cache": "^0.1.3", "@3-/read": "^0.1.4", "@3-/write": "^0.0.2", "@iarna/toml": "^2.2.5" }, "bin": { "cargo_upgrade": "bin.js" } }, ""],
+
+    "@3-/coffee_plus": ["@3-/coffee_plus@0.1.29", "https://registry.npmmirror.com@3-/coffee_plus/-/coffee_plus-0.1.29.tgz", { "dependencies": { "@3-/camel": "^0.1.1", "@3-/debounce": "^0.1.2", "@3-/jsext": "^0.0.7", "@3-/read": "^0.1.4", "@3-/walk": "^0.0.2", "@3-/write": "^0.0.2", "chokidar": "^4.0.3", "fs-extra": "^11.3.0", "lodash-es": "^4.17.21", "yargs": "^18.0.0" }, "bin": { "cep": "cep.js" } }, ""],
+
+    "@3-/debounce": ["@3-/debounce@0.1.2", "https://registry.npmmirror.com@3-/debounce/-/debounce-0.1.2.tgz", {}, ""],
+
+    "@3-/jsext": ["@3-/jsext@0.0.7", "https://registry.npmmirror.com@3-/jsext/-/jsext-0.0.7.tgz", {}, ""],
+
+    "@3-/jsmap": ["@3-/jsmap@0.1.3", "https://registry.npmmirror.com@3-/jsmap/-/jsmap-0.1.3.tgz", {}, ""],
+
+    "@3-/loader": ["@3-/loader@0.0.2", "https://registry.npmmirror.com@3-/loader/-/loader-0.0.2.tgz", { "dependencies": { "@3-/coffee_plus": "^0.0.3", "@3-/jsext": "^0.0.1", "coffeescript": "^2.7.0" } }, ""],
+
+    "@3-/msgpack": ["@3-/msgpack@0.1.4", "https://registry.npmmirror.com@3-/msgpack/-/msgpack-0.1.4.tgz", { "dependencies": { "msgpackr": "^1.10.1" } }, ""],
+
+    "@3-/read": ["@3-/read@0.1.4", "https://registry.npmmirror.com@3-/read/-/read-0.1.4.tgz", {}, ""],
+
+    "@3-/walk": ["@3-/walk@0.0.2", "https://registry.npmmirror.com@3-/walk/-/walk-0.0.2.tgz", {}, ""],
+
+    "@3-/write": ["@3-/write@0.0.2", "https://registry.npmmirror.com@3-/write/-/write-0.0.2.tgz", {}, ""],
+
+    "@colors/colors": ["@colors/colors@1.5.0", "https://registry.npmmirror.com@colors/colors/-/colors-1.5.0.tgz", {}, ""],
+
+    "@iarna/toml": ["@iarna/toml@2.2.5", "https://registry.npmmirror.com@iarna/toml/-/toml-2.2.5.tgz", {}, ""],
+
+    "@msgpackr-extract/msgpackr-extract-darwin-arm64": ["@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.3", "https://registry.npmmirror.com@msgpackr-extract/msgpackr-extract-darwin-arm64/-/msgpackr-extract-darwin-arm64-3.0.3.tgz", { "os": "darwin", "cpu": "arm64" }, ""],
+
+    "@msgpackr-extract/msgpackr-extract-darwin-x64": ["@msgpackr-extract/msgpackr-extract-darwin-x64@3.0.3", "", { "os": "darwin", "cpu": "x64" }, "sha512-mdzd3AVzYKuUmiWOQ8GNhl64/IoFGol569zNRdkLReh6LRLHOXxU4U8eq0JwaD8iFHdVGqSy4IjFL4reoWCDFw=="],
+
+    "@msgpackr-extract/msgpackr-extract-linux-arm": ["@msgpackr-extract/msgpackr-extract-linux-arm@3.0.3", "", { "os": "linux", "cpu": "arm" }, "sha512-fg0uy/dG/nZEXfYilKoRe7yALaNmHoYeIoJuJ7KJ+YyU2bvY8vPv27f7UKhGRpY6euFYqEVhxCFZgAUNQBM3nw=="],
+
+    "@msgpackr-extract/msgpackr-extract-linux-arm64": ["@msgpackr-extract/msgpackr-extract-linux-arm64@3.0.3", "", { "os": "linux", "cpu": "arm64" }, "sha512-YxQL+ax0XqBJDZiKimS2XQaf+2wDGVa1enVRGzEvLLVFeqa5kx2bWbtcSXgsxjQB7nRqqIGFIcLteF/sHeVtQg=="],
+
+    "@msgpackr-extract/msgpackr-extract-linux-x64": ["@msgpackr-extract/msgpackr-extract-linux-x64@3.0.3", "", { "os": "linux", "cpu": "x64" }, "sha512-cvwNfbP07pKUfq1uH+S6KJ7dT9K8WOE4ZiAcsrSes+UY55E/0jLYc+vq+DO7jlmqRb5zAggExKm0H7O/CBaesg=="],
+
+    "@msgpackr-extract/msgpackr-extract-win32-x64": ["@msgpackr-extract/msgpackr-extract-win32-x64@3.0.3", "", { "os": "win32", "cpu": "x64" }, "sha512-x0fWaQtYp4E6sktbsdAqnehxDgEc/VwM7uLsRCYWaiGu0ykYdZPiS8zCWdnjHwyiumousxfBm4SO31eXqwEZhQ=="],
+
+    "ansi-regex": ["ansi-regex@5.0.1", "https://registry.npmmirror.comansi-regex/-/ansi-regex-5.0.1.tgz", {}, ""],
+
+    "ansi-styles": ["ansi-styles@6.2.3", "https://registry.npmmirror.comansi-styles/-/ansi-styles-6.2.3.tgz", {}, ""],
+
+    "boolbase": ["boolbase@1.0.0", "https://registry.npmmirror.comboolbase/-/boolbase-1.0.0.tgz", {}, ""],
+
+    "chokidar": ["chokidar@4.0.3", "https://registry.npmmirror.comchokidar/-/chokidar-4.0.3.tgz", { "dependencies": { "readdirp": "^4.0.1" } }, ""],
+
+    "cli-table3": ["cli-table3@0.6.5", "https://registry.npmmirror.comcli-table3/-/cli-table3-0.6.5.tgz", { "dependencies": { "string-width": "^4.2.0" }, "optionalDependencies": { "@colors/colors": "1.5.0" } }, ""],
+
+    "cliui": ["cliui@9.0.1", "https://registry.npmmirror.comcliui/-/cliui-9.0.1.tgz", { "dependencies": { "string-width": "^7.2.0", "strip-ansi": "^7.1.0", "wrap-ansi": "^9.0.0" } }, ""],
+
+    "coffeescript": ["coffeescript@2.7.0", "https://registry.npmmirror.comcoffeescript/-/coffeescript-2.7.0.tgz", { "bin": { "cake": "bin/cake", "coffee": "bin/coffee" } }, ""],
+
+    "color-convert": ["color-convert@2.0.1", "https://registry.npmmirror.comcolor-convert/-/color-convert-2.0.1.tgz", { "dependencies": { "color-name": "~1.1.4" } }, ""],
+
+    "color-name": ["color-name@1.1.4", "https://registry.npmmirror.comcolor-name/-/color-name-1.1.4.tgz", {}, ""],
+
+    "commander": ["commander@11.1.0", "https://registry.npmmirror.comcommander/-/commander-11.1.0.tgz", {}, ""],
+
+    "css-select": ["css-select@5.2.2", "https://registry.npmmirror.comcss-select/-/css-select-5.2.2.tgz", { "dependencies": { "boolbase": "^1.0.0", "css-what": "^6.1.0", "domhandler": "^5.0.2", "domutils": "^3.0.1", "nth-check": "^2.0.1" } }, ""],
+
+    "css-tree": ["css-tree@3.1.0", "https://registry.npmmirror.comcss-tree/-/css-tree-3.1.0.tgz", { "dependencies": { "mdn-data": "2.12.2", "source-map-js": "^1.0.1" } }, ""],
+
+    "css-what": ["css-what@6.2.2", "https://registry.npmmirror.comcss-what/-/css-what-6.2.2.tgz", {}, ""],
+
+    "csso": ["csso@5.0.5", "https://registry.npmmirror.comcsso/-/csso-5.0.5.tgz", { "dependencies": { "css-tree": "~2.2.0" } }, ""],
+
+    "detect-libc": ["detect-libc@2.1.2", "https://registry.npmmirror.comdetect-libc/-/detect-libc-2.1.2.tgz", {}, ""],
+
+    "dom-serializer": ["dom-serializer@2.0.0", "https://registry.npmmirror.comdom-serializer/-/dom-serializer-2.0.0.tgz", { "dependencies": { "domelementtype": "^2.3.0", "domhandler": "^5.0.2", "entities": "^4.2.0" } }, ""],
+
+    "domelementtype": ["domelementtype@2.3.0", "https://registry.npmmirror.comdomelementtype/-/domelementtype-2.3.0.tgz", {}, ""],
+
+    "domhandler": ["domhandler@5.0.3", "https://registry.npmmirror.comdomhandler/-/domhandler-5.0.3.tgz", { "dependencies": { "domelementtype": "^2.3.0" } }, ""],
+
+    "domutils": ["domutils@3.2.2", "https://registry.npmmirror.comdomutils/-/domutils-3.2.2.tgz", { "dependencies": { "dom-serializer": "^2.0.0", "domelementtype": "^2.3.0", "domhandler": "^5.0.3" } }, ""],
+
+    "emoji-regex": ["emoji-regex@8.0.0", "https://registry.npmmirror.comemoji-regex/-/emoji-regex-8.0.0.tgz", {}, ""],
+
+    "entities": ["entities@4.5.0", "https://registry.npmmirror.comentities/-/entities-4.5.0.tgz", {}, ""],
+
+    "escalade": ["escalade@3.2.0", "https://registry.npmmirror.comescalade/-/escalade-3.2.0.tgz", {}, ""],
+
+    "eta": ["eta@4.5.1", "https://registry.npmmirror.com/eta/-/eta-4.5.1.tgz", {}, "sha512-EaNCGm+8XEIU7YNcc+THptWAO5NfKBHHARxt+wxZljj9bTr/+arRoOm9/MpGt4n6xn9fLnPFRSoLD0WFYGFUxQ=="],
+
+    "fs-extra": ["fs-extra@11.3.3", "https://registry.npmmirror.comfs-extra/-/fs-extra-11.3.3.tgz", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, ""],
+
+    "get-caller-file": ["get-caller-file@2.0.5", "https://registry.npmmirror.comget-caller-file/-/get-caller-file-2.0.5.tgz", {}, ""],
+
+    "get-east-asian-width": ["get-east-asian-width@1.4.0", "https://registry.npmmirror.comget-east-asian-width/-/get-east-asian-width-1.4.0.tgz", {}, ""],
+
+    "graceful-fs": ["graceful-fs@4.2.11", "https://registry.npmmirror.comgraceful-fs/-/graceful-fs-4.2.11.tgz", {}, ""],
+
+    "is-fullwidth-code-point": ["is-fullwidth-code-point@3.0.0", "https://registry.npmmirror.comis-fullwidth-code-point/-/is-fullwidth-code-point-3.0.0.tgz", {}, ""],
+
+    "jsonfile": ["jsonfile@6.2.0", "https://registry.npmmirror.comjsonfile/-/jsonfile-6.2.0.tgz", { "dependencies": { "universalify": "^2.0.0" }, "optionalDependencies": { "graceful-fs": "^4.1.6" } }, ""],
+
+    "lodash-es": ["lodash-es@4.17.22", "https://registry.npmmirror.comlodash-es/-/lodash-es-4.17.22.tgz", {}, ""],
+
+    "markdown-table": ["markdown-table@3.0.4", "", {}, "sha512-wiYz4+JrLyb/DqW2hkFJxP7Vd7JuTDm77fvbM8VfEQdmSMqcImWeeRbHwZjBjIFki/VaMK2BhFi7oUUZeM5bqw=="],
+
+    "mdn-data": ["mdn-data@2.12.2", "https://registry.npmmirror.commdn-data/-/mdn-data-2.12.2.tgz", {}, ""],
+
+    "msgpackr": ["msgpackr@1.11.8", "https://registry.npmmirror.commsgpackr/-/msgpackr-1.11.8.tgz", { "optionalDependencies": { "msgpackr-extract": "^3.0.2" } }, ""],
+
+    "msgpackr-extract": ["msgpackr-extract@3.0.3", "https://registry.npmmirror.commsgpackr-extract/-/msgpackr-extract-3.0.3.tgz", { "dependencies": { "node-gyp-build-optional-packages": "5.2.2" }, "optionalDependencies": { "@msgpackr-extract/msgpackr-extract-darwin-arm64": "3.0.3", "@msgpackr-extract/msgpackr-extract-darwin-x64": "3.0.3", "@msgpackr-extract/msgpackr-extract-linux-arm": "3.0.3", "@msgpackr-extract/msgpackr-extract-linux-arm64": "3.0.3", "@msgpackr-extract/msgpackr-extract-linux-x64": "3.0.3", "@msgpackr-extract/msgpackr-extract-win32-x64": "3.0.3" }, "bin": { "download-msgpackr-prebuilds": "bin/download-prebuilds.js" } }, ""],
+
+    "node-gyp-build-optional-packages": ["node-gyp-build-optional-packages@5.2.2", "https://registry.npmmirror.comnode-gyp-build-optional-packages/-/node-gyp-build-optional-packages-5.2.2.tgz", { "dependencies": { "detect-libc": "^2.0.1" }, "bin": { "node-gyp-build-optional-packages": "bin.js", "node-gyp-build-optional-packages-optional": "optional.js", "node-gyp-build-optional-packages-test": "build-test.js" } }, ""],
+
+    "nth-check": ["nth-check@2.1.1", "https://registry.npmmirror.comnth-check/-/nth-check-2.1.1.tgz", { "dependencies": { "boolbase": "^1.0.0" } }, ""],
+
+    "picocolors": ["picocolors@1.1.1", "https://registry.npmmirror.compicocolors/-/picocolors-1.1.1.tgz", {}, ""],
+
+    "readdirp": ["readdirp@4.1.2", "https://registry.npmmirror.comreaddirp/-/readdirp-4.1.2.tgz", {}, ""],
+
+    "require-directory": ["require-directory@2.1.1", "https://registry.npmmirror.comrequire-directory/-/require-directory-2.1.1.tgz", {}, ""],
+
+    "sax": ["sax@1.4.4", "https://registry.npmmirror.comsax/-/sax-1.4.4.tgz", {}, ""],
+
+    "source-map-js": ["source-map-js@1.2.1", "https://registry.npmmirror.comsource-map-js/-/source-map-js-1.2.1.tgz", {}, ""],
+
+    "string-width": ["string-width@4.2.3", "https://registry.npmmirror.comstring-width/-/string-width-4.2.3.tgz", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, ""],
+
+    "strip-ansi": ["strip-ansi@6.0.1", "https://registry.npmmirror.comstrip-ansi/-/strip-ansi-6.0.1.tgz", { "dependencies": { "ansi-regex": "^5.0.1" } }, ""],
+
+    "svgo": ["svgo@4.0.0", "https://registry.npmmirror.com/svgo/-/svgo-4.0.0.tgz", { "dependencies": { "commander": "^11.1.0", "css-select": "^5.1.0", "css-tree": "^3.0.1", "css-what": "^6.1.0", "csso": "^5.0.5", "picocolors": "^1.1.1", "sax": "^1.4.1" }, "bin": "bin/svgo.js" }, "sha512-VvrHQ+9uniE+Mvx3+C9IEe/lWasXCU0nXMY2kZeLrHNICuRiC8uMPyM14UEaMOFA5mhyQqEkB02VoQ16n3DLaw=="],
+
+    "universalify": ["universalify@2.0.1", "https://registry.npmmirror.comuniversalify/-/universalify-2.0.1.tgz", {}, ""],
+
+    "wrap-ansi": ["wrap-ansi@9.0.2", "https://registry.npmmirror.comwrap-ansi/-/wrap-ansi-9.0.2.tgz", { "dependencies": { "ansi-styles": "^6.2.1", "string-width": "^7.0.0", "strip-ansi": "^7.1.0" } }, ""],
+
+    "y18n": ["y18n@5.0.8", "https://registry.npmmirror.comy18n/-/y18n-5.0.8.tgz", {}, ""],
+
+    "yargs": ["yargs@18.0.0", "https://registry.npmmirror.comyargs/-/yargs-18.0.0.tgz", { "dependencies": { "cliui": "^9.0.1", "escalade": "^3.1.1", "get-caller-file": "^2.0.5", "string-width": "^7.2.0", "y18n": "^5.0.5", "yargs-parser": "^22.0.0" } }, ""],
+
+    "yargs-parser": ["yargs-parser@22.0.0", "https://registry.npmmirror.comyargs-parser/-/yargs-parser-22.0.0.tgz", {}, ""],
+
+    "zx": ["zx@8.8.5", "https://registry.npmmirror.comzx/-/zx-8.8.5.tgz", { "bin": "build/cli.js" }, ""],
+
+    "@3-/loader/@3-/coffee_plus": ["@3-/coffee_plus@0.0.3", "https://registry.npmmirror.com@3-/coffee_plus/-/coffee_plus-0.0.3.tgz", { "dependencies": { "@3-/camel": "^0.0.2", "@3-/jsext": "^0.0.1", "@3-/walk": "^0.0.1", "@3-/write": "^0.0.1", "fs-extra": "^11.1.1", "lodash-es": "^4.17.21", "yargs": "^17.7.2" }, "bin": { "cep": "cep.js" } }, ""],
+
+    "@3-/loader/@3-/jsext": ["@3-/jsext@0.0.1", "https://registry.npmmirror.com@3-/jsext/-/jsext-0.0.1.tgz", {}, ""],
+
+    "cliui/string-width": ["string-width@7.2.0", "https://registry.npmmirror.comstring-width/-/string-width-7.2.0.tgz", { "dependencies": { "emoji-regex": "^10.3.0", "get-east-asian-width": "^1.0.0", "strip-ansi": "^7.1.0" } }, ""],
+
+    "cliui/strip-ansi": ["strip-ansi@7.1.2", "https://registry.npmmirror.comstrip-ansi/-/strip-ansi-7.1.2.tgz", { "dependencies": { "ansi-regex": "^6.0.1" } }, ""],
+
+    "csso/css-tree": ["css-tree@2.2.1", "https://registry.npmmirror.comcss-tree/-/css-tree-2.2.1.tgz", { "dependencies": { "mdn-data": "2.0.28", "source-map-js": "^1.0.1" } }, ""],
+
+    "wrap-ansi/string-width": ["string-width@7.2.0", "https://registry.npmmirror.comstring-width/-/string-width-7.2.0.tgz", { "dependencies": { "emoji-regex": "^10.3.0", "get-east-asian-width": "^1.0.0", "strip-ansi": "^7.1.0" } }, ""],
+
+    "wrap-ansi/strip-ansi": ["strip-ansi@7.1.2", "https://registry.npmmirror.comstrip-ansi/-/strip-ansi-7.1.2.tgz", { "dependencies": { "ansi-regex": "^6.0.1" } }, ""],
+
+    "yargs/string-width": ["string-width@7.2.0", "https://registry.npmmirror.comstring-width/-/string-width-7.2.0.tgz", { "dependencies": { "emoji-regex": "^10.3.0", "get-east-asian-width": "^1.0.0", "strip-ansi": "^7.1.0" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/@3-/camel": ["@3-/camel@0.0.2", "https://registry.npmmirror.com@3-/camel/-/camel-0.0.2.tgz", {}, ""],
+
+    "@3-/loader/@3-/coffee_plus/@3-/walk": ["@3-/walk@0.0.1", "https://registry.npmmirror.com@3-/walk/-/walk-0.0.1.tgz", {}, ""],
+
+    "@3-/loader/@3-/coffee_plus/@3-/write": ["@3-/write@0.0.1", "https://registry.npmmirror.com@3-/write/-/write-0.0.1.tgz", {}, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs": ["yargs@17.7.2", "https://registry.npmmirror.comyargs/-/yargs-17.7.2.tgz", { "dependencies": { "cliui": "^8.0.1", "escalade": "^3.1.1", "get-caller-file": "^2.0.5", "require-directory": "^2.1.1", "string-width": "^4.2.3", "y18n": "^5.0.5", "yargs-parser": "^21.1.1" } }, ""],
+
+    "cliui/string-width/emoji-regex": ["emoji-regex@10.6.0", "https://registry.npmmirror.comemoji-regex/-/emoji-regex-10.6.0.tgz", {}, ""],
+
+    "cliui/strip-ansi/ansi-regex": ["ansi-regex@6.2.2", "https://registry.npmmirror.comansi-regex/-/ansi-regex-6.2.2.tgz", {}, ""],
+
+    "csso/css-tree/mdn-data": ["mdn-data@2.0.28", "https://registry.npmmirror.commdn-data/-/mdn-data-2.0.28.tgz", {}, ""],
+
+    "wrap-ansi/string-width/emoji-regex": ["emoji-regex@10.6.0", "https://registry.npmmirror.comemoji-regex/-/emoji-regex-10.6.0.tgz", {}, ""],
+
+    "wrap-ansi/strip-ansi/ansi-regex": ["ansi-regex@6.2.2", "https://registry.npmmirror.comansi-regex/-/ansi-regex-6.2.2.tgz", {}, ""],
+
+    "yargs/string-width/emoji-regex": ["emoji-regex@10.6.0", "https://registry.npmmirror.comemoji-regex/-/emoji-regex-10.6.0.tgz", {}, ""],
+
+    "yargs/string-width/strip-ansi": ["strip-ansi@7.1.2", "https://registry.npmmirror.comstrip-ansi/-/strip-ansi-7.1.2.tgz", { "dependencies": { "ansi-regex": "^6.0.1" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/cliui": ["cliui@8.0.1", "https://registry.npmmirror.comcliui/-/cliui-8.0.1.tgz", { "dependencies": { "string-width": "^4.2.0", "strip-ansi": "^6.0.1", "wrap-ansi": "^7.0.0" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/string-width": ["string-width@4.2.3", "https://registry.npmmirror.comstring-width/-/string-width-4.2.3.tgz", { "dependencies": { "emoji-regex": "^8.0.0", "is-fullwidth-code-point": "^3.0.0", "strip-ansi": "^6.0.1" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/yargs-parser": ["yargs-parser@21.1.1", "https://registry.npmmirror.comyargs-parser/-/yargs-parser-21.1.1.tgz", {}, ""],
+
+    "yargs/string-width/strip-ansi/ansi-regex": ["ansi-regex@6.2.2", "https://registry.npmmirror.comansi-regex/-/ansi-regex-6.2.2.tgz", {}, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/cliui/strip-ansi": ["strip-ansi@6.0.1", "https://registry.npmmirror.comstrip-ansi/-/strip-ansi-6.0.1.tgz", { "dependencies": { "ansi-regex": "^5.0.1" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/cliui/wrap-ansi": ["wrap-ansi@7.0.0", "https://registry.npmmirror.comwrap-ansi/-/wrap-ansi-7.0.0.tgz", { "dependencies": { "ansi-styles": "^4.0.0", "string-width": "^4.1.0", "strip-ansi": "^6.0.0" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/string-width/emoji-regex": ["emoji-regex@8.0.0", "https://registry.npmmirror.comemoji-regex/-/emoji-regex-8.0.0.tgz", {}, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/string-width/strip-ansi": ["strip-ansi@6.0.1", "https://registry.npmmirror.comstrip-ansi/-/strip-ansi-6.0.1.tgz", { "dependencies": { "ansi-regex": "^5.0.1" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/cliui/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "https://registry.npmmirror.comansi-regex/-/ansi-regex-5.0.1.tgz", {}, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/cliui/wrap-ansi/ansi-styles": ["ansi-styles@4.3.0", "https://registry.npmmirror.comansi-styles/-/ansi-styles-4.3.0.tgz", { "dependencies": { "color-convert": "^2.0.1" } }, ""],
+
+    "@3-/loader/@3-/coffee_plus/yargs/string-width/strip-ansi/ansi-regex": ["ansi-regex@5.0.1", "https://registry.npmmirror.comansi-regex/-/ansi-regex-5.0.1.tgz", {}, ""],
+  }
+}
