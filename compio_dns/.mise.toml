@@ -1,0 +1,2 @@
+[env]
+RUSTFLAGS = "--cfg compio_dns {{ env.RUSTFLAGS }}"

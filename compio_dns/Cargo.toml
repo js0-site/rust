@@ -1,0 +1,38 @@
+[package]
+name = "compio_dns"
+version = "0.1.1"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0/rust.git"
+homepage = "https://github.com/js0/rust/tree/main/compio_dns"
+description = "A DNS resolver for compio, using cache and system configuration for zero-cost async resolution. / compio 的异步 DNS 解析器，支持缓存和系统配置。"
+keywords = ["async", "dns", "resolver", "cache", "compio"]
+categories = ["network-programming", "asynchronous", "caching"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dependencies]
+cfg-if = "1.0.4"
+compio-buf = "0.8.0"
+compio-io = "0.9.1"
+compio-net = "0.11.0"
+compio-runtime = { version = "0.11.0", features = ["time"] }
+compio_net_extern_resolve = { version = "0.1.1", path = "../compio_net_extern_resolve" }
+fastrand = "2.3.0"
+futures-util = "0.3.31"
+memchr = "2.8.0"
+rapidhash.workspace = true
+scc = "3"
+static_init = "1.0.4"
+thiserror = "2.0.18"
+zerocopy = { version = "0.8.39", features = ["derive"] }
+
+[dev-dependencies]
+aok = "0.1.18"
+compio = { version = "0.18.0", features = ["macros"] }
