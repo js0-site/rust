@@ -1,0 +1,144 @@
+<svg height="480" viewBox="0 0 1000 480" width="1000" xmlns="http://www.w3.org/2000/svg">
+<text fill="rgb(30, 41, 59)" font-family="Arial, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" x="500" y="35">
+PickFast Demo: DNS Response Latency vs Selection Count
+</text>
+<g>
+<rect fill="rgb(147, 197, 253)" height="260" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="66.875" y="110"/>
+<polygon fill="rgb(191, 219, 254)" points="66.875,110 145.625,110 180.7283024756149,90.82297845583187 101.97830247561491,90.82297845583187" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="145.625,110 145.625,370 180.7283024756149,350.8229784558319 180.7283024756149,90.82297845583187" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="106.25" y="100">
+4893
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="106.25" y="100">
+4893
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="106.25" y="390">
+5ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="106.25" y="408">
+223.5.5.5
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="76.14551399959124" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="179.375" y="293.85448600040877"/>
+<polygon fill="rgb(191, 219, 254)" points="179.375,293.85448600040877 258.125,293.85448600040877 293.2283024756149,274.67746445624067 214.4783024756149,274.67746445624067" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="258.125,293.85448600040877 258.125,370 293.2283024756149,350.8229784558319 293.2283024756149,274.67746445624067" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="218.75" y="283.85448600040877">
+1433
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="218.75" y="283.85448600040877">
+1433
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="218.75" y="390">
+20ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="218.75" y="408">
+1.0.0.1
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="43.78499897813202" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="291.875" y="326.215001021868"/>
+<polygon fill="rgb(191, 219, 254)" points="291.875,326.215001021868 370.625,326.215001021868 405.7283024756149,307.0379794776999 326.9783024756149,307.0379794776999" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="370.625,326.215001021868 370.625,370 405.7283024756149,350.8229784558319 405.7283024756149,307.0379794776999" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="331.25" y="316.215001021868">
+824
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="331.25" y="316.215001021868">
+824
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="331.25" y="390">
+40ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="331.25" y="408">
+9.9.9.9
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="34.326589004700594" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="404.375" y="335.6734109952994"/>
+<polygon fill="rgb(191, 219, 254)" points="404.375,335.6734109952994 483.125,335.6734109952994 518.2283024756149,316.4963894511313 439.4783024756149,316.4963894511313" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="483.125,335.6734109952994 483.125,370 518.2283024756149,350.8229784558319 518.2283024756149,316.4963894511313" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="443.75" y="325.6734109952994">
+646
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="443.75" y="325.6734109952994">
+646
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="443.75" y="390">
+60ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="443.75" y="408">
+208.67.222.222
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="30.819538115675453" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="516.875" y="339.18046188432453"/>
+<polygon fill="rgb(191, 219, 254)" points="516.875,339.18046188432453 595.625,339.18046188432453 630.7283024756149,320.00344034015643 551.9783024756149,320.00344034015643" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="595.625,339.18046188432453 595.625,370 630.7283024756149,350.8229784558319 630.7283024756149,320.00344034015643" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="556.25" y="329.18046188432453">
+580
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="556.25" y="329.18046188432453">
+580
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="556.25" y="390">
+70ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="556.25" y="408">
+114.114.114.114
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="30.66012671162886" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="629.375" y="339.33987328837117"/>
+<polygon fill="rgb(191, 219, 254)" points="629.375,339.33987328837117 708.125,339.33987328837117 743.2283024756149,320.16285174420307 664.4783024756149,320.16285174420307" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="708.125,339.33987328837117 708.125,370 743.2283024756149,350.8229784558319 743.2283024756149,320.16285174420307" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="668.75" y="329.33987328837117">
+577
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="668.75" y="329.33987328837117">
+577
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="668.75" y="390">
+80ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="668.75" y="408">
+1.1.1.1
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="28.056407112201104" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="741.875" y="341.9435928877989"/>
+<polygon fill="rgb(191, 219, 254)" points="741.875,341.9435928877989 820.625,341.9435928877989 855.7283024756149,322.7665713436308 776.9783024756149,322.7665713436308" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="820.625,341.9435928877989 820.625,370 855.7283024756149,350.8229784558319 855.7283024756149,322.7665713436308" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="781.25" y="331.9435928877989">
+528
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="781.25" y="331.9435928877989">
+528
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="781.25" y="390">
+90ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="781.25" y="408">
+180.76.76.76
+</text>
+</g>
+<g>
+<rect fill="rgb(147, 197, 253)" height="27.57817290006131" stroke="rgba(0,0,0,0.2)" stroke-width="1" width="78.75" x="854.375" y="342.4218270999387"/>
+<polygon fill="rgb(191, 219, 254)" points="854.375,342.4218270999387 933.125,342.4218270999387 968.2283024756149,323.2448055557706 889.4783024756149,323.2448055557706" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<polygon fill="rgb(96, 165, 250)" points="933.125,342.4218270999387 933.125,370 968.2283024756149,350.8229784558319 968.2283024756149,323.2448055557706" stroke="rgba(0,0,0,0.2)" stroke-width="1"/>
+<text fill="none" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="white" stroke-width="3" text-anchor="middle" x="893.75" y="332.4218270999387">
+519
+</text>
+<text fill="black" font-family="Arial, sans-serif" font-size="13" font-weight="bold" stroke="none" stroke-width="0" text-anchor="middle" x="893.75" y="332.4218270999387">
+519
+</text>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="12" text-anchor="middle" x="893.75" y="390">
+100ms
+</text>
+<text fill="rgb(100, 116, 139)" font-family="Arial, sans-serif" font-size="10" text-anchor="middle" x="893.75" y="408">
+8.8.8.8
+</text>
+</g>
+<text fill="rgb(71, 85, 105)" font-family="Arial, sans-serif" font-size="16" text-anchor="middle" transform="rotate(-90, 35, 240)" x="35" y="240">
+Selection Count
+</text>
+</svg>
