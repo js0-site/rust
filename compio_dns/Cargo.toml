@@ -1,0 +1,62 @@
+[package]
+name = "compio_dns"
+version = "0.1.7"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/compio_dns"
+description = "Zero-overhead async DNS resolver for compio with smart caching. / 专为 compio 生态打造的零开销异步 DNS 解析器，内置智能缓存。"
+keywords = [ "async", "dns", "resolver", "cache", "performance" ]
+categories = [
+"network-programming",
+"asynchronous",
+"caching",
+"os",
+"web-programming"
+]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+cfg-if = "1.0.4"
+compio-buf = "0.8.0"
+compio-io = "0.9.1"
+compio-net = "0.11.1"
+fastrand = "2.3.0"
+futures-util = "0.3.32"
+memchr = "2.8.0"
+scc = "3"
+static_init = "1.0.4"
+thiserror = "2.0.18"
+
+[dependencies.compio-runtime]
+version = "0.11.0"
+features = [ "time" ]
+
+[dependencies.compio_net_extern_resolve]
+version = "0.1.6"
+path = "../compio_net_extern_resolve"
+
+[dependencies.rapidhash]
+workspace = true
+
+[dependencies.zerocopy]
+version = "0.8.40"
+features = [ "derive" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+
+[dev-dependencies.compio]
+version = "0.18.0"
+features = [ "macros" ]
+
+[lints.rust.unexpected_cfgs]
+level = "allow"
+check-cfg = [ "cfg(compio_dns)" ]

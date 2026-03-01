@@ -1,0 +1,29 @@
+[package]
+name = "compio_net_extern_resolve"
+version = "0.1.6"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/compio_net_extern_resolve"
+description = "Plug custom async DNS resolvers into compio / 将自定义异步 DNS 解析器接入 compio"
+keywords = ["compio", "dns", "async", "resolver", "networking"]
+categories = ["asynchronous", "network-programming", "os", "development-tools::build-utils", "rust-patterns"]
+readme = "README.md"
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+compio-net = "0.11.1"
+
+[build-dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+sonic-rs = "0.5.7"
+thiserror = "2.0.18"
+
+[package.metadata.cargo-machete]
+ignored = ["compio-net"]

@@ -1,0 +1,12 @@
+{
+  "name": "autoscale_cuckoo_filter",
+  "type": "module",
+  "devDependencies": {},
+  "peerDependencies": {},
+  "dependencies": {
+    "cli-table3": "^0.6.5",
+    "svgo": "^4.0.0",
+    "vega": "^6.2.0",
+    "vega-lite": "^6.4.1"
+  }
+}

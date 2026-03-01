@@ -1,0 +1,1 @@
+../sh/clippy.sh
