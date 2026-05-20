@@ -1,0 +1,92 @@
+[package]
+name = "smtp_srv"
+version = "0.2.29"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/smtp_srv"
+description = "Auto-refreshing SMTPS server powered by Redis / Kvrocks / 基于 Redis / Kvrocks 自动热更新证书的 SMTPS 服务器"
+keywords = [ "smtp", "server", "redis", "kvrocks", "tls" ]
+categories = [
+"email",
+"network-programming",
+"asynchronous",
+"cryptography",
+"development-tools"
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+kill_port = [ "smtp_recv/kill_port" ]
+
+[dependencies]
+aok = "0.1.18"
+fred = "10.1.0"
+genv = "0.1.18"
+intbin = "0.2.3"
+log = "0.4.29"
+password_ = { version = "0.1.1", path = "../password_" }
+rustls = "0.23.40"
+xbin = "0.1.9"
+xboot = "0.1.35"
+
+[dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
+
+[dependencies.mail_forward]
+version = "0.1.9"
+path = "../mail_forward"
+
+[dependencies.xkv]
+version = "0.1.51"
+features = ["r"]
+path = "../xkv"
+
+[dependencies.xmail]
+version = "0.1.16"
+path = "../xmail"
+
+[dependencies.graceful_restart]
+version = "0.1.6"
+path = "../graceful_restart"
+
+[dependencies.log_init]
+version = "0.1.34"
+features = [ "systemd" ]
+
+[dependencies.smtp_send]
+version = "0.1.33"
+path = "../smtp_send"
+
+[dependencies.mimalloc]
+version = "0.1.50"
+
+[dependencies.mail_struct]
+version = "0.1.22"
+path = "../mail_struct"
+features = [ "encode" ]
+
+[dependencies.auth_env]
+version = "0.1.4"
+path = "../auth_env"
+
+[dependencies.cert_by_host]
+version = "0.1.8"
+path = "../cert_by_host"
+
+[dependencies.smtp_recv]
+version = "0.1.65"
+path = "../smtp_recv"
+
+[dependencies.ssl_trait]
+version = "0.1.3"
+path = "../ssl_trait"
+
+[dependencies.tokio]
+version = "1.52.3"
+features = [ "rt-multi-thread" ]

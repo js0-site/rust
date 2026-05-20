@@ -1,0 +1,63 @@
+[package]
+name = "site_log"
+version = "0.1.11"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/site_log"
+description = "site_log"
+keywords = [ ]
+categories = ["development-tools::debugging", "database", "asynchronous", "concurrency", "data-structures"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = [ "--cfg", "docsrs" ]
+
+[features]
+default = [ ]
+
+[dependencies]
+anyhow = "1.0.102"
+fred = "10.1.0"
+intbin = "0.2.3"
+linkme = "0.3.36"
+tokio = "1.52.3"
+xbin = "0.1.9"
+
+[dependencies.site_log_derive]
+version = "0.1.4"
+path = "../site_log_derive"
+
+[dependencies.ipbin]
+version = "0.1.1"
+path = "../ipbin"
+
+[dependencies.kvid]
+version = "0.1.6"
+path = "../kvid"
+
+[dependencies.tosql]
+version = "0.1.16"
+path = "../tosql"
+
+[dependencies.vb]
+version = "0.2.7"
+path = "../vb"
+
+[dependencies.xkv]
+version = "0.1.51"
+features = [ "r" ]
+
+[dev-dependencies]
+aok = "0.1.18"
+drop = "0.1.4"
+log = "0.4.29"
+log_init = "0.1.34"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = [ "parking_lot" ]
+
+[dev-dependencies.tokio]
+version = "1.52.3"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]

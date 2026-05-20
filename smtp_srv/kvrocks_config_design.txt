@@ -1,0 +1,221 @@
+基于 Kvrocks 的多域名动态 SMTP 配置方案 (Design: Kvrocks-based Dynamic Multi-Domain SMTP Configuration)
+
+本项目旨在移除传统基于环境变量的单域名配置方式，通过引入 xkv 依赖包并复用其基于 R_ 前缀的环境变量配置连接 Kvrocks 数据库（其中 R_USER 为空），实现支持多域名（多租户）的动态 DKIM 签名与客户端登录认证。
+
+为了追求极致性能与简单，本项目在 Kvrocks (Redis) 中全面使用标准的平铺 String (GET/SET/MGET) 结构进行读写。同时，为了最大限度减少数据转换开销和数据库内存占用，Kvrocks 中保存的所有键值（Values）均为二进制数据（Binary/Bytes）。
+
+在登录与认证设计上：
+* 邮箱后缀（即域名部分，如 i@example.com 中的 example.com）即代表所在的 Host。通过 smtpDomainHost:<domain> 即可解析出该域名归属的租户整型 host_id。
+* 账号密码直接以用户名（拆分为 domain 和 prefix）作为 Key 映射密码哈希，即 Key 为 smtpUser:<domain>:<prefix>。
+  - 这种设计将同一个域名的所有用户聚集在同一个 RocksDB 前缀（smtpUser:<domain>:）下，能完美利用 RocksDB 的前缀缓存（Prefix Cache）与前缀布隆过滤器（Prefix Bloom Filter）特性，大幅提升查询性能。
+* 进行登录校验时，利用 MGET 在 1 次网络往返中同时读取 smtpDomainHost:<domain> 和 smtpUser:<domain>:<prefix>，极速完成租户识别与密码匹配。
+
+其他设计原则：
+* 整型 ID（如 host_id 和 user_id）均使用 intbin::to_bin 编码为二进制格式；读取时使用 intbin::bin_u64 解码。
+* 字符串字段（用户名、DKIM 前缀、私钥）：均以原始 UTF-8 字节流（Vec<u8>）形式存入 Kvrocks；读取后在 Rust 中仅在必要时转换为字符串。
+
+========================================================================
+1. 目标与设计原则
+========================================================================
+
+* 多租户支持：每个域名绑定独立的 host_id，拥有独立的安全沙箱与配置。
+* 性能优先：配置字段全部扁平化为 String 结构，且全量以二进制形式存储。SMTP AUTH 登录校验使用 MGET 单轮读取域名映射与密码哈希。同时利用 smtpUser:<domain>:<prefix> 格式的键名结构优化 RocksDB 前缀寻址与缓存效率。
+* 安全保障：SMTP 认证密码通过 password_ 库（基于 Argon2id 算法）进行强加密哈希和验证，杜绝数据库明文泄露。
+* 动态加载：DKIM 签名密钥与 SMTPS 登录账号密码均保存在 Kvrocks 中，修改即时生效，无需重启服务。
+* 统一的连接口径：复用现有的 xkv 依赖包，并基于 "R_" 前缀的环境变量进行连接配置，避免引入多余 of 连接逻辑。
+
+========================================================================
+2. 数据库结构设计 (Schema Design)
+========================================================================
+
+在 Kvrocks 中，我们使用平铺的 String 结构记录来实现域名映射与配置读取，所有值均为二进制。
+
+2.1 域名与 Host ID 映射表
+----------------------------------
+用于通过发件域名或登录邮箱的域名后缀快速定位到对应的 host_id。主要用于 outbound / forward 邮件 of DKIM 签名查询，以及登录时的租户解析。
+
+* 键名 (Key)：xbin::concat!(b"smtpDomainHost:", domain.as_bytes())
+* 数据结构：String
+* 键值 (Value)：host_id 的二进制字节流 (由 intbin::to_bin 编码)
+* 示例 (以 example.com 绑定 host_id = 1001 为例)：
+  - Key: b"smtpDomainHost:example.com"
+  - Value: [233, 3] (即 1001 的 intbin 编码字节流)
+
+2.2 租户账号映射表 (用户名/密码对应)
+----------------------------------
+保存每个登录账号用户名对应的加密密码哈希。键名采用 smtpUser:<domain>:<prefix> 以优化前缀索引。
+
+* 键名 (Key): xbin::concat!(b"smtpUser:", domain.as_bytes(), b":", prefix.as_bytes())
+* 数据结构: String
+* 键值 (Value): 48 字节二进制哈希 (由 16 字节随机 Salt 和 32 字节 Argon2id Hash 拼接而成)
+* 示例 (账号 = i@example.com，其中 domain = example.com, prefix = i)：
+  - Key: b"smtpUser:example.com:i"
+  - Value: [16 字节 Salt] + [32 字节 Hash] (48 字节二进制流)
+
+2.3 租户/主机 DKIM 配置表
+----------------------------------
+保存每个 host_id 对应的 DKIM 发信签名配置。
+
+* 键名 (Key): xbin::concat!(b"smtpHostDkim:", intbin::to_bin(host_id))
+* 数据结构: String (单 KV 紧凑二进制编码)
+* 键值 (Value): [selector 字节流] + [32 字节 DKIM 种子二进制数据]
+* 说明: 由于 DKIM 种子固定为 32 字节，我们可以直接将可变长度的 selector 放在前面，固定的 32 字节种子放在最后。在 Rust 中解析时，只需通过 `len - 32` 切片即可，完全不需要存储额外的长度前缀字节。底层的 `sk_dkim` 库利用这 32 字节种子确定性派生出 2048 位的 RSA 证书私钥。
+* 示例 (host_id = 1001, Selector = "js0-rsa")：
+  - Key: b"smtpHostDkim:" 拼接 [233, 3]
+  - Value: b"js0-rsa" + [32 字节的二进制随机种子]
+
+
+========================================================================
+3. 系统流程设计 (System Flows)
+========================================================================
+
+3.1 客户端 SMTP 登录校验流程 (SMTP AUTH)
+----------------------------------
+1. 客户端发送 SMTP AUTH LOGIN (username, password)。
+2. SMTPS 服务端解析 username 获得 prefix 与 domain 部分（例如 "i@example.com" -> prefix: "i", domain: "example.com"）。
+3. SMTPS 服务端利用 MGET 一次性读取域名映射与账号密码数据：
+   - Key 1: xbin::concat!(b"smtpDomainHost:", domain.as_bytes())
+   - Key 2: xbin::concat!(b"smtpUser:", domain.as_bytes(), b":", prefix.as_bytes())
+4. Kvrocks 返回二进制形式 of data_bytes 数组。
+5. SMTPS 服务端若发现 Key 2 对应的密码数据长度不为 48 字节，或者 Key 1 对应的 host_id 不存在，则直接拒绝。
+6. 拆分密码二进制数据：
+   - salt = &pass_bytes[0..16]
+   - hash = &pass_bytes[16..48]
+7. 调用 password_::verify(password.as_bytes(), salt, hash) 进行 Argon2id 密码校验：
+   - 若匹配，解析二进制 user_id = intbin::bin_u64(&host_id_bytes)，并返回登录成功；
+   - 若不匹配，返回验证失败。
+
+3.2 邮件签名及投递流程 (Outbound & DKIM Sign)
+----------------------------------
+1. 服务端收到待发送的邮件消息（带有关联的 user_id，类型为 u64）。
+2. SMTPS 服务端读取该用户的 DKIM 二进制配置：
+   - Key: xbin::concat!(b"smtpHostDkim:", intbin::to_bin(user_id))
+3. 校验并解析所得二进制 Value：
+   - 截取末尾的最后 32 字节作为 DKIM 种子字节流 (sk_bytes)。
+   - 截取 0 到 `len - 32` 字节并解析为 UTF-8 字符串，作为 `selector`。
+4. 动态创建 Send 实例投递。若不存在对应配置或解析失败，或者该邮件为 forward 转发邮件（没有关联的 user_id），则尝试利用发件人 domain 获取 host_id 并查询 DKIM 属性，若查不到则回退为无 DKIM 签名的普通投递。
+
+========================================================================
+4. 关键代码改造建议 (Implementation Path)
+========================================================================
+
+4.1 Kvrocks 客户端配置 (复用 xkv::R)
+---------------------------------------------------
+连接配置信息会根据 xkv 的规范，通过如下环境变量传入：
+* R_NODE: Kvrocks 节点地址 (主节点或集群节点列表)
+* R_PASSWORD: 连接密码
+* R_USER: 置为空 (即 R_USER=)
+* R_RESP: 默认设为 3
+* R_DB: 可选，数据库索引
+
+在 Rust 业务代码中直接使用 xkv::R 即可发起调用，无需手动管理连接。
+
+4.2 改造登录校验：实现 Auth 接口
+---------------------------------------------------
+use auth_trait::Auth;
+use fred::interfaces::KeysInterface;
+
+#[derive(Clone)]
+pub struct AuthKvrocks;
+
+impl Auth for AuthKvrocks {
+  async fn verify(
+    &self,
+    _host: &str,
+    username: &str,
+    password: &str,
+  ) -> Result<Option<u64>> {
+    let Some((prefix, domain)) = username.split_once('@') else {
+      return Ok(None);
+    };
+    let domain = domain.to_lowercase();
+    let prefix = prefix.to_lowercase();
+
+    let domain_key: Vec<u8> = xbin::concat!(b"smtpDomainHost:", domain.as_bytes());
+    let user_key: Vec<u8> = xbin::concat!(b"smtpUser:", domain.as_bytes(), b":", prefix.as_bytes());
+
+    // 1. MGET 一次性读取域名映射及用户密码字节流
+    let data: Vec<Option<Vec<u8>>> = xkv::R.mget(vec![domain_key, user_key]).await?;
+    if data.len() == 2 
+      && let Some(Some(host_id_bytes)) = data.get(0)
+      && let Some(Some(pass_bytes)) = data.get(1) 
+    {
+      if pass_bytes.len() == 48 {
+        // 2. 拆分 Salt 和 Hash
+        let salt = &pass_bytes[0..16];
+        let hash = &pass_bytes[16..48];
+
+        // 3. 调用本地库进行 Argon2id 密码核对
+        if password_::verify(password.as_bytes(), salt, hash) {
+          let user_id = intbin::bin_u64(host_id_bytes);
+          return Ok(Some(user_id));
+        }
+      }
+    } else {
+      // 4. 防用户名枚举与 CPU DoS 攻击：用户不存在时引入模拟延迟，避免空跑 Argon2id 耗尽 CPU
+      tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    }
+    
+    Ok(None)
+  }
+}
+
+4.3 改造发件模块：动态加载 DKIM (在 smtp_srv/src/mailer.rs 中)
+-------------------------------------------------------------
+use fred::interfaces::KeysInterface;
+use smtp_send::{Send, send};
+
+impl smtp_recv::Mailer for Mailer {
+  async fn send(&self, UserMail { user_id, mut mail }: UserMail) -> Void {
+    // 1. GET 读取该主机的单 KV 紧凑二进制配置
+    let key: Vec<u8> = xbin::concat!(b"smtpHostDkim:", intbin::to_bin(user_id));
+
+    if let Some(dkim_bytes) = xkv::R.get::<Option<Vec<u8>>, _>(key).await.ok().flatten() {
+      let len = dkim_bytes.len();
+      if len > 32 {
+        let prefix_bytes = &dkim_bytes[..len - 32];
+        let sk_bytes = &dkim_bytes[len - 32..];
+        if let Ok(prefix) = std::str::from_utf8(prefix_bytes) {
+          // 2. 直接传入二进制私钥字节流 sk_bytes 动态创建 Send 实例并发送
+          let smtp = Send::new(prefix, sk_bytes);
+          let _ = smtp.send(&mut mail).await;
+          return OK;
+        }
+      }
+    }
+
+    let _ = send(&mail, None).await;
+    OK
+  }
+}
+
+========================================================================
+5. 部署与测试建议
+========================================================================
+
+5.1 启动服务命令
+----------------------------------
+在已配置 R_NODE, R_PASSWORD, R_USER= 等环境变量的环境下：
+cargo run --bin smtp_srv
+
+========================================================================
+6. 模块设计与修改范围 (Module & File Path Design)
+========================================================================
+
+本项目具体的修改路径和文件名如下：
+
+6.1 新建认证模块文件
+----------------------------------
+* 文件路径: [auth.rs](file:///Users/z/js0/rust/smtp_srv/src/auth.rs) [NEW]
+* 作用: 实现 AuthKvrocks，承载客户端 SMTP AUTH 校验逻辑，利用 MGET 一轮极速获取映射的宿主 ID 与 Argon2id 密码哈希，并调用 password_ 进行比对。
+
+6.2 改造服务端启动入口
+----------------------------------
+* 文件路径: [lib.rs](file:///Users/z/js0/rust/smtp_srv/src/lib.rs) [MODIFY]
+* 作用: 引入新模块 mod auth; 并将原本的 AuthEnv::load 替换为 auth::AuthKvrocks，传递给 smtp_recv::run 进行认证初始化。
+
+6.3 改造发件模块逻辑
+----------------------------------
+* 文件路径: [mailer.rs](file:///Users/z/js0/rust/smtp_srv/src/mailer.rs) [MODIFY]
+* 作用: 移除对静态环境变量 (DKIM_PREFIX/DKIM_SK) 的强依赖。改造 Mailer::send 与 Mailer::forward。在 send 中直接通过传入的 user_id 作为 host_id 拼接 Key 读取 DKIM 配置并签名；在 forward 中通过 mail.sender_host 映射出 host_id 并查询签名配置，若查不到则回退到无签名普通发信。
+

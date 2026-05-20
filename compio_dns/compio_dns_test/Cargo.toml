@@ -1,0 +1,30 @@
+[package]
+name = "compio_dns_test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+compio-net = "0.11.1"
+aok = "0.1.18"
+sonic-rs = "0.5.8"
+fastrand = "2.4.1"
+
+[dependencies.compio_dns]
+path = ".."
+optional = true
+version = "0.1.7"
+
+[dependencies.compio]
+version = "0.18.0"
+features = [ "macros" ]
+
+[dependencies.serde]
+version = "1.0.228"
+features = [ "derive" ]
+
+[features]
+default = [ "dep:compio_dns" ]
+
+[lints.rust.unexpected_cfgs]
+level = "allow"
+check-cfg = [ "cfg(compio_dns)" ]

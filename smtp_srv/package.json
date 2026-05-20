@@ -1,0 +1,9 @@
+{
+  "type": "module",
+  "dependencies": {
+    "@3-/redis_lua": "^0.1.1"
+  },
+  "devDependencies": {
+    "ansis": "^4.2.0"
+  }
+}

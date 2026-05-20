@@ -1,0 +1,38 @@
+[package]
+name = "static_"
+version = "0.1.19"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/static_"
+description = "Async global static initialization / 异步全局静态变量初始化"
+keywords = [ "async", "static", "global", "initialization", "oncecell" ]
+categories = ["asynchronous", "concurrency", "development-tools", "rust-patterns", "data-structures"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = [ ]
+
+[dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+
+[dependencies.xboot]
+version = "0.1.33"
+path = "../xboot"
+
+[dependencies.async_wrap]
+version = "0.1.10"
+
+[dev-dependencies]
+aok = "0.1.18"
+static_init = "1.0.4"
+
+[dev-dependencies.log_init]
+version = "0.1.34"
+
+[dev-dependencies.tokio]
+version = "1.48.0"
+features = [ "macros", "rt", "rt-multi-thread", "time", "sync" ]

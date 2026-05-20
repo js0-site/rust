@@ -1,0 +1,31 @@
+[package]
+name = "sk_dkim"
+version = "0.1.7"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/sk_dkim"
+description = "Deterministic DKIM key generation based on secret key / 基于密钥的确定性 DKIM 密钥生成"
+keywords = ["dkim", "rsa", "deterministic", "email", "security"]
+categories = ["cryptography", "email", "development-tools", "security", "algorithms"]
+
+[features]
+default = []
+pk = ["dep:base64"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+base64 = { version = "0.22.1", optional = true }
+blake3 = "1.8.5"
+rand_chacha = "0.10.0"
+rsa = "0.10.0-rc.18"
+
+[dev-dependencies]
+aok = "0.1.18"
+genv = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
