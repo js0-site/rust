@@ -1,0 +1,48 @@
+# Rust 代码审查清单 (Rust Code Review Checklist)
+
+1. 写法现代 (Modern Style)
+- 使用 Rust 最新发行版特性 (e.g., 2024 edition)
+- 标准库 fs 支持 try_lock (如适用)
+- Trait 支持返回 impl Future 方式定义异步函数 (如适用)
+- 对于极低概率失败的操作（如概率低于硬件错误率），优先使用 From 并 panic，而不是 TryFrom（例如 BinaryFuse 构建）。
+  - 理由：Binary Fuse 单次构建成功率下界 > 90% (Mueller & Lemire)，1000 次重试后的失败率 $P \le (0.1)^{1000} = 10^{-1000}$，远低于硬件错误率。
+
+2. 逻辑正确 (Correctness)
+- 确保代码无潜在 BUG，符合生产环境要求
+- 遵循行业最佳实践
+
+3. 性能与复杂度 (Performance & Complexity)
+- 时间和空间复杂度最优化
+- 优先使用迭代器和流，减少 O(n) 空间占用
+- 性能敏感场景使用高效算法/数据结构
+- 避免冗余的 collect()，利用短路操作 (find, take_while 等)
+- 尽可能消除异步闭包捕获，仅捕获必要字段
+- 冷路径标注 #[cold] (严禁滥用)
+- 在 100% 安全处使用 get_unchecked, unwrap_unchecked 减少越界检查开销
+
+4. 架构与模块化 (Architecture & Modularity)
+- 模块低耦合、高内聚
+- 接口清晰优雅，易于维护
+- 模块内部结构体直接暴露字段，避免过度封装
+- 通过泛型、Trait 减少代码冗余
+- 避免过度设计 (如对文件/锁操作滥用 spawn_blocking)
+
+5. 代码风格 (Code Style)
+- 函数名、变量名简短清晰
+- 字符串常量化
+- 注释采用中英双语 (英文在上，中文在下，分行书写)
+
+6. 约束与导入 (Constraints & Imports)
+- 保持约束最小化，文件开头统一导入
+
+7. 类型转换与安全 (Type Conversion & Safety)
+- 谨慎使用 as 转换，确保安全
+- 在极致性能场景下通过 unsafe 绕过已知安全的越界检查
+
+8. 性能优化 (Optimization)
+- 减少 clone 和 Arc 开销
+- 使用高性能库: rapidhash 等
+
+9. 工具链 (Tooling)
+- 执行 clippy 修复警告
+- 执行单元测试验证正确性

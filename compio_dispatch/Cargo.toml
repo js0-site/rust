@@ -1,0 +1,32 @@
+[package]
+name = "compio_dispatch"
+version = "0.1.5"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/compio_dispatch"
+description = "Global task dispatcher for compio applications. / Compio 应用全局任务分发器。"
+keywords = ["compio", "dispatcher", "async", "global", "static"]
+categories = ["asynchronous", "concurrency", "os", "network-programming", "wasm"]
+readme = "README.md"
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+compio-dispatcher = "0.10"
+compio-driver = "0.11"
+futures-channel = "0.3"
+static_init = "1.0"
+
+[dev-dependencies]
+aok = "0.1.18"
+compio = { version = "0.18.0", features = ["macros", "time"] }
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = "1.0.4"
+

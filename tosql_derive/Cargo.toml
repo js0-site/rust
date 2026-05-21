@@ -1,0 +1,42 @@
+[package]
+name = "tosql_derive"
+version = "0.1.14"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/tosql_derive"
+description = "Derive macro for ToSqlTrait trait / ToSqlTrait trait 派生宏"
+keywords = ["sql", "macro", "derive", "serialization", "codegen"]
+categories = [
+  "development-tools::procedural-macro-helpers",
+  "development-tools",
+  "parsing",
+  "database",
+  "algorithms",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[lib]
+proc-macro = true
+
+[features]
+default = []
+
+[dependencies]
+quote = "1"
+proc-macro2 = "1"
+bytes = "1.11.1"
+
+[dependencies.syn]
+version = "2"
+features = ["full", "extra-traits"]
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+bytes = "1.11.1"

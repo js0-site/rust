@@ -1,0 +1,40 @@
+[package]
+name = "u64_2"
+version = "0.1.3"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/u64_2"
+description = "Ultra-fast dual u64 variable-length encoding / 超高速双 u64 变长编码"
+keywords = ["encoding", "variable-length", "u64", "performance", "compression"]
+categories = ["encoding", "compression", "algorithms", "development-tools", "data-structures"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.29"
+log_init = "0.1.34"
+static_init = "1.0.4"
+criterion = "0.8.2"
+fastrand = "2.4.1"
+
+[dev-dependencies.vb]
+path = "../vb"
+version = "0.2.7"
+
+[dev-dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
+
+[[bench]]
+name = "u64_encode_decode"
+harness = false
+
+[[example]]
+name = "cmp"
