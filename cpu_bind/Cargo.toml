@@ -1,0 +1,41 @@
+[package]
+name = "cpu_bind"
+version = "0.1.4"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0/jdb.git"
+homepage = "https://github.com/js0/jdb/tree/main/cpu_bind"
+description = "Bind threads to idlest CPU core / 将线程绑定到最空闲 CPU 核心"
+keywords = ["cpu-affinity", "thread-binding", "cpu-load", "compio", "scheduling"]
+categories = ["concurrency", "os::unix-apis", "asynchronous", "development-tools::profiling"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dependencies]
+compio-runtime = "0.12.0"
+core_affinity = "0.8.3"
+rapidhash.workspace = true
+
+[dependencies.compio]
+version = "0.19.0"
+features = ["time"]
+
+[dependencies.cpu_load]
+version = "0.1.8"
+path = "../cpu_load"
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.30"
+log_init = "0.1.34"
+static_init = "1.0.4"
+
+[dev-dependencies.compio]
+version = "0.19.0"
+features = ["macros"]

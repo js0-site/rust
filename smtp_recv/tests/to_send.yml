@@ -1,0 +1,48 @@
+- sender:
+    name: "张三"
+    address: "sender@example.com"
+  to:
+    - name: "李四"
+      address: "recipient1@example.com"
+    - name: null
+      address: "to-noname@example.com"
+    - name: "王五"
+      address: "recipient2@example.com"
+  cc:
+    - name: "赵六"
+      address: "cc1@example.com"
+    - name: null
+      address: "cc-noname@example.com"
+    - name: "钱七"
+      address: "cc2@example.com"
+  bcc:
+    - "bcc1@example.com"
+    - "bcc2@example.com"
+  subject: "测试邮件 1"
+  text: "This is a test email with multiple recipients, CC, and BCC."
+  html: "<html><body>This is a test email with multiple recipients, CC, and BCC.<br/></body></html>"
+  attachments: []
+- sender:
+    name: "张三"
+    address: "sender@example.com"
+  to:
+    - name: "李四"
+      address: "recipient1@example.com"
+    - name: null
+      address: "to-noname@example.com"
+    - name: "王五"
+      address: "recipient2@example.com"
+  cc:
+    - name: "赵六"
+      address: "cc1@example.com"
+    - name: null
+      address: "cc-noname@example.com"
+    - name: "钱七"
+      address: "cc2@example.com"
+  bcc:
+    - "bcc1@example.com"
+    - "bcc2@example.com"
+  subject: "测试邮件 2"
+  text: "This is a test email with multiple recipients, CC, and BCC."
+  html: "<html><body>This is a test email with multiple recipients, CC, and BCC.<br/></body></html>"
+  attachments: []

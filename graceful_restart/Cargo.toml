@@ -1,0 +1,46 @@
+[package]
+name = "graceful_restart"
+version = "0.1.6"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/graceful_restart"
+description = "Zero-downtime process restart library with signal handling / 零停机进程重启库，支持信号处理"
+keywords = ["restart", "signal", "graceful", "process", "sighup"]
+categories = ["os", "os::unix-apis", "development-tools", "asynchronous", "concurrency"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.30"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
+
+[dependencies]
+futures = "0.3.32"
+linkme = "0.3.36"
+listen_signal = { version = "0.1.15", path = "../listen_signal" }
+log = "0.4.30"
+parking_lot = { version = "0.12.5", features = ["send_guard"] }
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+tokio = { version = "1.52.3", features = ["rt"] }
+tokio-util = "0.7.18"
+xboot = "0.1.35"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+sys_notify = { version = "0.1.4", path = "../sys_notify" }
+self_cmd = { version = "0.1.1", path = "../self_cmd" }
+nix = { version = "0.31.3", features = ["process"] }
+
+[package.metadata.cargo-machete]
+ignored = ["linkme"]

@@ -1,0 +1,33 @@
+[package]
+name = "vb"
+version = "0.2.7"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/vb"
+description = "The fastest VByte/Varint encoding library in Rust / Rust 生态最快的变长字节编码库"
+keywords = ["vbyte", "varint", "compression", "integer", "delta"]
+categories = ["compression", "encoding", "algorithms", "development-tools", "data-structures"]
+
+[package.metadata.docs.rs]
+all-features = true
+
+[features]
+default = []
+diff = []
+all = ["diff"]
+
+[dependencies]
+thiserror = "2.0.18"
+
+[dev-dependencies]
+criterion = { version = "0.8", features = ["html_reports"] }
+fastrand = "2"
+serde_json = "1"
+integer-encoding = "4"
+leb128 = "0.2"
+
+[[bench]]
+name = "compare"
+path = "benches/comparison_benchmarks.rs"
+harness = false

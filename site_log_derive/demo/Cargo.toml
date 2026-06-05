@@ -1,0 +1,26 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2024"
+categories = [
+  "development-tools::testing",
+  "development-tools",
+  "asynchronous",
+  "concurrency",
+  "data-structures",
+]
+
+[dependencies]
+linkme = "0.3.36"
+
+[dependencies.site_log_derive]
+version = "0.1.4"
+path = ".."
+
+[dependencies.site_log]
+version = "0.1.11"
+path = "../../site_log"
+
+[dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread"]

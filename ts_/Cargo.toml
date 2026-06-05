@@ -1,0 +1,33 @@
+[package]
+name = "ts_"
+version = "0.1.3"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/ts_"
+description = "High-performance, lightweight time measurement library based on coarsetime. / 基于 coarsetime 的高性能轻量级时间测量库。"
+keywords = ["time", "performance", "clock", "measurement", "fast"]
+categories = ["date-and-time", "development-tools", "algorithms", "data-structures", "no-std"]
+
+[features]
+default = []
+nano = ["dep:coarsetime"]
+sec = ["dep:coarsetime"]
+milli = ["dep:coarsetime"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+coarsetime = { version = "0.1.37", optional = true }
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.30"
+log_init = "0.1.34"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]

@@ -1,0 +1,40 @@
+[package]
+name = "clap_args"
+version = "0.1.8"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/dev/clap_args"
+description = "Lightweight wrapper for clap to auto-handle version and help / clap 轻量封装，自动处理版本与帮助"
+keywords = ["clap", "cli", "args", "parser", "macro"]
+categories = [
+  "command-line-interface",
+  "development-tools",
+  "parsing",
+  "command-line-utilities",
+  "config",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+macro = []
+
+[dependencies]
+aok = "0.1.18"
+const-str = "1.1.0"
+current_platform = "0.2.0"
+
+[dependencies.clap]
+version = "4.6.1"
+features = ["string"]
+
+[dependencies.xerr]
+version = "0.1.16"
+
+[[example]]
+name = "demo"
+required-features = ["macro"]

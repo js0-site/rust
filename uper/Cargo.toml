@@ -1,0 +1,85 @@
+[package]
+name = "uper"
+version = "0.1.13"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/dev/uper"
+description = "uper"
+keywords = []
+categories = [
+  "command-line-utilities",
+  "development-tools",
+  "compression",
+  "asynchronous",
+  "config",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = ["conf"]
+conf = ["dep:confer", "dep:confdir"]
+
+[dependencies]
+anyhow = "1.0.102"
+coarsetime = "0.1.37"
+const-str = "1.1.0"
+crossfire = "3.1.16"
+current_platform = "0.2.0"
+defer-lite = "1.0.0"
+down = { version = "0.1.5", path = "../down" }
+self-replace = "1.5.0"
+tar = "0.4.46"
+thiserror = "2.0.18"
+upgrade_verify = "0.1.4"
+
+[dependencies.clap_args]
+version = "0.1.8"
+
+[dependencies.clap]
+version = "4.6.1"
+features = ["string"]
+
+[dependencies.pbar]
+version = "0.1.8"
+
+[dependencies.sver]
+version = "0.1.10"
+
+[dependencies.zstd]
+version = "0.13.3"
+features = ["bindgen"]
+
+[dependencies.vb]
+version = "0.2.7"
+
+[dependencies.idoh]
+version = "0.2.6"
+
+[dependencies.idns]
+version = "0.2.13"
+
+[dependencies.riter]
+version = "0.1.1"
+
+[dependencies.ver_from_txt]
+version = "0.1.12"
+
+[dependencies.xerr]
+version = "0.1.16"
+
+[dependencies.confer]
+version = "0.1.12"
+features = ["fs"]
+optional = true
+
+[dependencies.confdir]
+version = "0.1.4"
+optional = true
+
+[dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]

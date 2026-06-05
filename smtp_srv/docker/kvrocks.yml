@@ -1,0 +1,41 @@
+services:
+  kv:
+    restart: always
+    image: apache/kvrocks:latest
+    entrypoint:
+      - kvrocks
+      - -c
+      - /var/lib/kvrocks/kvrocks.conf
+      - --requirepass
+      - ${R_PASSWORD}
+      - --resp3-enabled
+      - "yes"
+      - --bind
+      - "0.0.0.0"
+      - --pidfile
+      - /var/run/kvrocks/kvrocks.pid
+      - --dir
+      - /data
+      - --timeout
+      - "360"
+      - --resp3-enabled
+      - "yes"
+      - --rocksdb.compression
+      - zstd
+      - --workers
+      - "2"
+      - --rocksdb.write_buffer_size
+      - "16"
+      - --rocksdb.max_write_buffer_number
+      - "1"
+      - --rocksdb.max_open_files
+      - "1024"
+      - --rocksdb.enable_blob_files
+      - "yes"
+      - --rocksdb.read_options.async_io
+      - "yes"
+    volumes:
+      - ./mnt/data/kvrocks:/data
+      - ./mnt/log/kvrocks:/log
+    ports:
+      - ${R_PORT}:6666

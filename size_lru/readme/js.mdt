@@ -1,0 +1,21 @@
+[English](#en) | [中文](#zh)
+
+---
+
+<a id="en"></a>
+
+<+ ./en/js.md >
+
+---
+
+Underlying Rust Crate: [size_lru](https://crates.io/crates/size_lru)
+
+---
+
+<a id="zh"></a>
+
+<+ ./zh/js.md >
+
+---
+
+底层 Rust Crate: [size_lru](https://crates.io/crates/size_lru)

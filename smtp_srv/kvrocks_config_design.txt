@@ -1,0 +1,154 @@
+# Kvrocks 多域名动态 SMTP 配置设计
+
+通过 xkv 连接 Kvrocks，支持多域名的动态 DKIM 签名与登录认证。
+
+## 1. 数据库设计 (Schema)
+
+所有配置使用二进制平铺 String (GET/SET/MGET) 结构存储。
+
+### 1.1 域名与 Host ID 映射
+* Key: `xbin::concat!(b"smtpDomainHost:", domain.as_bytes())`
+* Value: `intbin::to_bin(host_id)` (二进制 `host_id`)
+* 示例 (domain = "example.com", host_id = 1001):
+  - Key: `b"smtpDomainHost:example.com"`
+  - Value: `[233, 3]`
+
+### 1.2 租户账号映射
+* Key: `xbin::concat!(b"smtpUser:", domain.as_bytes(), b":", prefix.as_bytes())`
+* Value: `[16 字节 Salt] + [32 字节 Argon2id Hash]` (共 48 字节)
+* 示例 (domain = "example.com", prefix = "i"):
+  - Key: `b"smtpUser:example.com:i"`
+  - Value: `[16 字节 Salt] + [32 字节 Hash]`
+
+### 1.3 租户/主机 DKIM Selector 配置
+* Key: `xbin::concat!(b"smtpHostDkim:", intbin::to_bin(host_id))`
+* Value: `[selector 字符串]` (例如: `b"js0-rsa"`)
+* 说明: 每个 Host (租户) 拥有独立的 Selector。
+
+### 1.4 全局 DKIM 种子配置
+* Key: `b"smtpDkimSk"`
+* Value: `[32 字节全局 DKIM 种子]`
+* 说明: 所有域名公用同一个全局 SK 种子，底层 `sk_dkim` 派生具体 RSA 签名私钥的算法逻辑如下：
+  1. 计算基础哈希: `hasher = blake3::Hasher::new().update(smtpDkimSk)`
+  2. 拼接租户特异参数: `hasher.update(selector) + hasher.update(b".") + hasher.update(domain)`
+  3. 获取 32 字节最终种子: `seed = hasher.finalize()`
+  4. 初始化确定性随机数发生器: `rng = ChaCha20Rng::from_seed(seed)`
+  5. 生成 2048 位 RSA 证书私钥: `rsa_private_key = RsaPrivateKey::new(&mut rng, 2048)`
+  由此，不同域名派生出的 RSA 私钥在密码学上完全隔离且绝对安全。
+
+## 2. 系统流程
+
+### 2.1 SMTP 登录校验
+1. 客户端发送 `AUTH LOGIN (username, password)`。
+2. 解析 `username` 并转为小写，获取 `prefix` 和 `domain`。
+3. `MGET` 读取 `smtpDomainHost:<domain>` 和 `smtpUser:<domain>:<prefix>`。
+4. 若用户不存在，`sleep(100ms)` 后返回失败（防时间攻击及 CPU DoS）。
+5. 若存在，验证 Argon2id 密码哈希，成功则返回 `user_id`。
+
+### 2.2 邮件 DKIM 签名
+1. 发信时，使用 `MGET` 一次性读取该主机的 `smtpHostDkim:<host_id>` (获取专属 selector) 以及全局的 `smtpDkimSk` (获取全局 SK 种子)。
+2. 底层 `sk_dkim` 库使用加载的全局种子结合当前发信域名的 `selector` 与发信域名，在内存中确定性地派生出该域名专属的 2048 位 RSA 私钥并签名。
+3. Forward 转发邮件时：
+   - 检查 `smtpDomainHost:<mail.sender_host>` 获取 `host_id`。
+   - 若存在（说明是本域账号发信），再 `MGET` 读取对应的 `selector` 和全局种子进行派生签名投递。
+   - 若不存在（外域转发邮件），直接不签名投递。
+
+## 3. 代码实现
+
+### 3.1 登录认证 (smtp_srv/src/auth.rs)
+```rust
+use auth_trait::Auth;
+use fred::interfaces::KeysInterface;
+
+#[derive(Clone)]
+pub struct AuthKvrocks;
+
+impl Auth for AuthKvrocks {
+  async fn verify(&self, _host: &str, username: &str, password: &str) -> Result<Option<u64>> {
+    let Some((prefix, domain)) = username.split_once('@') else {
+      return Ok(None);
+    };
+    let domain = domain.to_lowercase();
+    let prefix = prefix.to_lowercase();
+
+    let domain_key = xbin::concat!(b"smtpDomainHost:", domain.as_bytes());
+    let user_key = xbin::concat!(b"smtpUser:", domain.as_bytes(), b":", prefix.as_bytes());
+
+    let data: Vec<Option<Vec<u8>>> = xkv::R.mget(vec![domain_key, user_key]).await?;
+    if data.len() == 2 
+      && let Some(Some(host_id_bytes)) = data.get(0)
+      && let Some(Some(pass_bytes)) = data.get(1) 
+    {
+      if pass_bytes.len() == 48 {
+        let salt = &pass_bytes[0..16];
+        let hash = &pass_bytes[16..48];
+        if password_::verify(password.as_bytes(), salt, hash) {
+          return Ok(Some(intbin::bin_u64(host_id_bytes)));
+        }
+      }
+    } else {
+      tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    }
+    Ok(None)
+  }
+}
+```
+
+### 3.2 发件加载 DKIM (smtp_srv/src/mailer.rs)
+```rust
+use fred::interfaces::KeysInterface;
+use mail_struct::{Mail, UserMail};
+use smtp_send::{Send, send};
+
+async fn sign_and_send(host_id_bytes: &[u8], mut mail: Mail) -> Void {
+  let host_dkim_key = xbin::concat!(b"smtpHostDkim:", host_id_bytes);
+  let global_sk_key = b"smtpDkimSk".to_vec();
+
+  let data: Vec<Option<Vec<u8>>> = xkv::R.mget(vec![host_dkim_key, global_sk_key]).await.unwrap_or_default();
+  if data.len() == 2
+    && let Some(Some(selector_bytes)) = data.get(0)
+    && let Some(Some(sk_bytes)) = data.get(1)
+  {
+    if sk_bytes.len() == 32 {
+      if let Ok(selector) = std::str::from_utf8(selector_bytes) {
+        let smtp = Send::new(selector, sk_bytes);
+        let _ = smtp.send(&mut mail).await;
+        return OK;
+      }
+    }
+  }
+  let _ = send(&mail, None).await;
+  OK
+}
+
+impl smtp_recv::Mailer for Mailer {
+  async fn send(&self, UserMail { user_id, mail }: UserMail) -> Void {
+    sign_and_send(&intbin::to_bin(user_id), mail).await
+  }
+
+  async fn forward(&self, mail: Mail) -> Void {
+    let domain_key = xbin::concat!(b"smtpDomainHost:", mail.sender_host.as_bytes());
+    if let Some(host_id_bytes) = xkv::R.get::<Option<Vec<u8>>, _>(domain_key).await.ok().flatten() {
+      sign_and_send(&host_id_bytes, mail).await
+    } else {
+      let _ = send(&mail, None).await;
+      OK
+    }
+  }
+}
+```
+
+## 4. 修改范围
+* `smtp_srv/src/auth.rs` [NEW]: 实现 `AuthKvrocks` 认证。
+* `smtp_srv/src/lib.rs` [MODIFY]: 引入 `auth` 模块，初始化 `AuthKvrocks` 并传给 `smtp_recv::run`。
+* `smtp_srv/src/mailer.rs` [MODIFY]: 改造 `Mailer`，发信与本域转发时动态 MGET 读取租户 selector 与全局 SK，并进行派生签名。
+
+## 5. 辅助工具
+
+可以通过 `smtp_user` 命令行工具快速向 Kvrocks 写入用户账号和密码：
+```bash
+cargo run --example smtp_user <email> <password>
+```
+说明：
+- 写入的账号密码会被自动转换为小写，并通过 Argon2id 加密存储。
+- 如果对应的发信域名没有映射过 `host_id`，工具会自动在 Kvrocks 中对 `smtpHostId` 键进行 `INCR` 操作，为该域名分配并保存一个全新的、唯一的自增 `host_id`。

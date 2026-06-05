@@ -1,0 +1,23 @@
+# zed 的临时文件
+*~
+
+dehb_logs/
+/sh
+
+Cargo.lock
+rustc-ice-*.txt
+
+.DS_Store
+.env
+__pycache__/
+bundle/
+bun.lock
+lib/
+node_modules/
+out/
+pnpm-lock.yaml
+target/
+.antigravitycli/
+*.log
+.cursor/
+.codegraph/
