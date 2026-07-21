@@ -1,0 +1,41 @@
+[package]
+name = "site_log_derive"
+version = "0.1.4"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/site_log_derive"
+description = "site_log_derive"
+keywords = []
+categories = [
+  "development-tools::procedural-macro-helpers",
+  "development-tools",
+  "parsing",
+  "rust-patterns",
+  "algorithms",
+]
+
+[lib]
+proc-macro = true
+
+[features]
+default = []
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+syn = { version = "2", features = ["full", "extra-traits"] }
+quote = "1"
+convert_case = "0.11"
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.33"
+log_init = "0.1.38"
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+
+[dev-dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]

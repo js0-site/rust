@@ -1,0 +1,74 @@
+[package]
+name = "sfid"
+version = "0.1.14"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/sfid"
+description = "Distributed Snowflake ID generator with Redis-based auto machine ID allocation / 基于 Redis 自动分配机器号的分布式雪花 ID 生成器"
+keywords = ["snowflake", "id-generator", "distributed", "redis", "unique-id"]
+categories = ["data-structures", "concurrency", "algorithms", "development-tools", "database"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = ["snowflake", "auto_pid"]
+snowflake = ["dep:coarsetime"]
+auto_pid = ["snowflake", "dep:fred", "dep:xkv", "dep:tokio", "dep:xbin", "dep:fs4"]
+parse = []
+
+[dependencies]
+thiserror = "2.0.18"
+log = "0.4"
+
+[dependencies.coarsetime]
+version = "0.1.37"
+optional = true
+
+[dependencies.fred]
+version = "10.1.0"
+optional = true
+
+[dependencies.fs4]
+version = "1.1.0"
+features = ["tokio", "sync"]
+optional = true
+
+
+[dependencies.osid]
+version = "0.1.2"
+path = "../osid"
+
+[dependencies.tokio]
+version = "1.52.3"
+features = ["rt", "time"]
+optional = true
+
+[dependencies.xbin]
+version = "0.1.14"
+optional = true
+
+[dependencies.xkv]
+version = "0.1"
+features = ["r"]
+optional = true
+
+[dev-dependencies]
+aok = "0.1.18"
+log_init = "0.1.38"
+rapidhash.workspace = true
+xboot = "0.1.39"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = ["parking_lot"]
+
+[dev-dependencies.tokio]
+version = "1.52.3"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]
+
+[[test]]
+name = "main"
+required-features = ["parse"]

@@ -1,0 +1,93 @@
+[package]
+name = "size_lru"
+version = "0.1.38"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/size_lru"
+description = "Fastest size-aware LRU cache with highest hit rate via LHD algorithm / 最快的大小感知 LRU 缓存，基于 LHD 算法实现最高命中率"
+keywords = ["cache", "lru", "lhd", "eviction", "size-aware"]
+categories = ["caching", "algorithms", "data-structures", "database", "wasm"]
+autobenches = false
+readme = "README.md"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+lhd = ["dep:fastrand", "dep:rapidhash"]
+no = []
+wasm = ["dep:wasm-bindgen", "dep:js-sys", "lhd"]
+bench-size-lru = ["lhd"]
+bench-lru = []
+bench-moka = []
+bench-mini-moka = []
+bench-clru = []
+bench-hashlink = []
+bench-schnellru = []
+all = [
+  "bench-size-lru",
+  "bench-lru",
+  "bench-moka",
+  "bench-mini-moka",
+  "bench-clru",
+  "bench-hashlink",
+  "bench-schnellru",
+]
+js-sys = ["dep:js-sys"]
+
+[dev-dependencies]
+aok = "0.1.18"
+clru = "0.6.3"
+fastrand = "2.4.1"
+hashlink = "0.12.0"
+log = "0.4.33"
+log_init = "0.1.38"
+lru = "0.18.0"
+mini-moka = "0.10.3"
+rand = "0.10.1"
+rapidhash = "4.4.1"
+schnellru = "0.2.4"
+sonic-rs = "0.5.8"
+static_init = "1.0.4"
+tempfile = "3.27.0"
+tikv-jemalloc-ctl = { version = "0.7.0", features = ["stats"] }
+tikv-jemallocator = "0.7.0"
+zipf = "7.0.2"
+
+[dev-dependencies.criterion]
+version = "0.8.2"
+features = ["html_reports"]
+
+[dev-dependencies.moka]
+version = "0.12.15"
+features = ["sync"]
+
+[dev-dependencies.serde]
+version = "1.0.228"
+features = ["derive"]
+
+[dependencies]
+js-sys = { version = "0.3.102", optional = true }
+thiserror = "2.0.18"
+
+[dependencies.fastrand]
+version = "2.4.1"
+optional = true
+
+[dependencies.rapidhash]
+version = "4.4.1"
+optional = true
+
+[dependencies.wasm-bindgen]
+version = "0.2"
+optional = true
+
+[[bench]]
+name = "bench"
+harness = false

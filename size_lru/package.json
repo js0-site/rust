@@ -1,0 +1,35 @@
+{
+  "name": "@3-/lru",
+  "version": "0.1.32",
+  "description": "Fastest size-aware LRU cache with highest hit rate via LHD algorithm / 最快的大小感知 LRU 缓存，基于 LHD 算法实现最高命中率",
+  "keywords": [
+    "cache",
+    "lru",
+    "lhd",
+    "eviction",
+    "size-aware",
+    "wasm"
+  ],
+  "homepage": "https://github.com/js0-site/rust/tree/dev/size_lru",
+  "license": "MulanPSL-2.0",
+  "author": "i18n.site@gmail.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/js0-site/rust.git"
+  },
+  "type": "module",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index_bg.wasm",
+    "index.js",
+    "index.d.ts"
+  ],
+  "devDependencies": {
+    "@3-/log": "^0.1.9",
+    "@3-/mdt": "^0.1.5",
+    "@3-/read": "^0.1.4",
+    "wasm-opt": "^1.4.0",
+    "zx": "^8.8.5"
+  }
+}

@@ -1,0 +1,29 @@
+[package]
+name = "ider"
+version = "0.1.7"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/ider"
+description = "高性能时间戳ID生成器 / High-performance timestamp ID generator"
+keywords = ["id", "generator", "timestamp", "unique", "performance"]
+categories = ["data-structures", "algorithms", "concurrency", "development-tools", "date-and-time"]
+
+[features]
+default = []
+id = []
+path = ["id", "dep:fast32"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[dependencies]
+coarsetime = "0.1.37"
+fast32 = { version = "1.0", optional = true }
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.33"
+log_init = "0.1.38"
+static_init = "1.0.4"
