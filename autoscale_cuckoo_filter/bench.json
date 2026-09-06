@@ -5,25 +5,25 @@
   "results": [
     {
       "lib": "autoscale_cuckoo_filter",
-      "add_mops": 23.89058113838619,
-      "contains_mops": 91.44059978632617,
-      "remove_mops": 64.13668810969939,
+      "add_mops": 21.832869384858903,
+      "contains_mops": 81.03276800884856,
+      "remove_mops": 53.5475234270415,
       "memory_kb": 353.0,
       "fpp": 0.0017
     },
     {
       "lib": "cuckoo_filter",
-      "add_mops": 10.77112300697872,
-      "contains_mops": 16.44351920415998,
-      "remove_mops": 12.96386323124291,
+      "add_mops": 9.087604507451836,
+      "contains_mops": 14.561612375302769,
+      "remove_mops": 13.627078640508126,
       "memory_kb": 353.0,
       "fpp": 0.00154
     },
     {
       "lib": "cuckoofilter",
-      "add_mops": 21.705708362536555,
-      "contains_mops": 22.243597701735876,
-      "remove_mops": 16.58146556941582,
+      "add_mops": 14.853413886367521,
+      "contains_mops": 20.423149793464514,
+      "remove_mops": 13.491489568380265,
       "memory_kb": 1024.0234375,
       "fpp": 0.00265
     }

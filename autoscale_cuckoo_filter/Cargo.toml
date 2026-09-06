@@ -2,7 +2,7 @@
 [package]
 name = "autoscale_cuckoo_filter"
 edition = "2024"
-version = "0.5.26"
+version = "0.5.27"
 authors = ["js0-site <jssite@googlegroups.com>"]
 description = "Fastest auto-scaling Cuckoo Filter in Rust / 最快的 Rust 自动扩容布谷鸟过滤器"
 homepage = "https://github.com/js0-site/rust/tree/main/autoscale_cuckoo_filter"
