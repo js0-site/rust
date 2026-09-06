@@ -228,8 +228,8 @@ This project is an open-source component of [js0.site ⋅ Refactoring the Intern
 
 We are redefining the development paradigm of the Internet in a componentized way. Welcome to follow us:
 
-- [Google Group](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
+* [Google Group](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
 
 ---
 
@@ -459,5 +459,5 @@ CPU 负载监控可追溯到早期 Unix 系统，`load average` 衡量系统需�
 
 我们正在以组件化的方式重新定义互联网的开发范式，欢迎关注：
 
-- [谷歌邮件列表](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
+* [谷歌邮件列表](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)

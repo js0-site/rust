@@ -4,6 +4,7 @@
 
 <a id="en"></a>
 
+
 # autoscale_cuckoo_filter : The Fastest Rust Cuckoo Filter with Auto-Scaling
 
 A high-performance Cuckoo Filter variant that automatically scales capacity as needed. Forked from [sile/cuckoo_filter](https://github.com/sile/cuckoo_filter) with significant performance optimizations.
@@ -419,8 +420,8 @@ This project is an open-source component of [js0.site ⋅ Refactoring the Intern
 
 We are redefining the development paradigm of the Internet in a componentized way. Welcome to follow us:
 
-- [Google Group](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
+* [Google Group](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
 
 ---
 
@@ -843,5 +844,5 @@ _括号内为相对性能：以 autoscale_cuckoo_filter 为基准（1.00 = 基�
 
 我们正在以组件化的方式重新定义互联网的开发范式，欢迎关注：
 
-- [谷歌邮件列表](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
+* [谷歌邮件列表](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)

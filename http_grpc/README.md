@@ -2,7 +2,7 @@
 
 ---
 
-<a id="en"></a>
+<a name="en"></a>
 
 # http_grpc: Convert a single HTTP request into multiplexed, concurrent gRPC-like calls
 
@@ -119,18 +119,7 @@ With the advent of the HTTP/2 standard, the Google team saw an opportunity to re
 
 ---
 
-## About
-
-This project is an open-source component of [js0.site ⋅ Refactoring the Internet Plan](https://js0.site).
-
-We are redefining the development paradigm of the Internet in a componentized way. Welcome to follow us:
-
-- [Google Group](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
-
----
-
-<a id="zh"></a>
+<a name="zh"></a>
 
 # http_grpc: 将单个HTTP请求转换为多路复用、并发的gRPC式调用
 
@@ -244,14 +233,3 @@ async fn handle_request(req: volo_http::request::Request<volo_http::body::Body>)
 gRPC，作为本项目所依赖的 RPC 理念，其前身是 Google 一个历史悠久的内部项目 "Stubby"。在十多年的时间里，Stubby 一直是连接 Google 庞大基础设施中成千上万个微服务的核心引擎。然而，Stubby 与 Google 的内部技术栈紧密耦合，不适合公开发布。
 
 随着 HTTP/2 标准的出现，Google 团队看到了一个在现代开放标准之上重建 Stubby 的机会。他们创造了 gRPC，它结合了 HTTP/2 的高效传输和 Protocol Buffers 的强类型接口定义。gRPC 于 2015 年开源，将高性能 RPC 的能力从 Google 内部解放出来，并随后捐赠给云原生计算基金会 (CNCF)，其发展至今依然蓬勃。本项目的灵感正是源于这种利用现代 Web 标准实现稳健高效通信的精神。
-
----
-
-## 关于
-
-本项目为 [js0.site ⋅ 重构互联网计划](https://js0.site) 的开源组件。
-
-我们正在以组件化的方式重新定义互联网的开发范式，欢迎关注：
-
-- [谷歌邮件列表](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)

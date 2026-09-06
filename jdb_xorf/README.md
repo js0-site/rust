@@ -4,6 +4,7 @@
 
 <a id="en"></a>
 
+
 # jdb_xorf: High-Performance Binary Fuse Filter in Rust
 
 ## Introduction
@@ -317,25 +318,25 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 ## Performance Benchmark
 
-| Library | Filter       | Bf Ops  | Query Ops | Memory    | Speedup |
-| ------- | ------------ | ------- | --------- | --------- | ------- |
-| jdb     | Bf8          | 4959.87 | 86727.74  | 116.04 KB | 1.65x   |
-| xorf    | BinaryFuse8  | 3971.65 | 52493.29  | 116.04 KB | -       |
-| jdb     | Bf16         | 4809.60 | 76974.42  | 232.04 KB | 1.56x   |
-| xorf    | BinaryFuse16 | 4015.96 | 49222.88  | 232.04 KB | -       |
-| jdb     | Bf32         | 4676.60 | 67297.71  | 464.04 KB | 1.39x   |
-| xorf    | BinaryFuse32 | 4016.81 | 48393.79  | 464.04 KB | -       |
+| Library | Filter | Bf Ops | Query Ops | Memory | Speedup |
+| --- | --- | --- | --- | --- | --- |
+| jdb | Bf8 | 4930.28 | 75812.43 | 116.04 KB | 1.48x |
+| xorf | BinaryFuse8 | 5345.37 | 51182.80 | 116.04 KB | - |
+| jdb | Bf16 | 4811.49 | 68210.47 | 232.04 KB | 1.55x |
+| xorf | BinaryFuse16 | 5021.32 | 44015.53 | 232.04 KB | - |
+| jdb | Bf32 | 4775.74 | 62412.94 | 464.04 KB | 1.29x |
+| xorf | BinaryFuse32 | 4591.10 | 48338.36 | 464.04 KB | - |
 
 ## Accuracy
 
-| Library | Filter       | False Positive Rate | False Negative Rate |
-| ------- | ------------ | ------------------- | ------------------- |
-| jdb     | Bf8          | 0.39196%            | 0                   |
-| xorf    | BinaryFuse8  | 0.38768%            | 0                   |
-| jdb     | Bf16         | 0.00132%            | 0                   |
-| xorf    | BinaryFuse16 | 0.00165%            | 0                   |
-| jdb     | Bf32         | 0.00000%            | 0                   |
-| xorf    | BinaryFuse32 | 0.00000%            | 0                   |
+| Library | Filter | False Positive Rate | False Negative Rate |
+| --- | --- | --- | --- |
+| jdb | Bf8 | 0.39076% | 0 |
+| xorf | BinaryFuse8 | 0.38816% | 0 |
+| jdb | Bf16 | 0.00154% | 0 |
+| xorf | BinaryFuse16 | 0.00155% | 0 |
+| jdb | Bf32 | 0.00000% | 0 |
+| xorf | BinaryFuse32 | 0.00000% | 0 |
 
 ---
 
@@ -345,8 +346,8 @@ This project is an open-source component of [js0.site ⋅ Refactoring the Intern
 
 We are redefining the development paradigm of the Internet in a componentized way. Welcome to follow us:
 
-- [Google Group](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
+* [Google Group](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
 
 ---
 
@@ -665,25 +666,25 @@ Google 在大规模数据中心的研究表明，每年约有 **1.3%** 的机器
 
 ## 性能基准
 
-| 库   | 过滤器       | 构建(万ops/s) | 查询(万ops/s) | 内存占用  | 对比  |
-| ---- | ------------ | ------------- | ------------- | --------- | ----- |
-| jdb  | Bf8          | 4959.87       | 86727.74      | 116.04 KB | 1.65x |
-| xorf | BinaryFuse8  | 3971.65       | 52493.29      | 116.04 KB | -     |
-| jdb  | Bf16         | 4809.60       | 76974.42      | 232.04 KB | 1.56x |
-| xorf | BinaryFuse16 | 4015.96       | 49222.88      | 232.04 KB | -     |
-| jdb  | Bf32         | 4676.60       | 67297.71      | 464.04 KB | 1.39x |
-| xorf | BinaryFuse32 | 4016.81       | 48393.79      | 464.04 KB | -     |
+| 库 | 过滤器 | 构建(万ops/s) | 查询(万ops/s) | 内存占用 | 对比 |
+| --- | --- | --- | --- | --- | --- |
+| jdb | Bf8 | 4930.28 | 75812.43 | 116.04 KB | 1.48x |
+| xorf | BinaryFuse8 | 5345.37 | 51182.80 | 116.04 KB | - |
+| jdb | Bf16 | 4811.49 | 68210.47 | 232.04 KB | 1.55x |
+| xorf | BinaryFuse16 | 5021.32 | 44015.53 | 232.04 KB | - |
+| jdb | Bf32 | 4775.74 | 62412.94 | 464.04 KB | 1.29x |
+| xorf | BinaryFuse32 | 4591.10 | 48338.36 | 464.04 KB | - |
 
 ## 准确率
 
-| 库   | 过滤器       | 假阳率   | 假阴率 |
-| ---- | ------------ | -------- | ------ |
-| jdb  | Bf8          | 0.39196% | 0      |
-| xorf | BinaryFuse8  | 0.38768% | 0      |
-| jdb  | Bf16         | 0.00132% | 0      |
-| xorf | BinaryFuse16 | 0.00165% | 0      |
-| jdb  | Bf32         | 0.00000% | 0      |
-| xorf | BinaryFuse32 | 0.00000% | 0      |
+| 库 | 过滤器 | 假阳率 | 假阴率 |
+| --- | --- | --- | --- |
+| jdb | Bf8 | 0.39076% | 0 |
+| xorf | BinaryFuse8 | 0.38816% | 0 |
+| jdb | Bf16 | 0.00154% | 0 |
+| xorf | BinaryFuse16 | 0.00155% | 0 |
+| jdb | Bf32 | 0.00000% | 0 |
+| xorf | BinaryFuse32 | 0.00000% | 0 |
 
 ---
 
@@ -693,5 +694,5 @@ Google 在大规模数据中心的研究表明，每年约有 **1.3%** 的机器
 
 我们正在以组件化的方式重新定义互联网的开发范式，欢迎关注：
 
-- [谷歌邮件列表](https://groups.google.com/g/js0-site)
-- [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
+* [谷歌邮件列表](https://groups.google.com/g/js0-site)
+* [js0site.bsky.social](https://bsky.app/profile/js0site.bsky.social)
