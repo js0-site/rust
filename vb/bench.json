@@ -1,0 +1,23 @@
+{
+  "data_count": 10000,
+  "results": [
+    {
+      "decode_ns": 24099.666,
+      "encode_ns": 23228.459,
+      "encoded_bytes": 25032,
+      "lib": "vb"
+    },
+    {
+      "decode_ns": 28689.042,
+      "encode_ns": 56739.875,
+      "encoded_bytes": 25032,
+      "lib": "integer-encoding"
+    },
+    {
+      "decode_ns": 46981.417,
+      "encode_ns": 34572.375,
+      "encoded_bytes": 25032,
+      "lib": "leb128"
+    }
+  ]
+}

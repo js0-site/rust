@@ -1,0 +1,71 @@
+[workspace]
+resolver = "3"
+members = [
+  "cpu_bind",
+  "cpu_load",
+  "ver_from_txt",
+  "uper",
+  "uper/test",
+  "add_space",
+  "http_grpc",
+  "kind2sql",
+  "kv2db",
+  "site_log",
+  "tosql_derive",
+  "sqle",
+  "tosql",
+  "vb",
+  "to_mysql",
+  "tosql_meta",
+  "tosql_static_meta",
+  "code_turn",
+  "tosql_linkme",
+  "ipbin",
+  "site_log_derive/demo",
+  "site_log_derive",
+  "tosql_macro",
+  "host",
+  "global_str",
+  "msgq",
+  "clap_args",
+  "set_timer",
+  "forking",
+  "idoq",
+  "sfid",
+  "osid",
+  "idpath",
+  "ider",
+  "u64_2",
+  "autoscale_cuckoo_filter",
+  "jdb_lru",
+  "jdb_pgm",
+  "jdb_xorf",
+  "shared_prefix_len",
+  "size_lru",
+  "add_ext",
+  "compio_dispatch",
+]
+exclude = ["sh/_tmpl"]
+
+[profile.release]
+lto = true
+opt-level = 3
+incremental = true
+codegen-units = 1
+overflow-checks = false
+debug-assertions = false
+# panic = 'abort'
+# strip = false
+
+[profile.dev]
+split-debuginfo = "unpacked"
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.bench]
+opt-level = 3
+
+[workspace.dependencies]
+rapidhash = "4.5"

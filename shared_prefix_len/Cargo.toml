@@ -1,0 +1,28 @@
+[package]
+name = "shared_prefix_len"
+version = "0.1.4"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/shared_prefix_len"
+description = "High-performance shared prefix length calculation / 高性能共享前缀长度计算"
+keywords = ["prefix", "string", "comparison", "performance", "optimization"]
+categories = ["algorithms", "text-processing", "encoding", "compression"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dev-dependencies]
+aok = "0.1.18"
+log = "0.4.34"
+log_init = "0.1.39"
+static_init = "1.0.4"
+
+[dev-dependencies.compio]
+version = "0.19.2"
+features = ["macros"]

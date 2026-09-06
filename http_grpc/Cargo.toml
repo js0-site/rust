@@ -1,0 +1,60 @@
+[package]
+description = "Converts HTTP requests into multiplexed gRPC-like calls / 将 HTTP 请求转换为多路复用的 gRPC 式调用"
+edition = "2024"
+homepage = "https://github.com/js0-site/rust/tree/dev/http_grpc"
+keywords = ["http", "grpc", "rpc", "multiplex", "async"]
+license = "MulanPSL-2.0"
+name = "http_grpc"
+repository = "https://github.com/js0-site/rust.git"
+version = "0.1.32"
+categories = [
+  "web-programming",
+  "network-programming",
+  "asynchronous",
+  "api-bindings",
+  "development-tools",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[build-dependencies]
+anyhow = "1.0.104"
+pilota-build = "0.13.10"
+
+[dependencies]
+anyhow = "1.0.104"
+aok = "0.1.18"
+bytes = "1.12.1"
+futures-util = "0.3.34"
+http-body-util = "0.1.5"
+num-traits = "0.2.19"
+pilota = "0.13.1"
+thiserror = "2.0.20"
+tokio-stream = "0.1.19"
+volo-http = "0.5.6"
+xbin = "0.1.14"
+xerr = "0.1.16"
+
+[dependencies.tokio]
+version = "1.53"
+features = ["rt"]
+
+
+[dependencies.xrpc]
+features = ["volo-http"]
+version = "0.1.40"
+
+[dev-dependencies]
+static_init = { version = "1.0.4", features = ["parking_lot"] }
+http = "1.5"
+log_init = "0.1.39"
+
+[dev-dependencies.tokio]
+version = "1.53"
+features = ["full"]
+
+
+[features]
+default = []
