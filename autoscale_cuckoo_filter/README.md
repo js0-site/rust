@@ -9,7 +9,7 @@
 
 A high-performance Cuckoo Filter variant that automatically scales capacity as needed. Forked from [sile/cuckoo_filter](https://github.com/sile/cuckoo_filter) with significant performance optimizations.
 
-**5.5x faster lookups** than the original implementation. The fastest scalable Cuckoo Filter in Rust ecosystem.
+**3x faster lookups** and **3x faster insertions/removals** than the original implementation. The fastest scalable Cuckoo Filter in Rust ecosystem.
 
 ![Benchmark Results](https://raw.githubusercontent.com/js0-site/rust/refs/heads/main/autoscale_cuckoo_filter/readme/en.svg)
 
@@ -30,7 +30,7 @@ A high-performance Cuckoo Filter variant that automatically scales capacity as n
 
 ## Features
 
-- **Blazing Fast**: 100M lookups/sec, 5.5x faster than alternatives
+- **Blazing Fast**: Up to 3.2x faster lookups, 3.1x faster insertions, and 3.5x faster removals than alternatives
 - Auto-scaling capacity when filter becomes full
 - Configurable false positive probability (FPP)
 - Support for deletion (unlike Bloom filters)
@@ -151,17 +151,17 @@ Builder for custom filter configuration.
 
 ### DefaultHasher
 
-Type alias for `GxHasher`, the default high-performance hasher.
+Type alias for `RapidHasher`, the default high-performance hasher.
 
 ## Performance
 
 Benchmark comparison with other Rust Cuckoo Filter implementations:
 
-| Library                     | FPP   | Contains (M/s)   | Add (M/s)    | Remove (M/s)     | Memory (KB) |
-| --------------------------- | ----- | ---------------- | ------------ | ---------------- | ----------- |
-| **autoscale_cuckoo_filter** | 0.17% | **97.88** (1.00) | 33.89 (1.00) | **57.54** (1.00) | 353         |
-| cuckoo_filter               | 0.15% | 17.48 (0.18)     | 10.45 (0.31) | 18.10 (0.31)     | 353         |
-| cuckoofilter                | 0.27% | 21.33 (0.22)     | 22.20 (0.66) | 11.63 (0.20)     | 1024        |
+| Library                     | FPP   | Contains (M/s)   | Add (M/s)        | Remove (M/s)     | Memory (KB) |
+| --------------------------- | ----- | ---------------- | ---------------- | ---------------- | ----------- |
+| **autoscale_cuckoo_filter** | 0.18% | **48.97** (1.00) | **31.88** (1.00) | **53.70** (1.00) | 353.0       |
+| cuckoo_filter               | 0.15% | 15.42 (0.31)     | 10.29 (0.32)     | 15.31 (0.29)     | 353.0       |
+| cuckoofilter                | 0.27% | 20.28 (0.41)     | 21.82 (0.68)     | 17.28 (0.32)     | 1024.0      |
 
 _Test: 100,000 items, capacity=200,000, target FPP≈1%. Ratio in parentheses relative to autoscale_cuckoo_filter._
 
@@ -388,13 +388,13 @@ MulanPSL-2.0
 
 ### Test Environment
 
-| Item   | Value                                       |
-| ------ | ------------------------------------------- |
-| OS     | macOS 26.1 (arm64)                          |
-| CPU    | Apple M2 Max                                |
-| Cores  | 12                                          |
-| Memory | 64.0 GB                                     |
-| Rust   | rustc 1.94.0-nightly (8d670b93d 2025-12-31) |
+| Item | Value |
+|------|-------|
+| OS | macOS 26.5.1 (arm64) |
+| CPU | Apple M2 Max |
+| Cores | 12 |
+| Memory | 64.0 GB |
+| Rust | rustc 1.98.0 (88d9e12ae 2026-08-18) |
 
 Test: 100000 items, capacity=200000
 
@@ -404,13 +404,13 @@ Test: 100000 items, capacity=200000
 
 ### Performance Comparison
 
-| Library                 | FPP   | Contains (M/s) | Add (M/s)    | Remove (M/s) | Memory (KB) |
-| ----------------------- | ----- | -------------- | ------------ | ------------ | ----------- |
-| autoscale_cuckoo_filter | 0.16% | 79.66 (1.00)   | 30.24 (1.00) | 47.45 (1.00) | 353.0       |
-| cuckoo_filter           | 0.15% | 18.10 (0.23)   | 11.40 (0.38) | 17.87 (0.38) | 353.0       |
-| cuckoofilter            | 0.27% | 21.76 (0.27)   | 20.40 (0.67) | 15.66 (0.33) | 1024.0      |
+| Library | FPP | Contains (M/s) | Add (M/s) | Remove (M/s) | Memory (KB) |
+|---------|-----|----------------|-----------|--------------|-------------|
+| autoscale_cuckoo_filter | 0.18% | 48.97 (1.00) | 31.88 (1.00) | 53.70 (1.00) | 353.0 |
+| cuckoo_filter | 0.15% | 15.42 (0.31) | 10.29 (0.32) | 15.31 (0.29) | 353.0 |
+| cuckoofilter | 0.27% | 20.28 (0.41) | 21.82 (0.68) | 17.28 (0.32) | 1024.0 |
 
-_Ratio in parentheses: relative to autoscale_cuckoo_filter (1.00 = baseline)_
+*Ratio in parentheses: relative to autoscale_cuckoo_filter (1.00 = baseline)*
 
 ---
 
@@ -431,7 +431,7 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 高性能布谷鸟过滤器变体，支持自动扩容。基于 [sile/cuckoo_filter](https://github.com/sile/cuckoo_filter) 深度优化。
 
-**查询速度提升 5.5 倍**。Rust 生态中最快的可扩展布谷鸟过滤器。
+**查询速度提升超 3 倍，插入与删除提升超 3 倍**。Rust 生态中最快的可扩展布谷鸟过滤器。
 
 ![性能测试结果](https://raw.githubusercontent.com/js0-site/rust/refs/heads/main/autoscale_cuckoo_filter/readme/zh.svg)
 
@@ -452,7 +452,7 @@ We are redefining the development paradigm of the Internet in a componentized wa
 
 ## 特性
 
-- **极致性能**：每秒 1 亿次查询，比同类库快 5.5 倍
+- **极致性能**：查询比同类实现快 3.2 倍，插入快 3.1 倍，删除快 3.5 倍
 - 过滤器满时自动扩容
 - 可配置假阳性概率 (FPP)
 - 支持删除（布隆过滤器不支持）
@@ -573,17 +573,17 @@ assert_eq!(filter.capacity(), 128);
 
 ### DefaultHasher
 
-`GxHasher` 的类型别名，默认高性能哈希器。
+`RapidHasher` 的类型别名，默认高性能哈希器。
 
 ## 性能
 
 与其他 Rust 布谷鸟过滤器实现的性能对比：
 
-| 库                          | FPP   | 查询 (M/s)       | 添加 (M/s)   | 删除 (M/s)       | 内存 (KB) |
-| --------------------------- | ----- | ---------------- | ------------ | ---------------- | --------- |
-| **autoscale_cuckoo_filter** | 0.17% | **97.88** (1.00) | 33.89 (1.00) | **57.54** (1.00) | 353       |
-| cuckoo_filter               | 0.15% | 17.48 (0.18)     | 10.45 (0.31) | 18.10 (0.31)     | 353       |
-| cuckoofilter                | 0.27% | 21.33 (0.22)     | 22.20 (0.66) | 11.63 (0.20)     | 1024      |
+| 库                          | FPP   | 查询 (M/s)       | 添加 (M/s)       | 删除 (M/s)       | 内存 (KB) |
+| --------------------------- | ----- | ---------------- | ---------------- | ---------------- | --------- |
+| **autoscale_cuckoo_filter** | 0.18% | **48.97** (1.00) | **31.88** (1.00) | **53.70** (1.00) | 353.0     |
+| cuckoo_filter               | 0.15% | 15.42 (0.31)     | 10.29 (0.32)     | 15.31 (0.29)     | 353.0     |
+| cuckoofilter                | 0.27% | 20.28 (0.41)     | 21.82 (0.68)     | 17.28 (0.32)     | 1024.0    |
 
 _测试：100,000 元素，容量=200,000，目标 FPP≈1%。括号内为相对性能比。_
 
@@ -812,13 +812,13 @@ MulanPSL-2.0
 
 ### 测试环境
 
-| 项目     | 值                                          |
-| -------- | ------------------------------------------- |
-| 操作系统 | macOS 26.1 (arm64)                          |
-| CPU      | Apple M2 Max                                |
-| 核心数   | 12                                          |
-| 内存     | 64.0 GB                                     |
-| Rust     | rustc 1.94.0-nightly (8d670b93d 2025-12-31) |
+| 项目 | 值 |
+|------|-------|
+| 操作系统 | macOS 26.5.1 (arm64) |
+| CPU | Apple M2 Max |
+| 核心数 | 12 |
+| 内存 | 64.0 GB |
+| Rust | rustc 1.98.0 (88d9e12ae 2026-08-18) |
 
 测试：100000 条数据，容量=200000
 
@@ -828,13 +828,13 @@ MulanPSL-2.0
 
 ### 性能对比
 
-| 库                      | 误判率 | 查询 (百万/秒) | 添加 (百万/秒) | 删除 (百万/秒) | 内存 (KB) |
-| ----------------------- | ------ | -------------- | -------------- | -------------- | --------- |
-| autoscale_cuckoo_filter | 0.16%  | 79.66 (1.00)   | 30.24 (1.00)   | 47.45 (1.00)   | 353.0     |
-| cuckoo_filter           | 0.15%  | 18.10 (0.23)   | 11.40 (0.38)   | 17.87 (0.38)   | 353.0     |
-| cuckoofilter            | 0.27%  | 21.76 (0.27)   | 20.40 (0.67)   | 15.66 (0.33)   | 1024.0    |
+| 库 | 误判率 | 查询 (百万/秒) | 添加 (百万/秒) | 删除 (百万/秒) | 内存 (KB) |
+|---------|-----|----------------|-----------|--------------|-------------|
+| autoscale_cuckoo_filter | 0.18% | 48.97 (1.00) | 31.88 (1.00) | 53.70 (1.00) | 353.0 |
+| cuckoo_filter | 0.15% | 15.42 (0.31) | 10.29 (0.32) | 15.31 (0.29) | 353.0 |
+| cuckoofilter | 0.27% | 20.28 (0.41) | 21.82 (0.68) | 17.28 (0.32) | 1024.0 |
 
-_括号内为相对性能：以 autoscale_cuckoo_filter 为基准（1.00 = 基准值）_
+*括号内为相对性能：以 autoscale_cuckoo_filter 为基准（1.00 = 基准值）*
 
 ---
 

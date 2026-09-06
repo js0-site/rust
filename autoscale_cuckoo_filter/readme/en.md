@@ -2,7 +2,7 @@
 
 A high-performance Cuckoo Filter variant that automatically scales capacity as needed. Forked from [sile/cuckoo_filter](https://github.com/sile/cuckoo_filter) with significant performance optimizations.
 
-**5.5x faster lookups** than the original implementation. The fastest scalable Cuckoo Filter in Rust ecosystem.
+**3x faster lookups** and **3x faster insertions/removals** than the original implementation. The fastest scalable Cuckoo Filter in Rust ecosystem.
 
 ![Benchmark Results](https://raw.githubusercontent.com/js0-site/rust/refs/heads/main/autoscale_cuckoo_filter/readme/en.svg)
 
@@ -23,7 +23,7 @@ A high-performance Cuckoo Filter variant that automatically scales capacity as n
 
 ## Features
 
-- **Blazing Fast**: 100M lookups/sec, 5.5x faster than alternatives
+- **Blazing Fast**: Up to 3.2x faster lookups, 3.1x faster insertions, and 3.5x faster removals than alternatives
 - Auto-scaling capacity when filter becomes full
 - Configurable false positive probability (FPP)
 - Support for deletion (unlike Bloom filters)
@@ -144,17 +144,17 @@ Builder for custom filter configuration.
 
 ### DefaultHasher
 
-Type alias for `GxHasher`, the default high-performance hasher.
+Type alias for `RapidHasher`, the default high-performance hasher.
 
 ## Performance
 
 Benchmark comparison with other Rust Cuckoo Filter implementations:
 
-| Library                     | FPP   | Contains (M/s)   | Add (M/s)    | Remove (M/s)     | Memory (KB) |
-| --------------------------- | ----- | ---------------- | ------------ | ---------------- | ----------- |
-| **autoscale_cuckoo_filter** | 0.17% | **97.88** (1.00) | 33.89 (1.00) | **57.54** (1.00) | 353         |
-| cuckoo_filter               | 0.15% | 17.48 (0.18)     | 10.45 (0.31) | 18.10 (0.31)     | 353         |
-| cuckoofilter                | 0.27% | 21.33 (0.22)     | 22.20 (0.66) | 11.63 (0.20)     | 1024        |
+| Library                     | FPP   | Contains (M/s)   | Add (M/s)        | Remove (M/s)     | Memory (KB) |
+| --------------------------- | ----- | ---------------- | ---------------- | ---------------- | ----------- |
+| **autoscale_cuckoo_filter** | 0.18% | **48.97** (1.00) | **31.88** (1.00) | **53.70** (1.00) | 353.0       |
+| cuckoo_filter               | 0.15% | 15.42 (0.31)     | 10.29 (0.32)     | 15.31 (0.29)     | 353.0       |
+| cuckoofilter                | 0.27% | 20.28 (0.41)     | 21.82 (0.68)     | 17.28 (0.32)     | 1024.0      |
 
 _Test: 100,000 items, capacity=200,000, target FPP≈1%. Ratio in parentheses relative to autoscale_cuckoo_filter._
 
