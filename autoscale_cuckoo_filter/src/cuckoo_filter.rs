@@ -319,7 +319,7 @@ impl<T: Hash + ?Sized, H: Hasher + Clone> CuckooFilter<T, H> {
     U: Hash + ?Sized,
   {
     let hash = crate::hash(&self.hasher, item);
-    for filter in &mut self.filters {
+    for filter in self.filters.iter_mut().rev() {
       if filter.remove(&self.hasher, hash) {
         return true;
       }
@@ -328,8 +328,9 @@ impl<T: Hash + ?Sized, H: Hasher + Clone> CuckooFilter<T, H> {
   }
 
   fn grow(&mut self) {
-    let cap = self.capacity * 2usize.pow(self.filters.len() as u32);
-    let prob = self.fpp / 2f64.powi(self.filters.len() as i32 + 1);
+    let shift = (self.filters.len() as u32).min(usize::BITS - 1);
+    let cap = self.capacity.saturating_mul(1usize << shift);
+    let prob = self.fpp / 2f64.powi((self.filters.len() as i32 + 1).min(1023));
     let fp_bits = ((1.0 / prob).log2() + ((2 * self.entries) as f64).log2()).ceil() as usize;
     // Cap fingerprint size to prevent overflow (max 56 bits)
     // 限制指纹大小以防止溢出（最大 56 位）

@@ -106,9 +106,9 @@ impl Buckets {
     let fp_bits = self.fp_bits;
     let fp_mask = self.fp_mask;
 
-    // For small fp_bits (<=16), read entire bucket at once (4*16=64 bits max)
-    // 对于小指纹位数（<=16），一次读取整个桶（最多 4*16=64 位）
-    if fp_bits <= 16 {
+    // For small fp_bits (<=16) and 4 entries, read entire bucket at once (4*16=64 bits max)
+    // 对于小指纹位数（<=16）且 4 条目，一次读取整个桶（最多 4*16=64 位）
+    if self.entries == 4 && fp_bits <= 16 {
       let bucket = self.bits.read_raw(base);
       // Use | instead of || to avoid branch misprediction
       // 使用 | 代替 || 避免分支预测失败
@@ -138,9 +138,9 @@ impl Buckets {
     let fp_bits = self.fp_bits;
     let fp_mask = self.fp_mask;
 
-    // For small fp_bits (<=16), read entire bucket at once
-    // 对于小指纹位数（<=16），一次读取整个桶
-    if fp_bits <= 16 {
+    // For small fp_bits (<=16) and 4 entries, read entire bucket at once
+    // 对于小指纹位数（<=16）且 4 条目，一次读取整个桶
+    if self.entries == 4 && fp_bits <= 16 {
       let bucket = self.bits.read_raw(base);
       if (bucket & fp_mask) == 0 {
         self.bits.set_uint_masked(base, fp_mask, fp);
@@ -195,9 +195,9 @@ impl Buckets {
     let fp_bits = self.fp_bits;
     let fp_mask = self.fp_mask;
 
-    // For small fp_bits (<=16), read entire bucket at once
-    // 对于小指纹位数（<=16），一次读取整个桶
-    if fp_bits <= 16 {
+    // For small fp_bits (<=16) and 4 entries, read entire bucket at once
+    // 对于小指纹位数（<=16）且 4 条目，一次读取整个桶
+    if self.entries == 4 && fp_bits <= 16 {
       let bucket = self.bits.read_raw(base);
       if (bucket & fp_mask) == fp {
         self.bits.set_uint_masked(base, fp_mask, 0);

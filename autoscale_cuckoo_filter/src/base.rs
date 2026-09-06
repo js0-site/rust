@@ -132,6 +132,17 @@ impl Base {
         let shrunk_i = shrunk.buckets.index(i as u64);
         shrunk.insert_fp(hasher, shrunk_i, fp);
       }
+      for &(fp, min_i) in &self.exceptional.0 {
+        if fp == 0 {
+          let shrunk_i0 = shrunk.buckets.index(min_i as u64);
+          let shrunk_i1 = shrunk.buckets.index(shrunk_i0 as u64 ^ crate::hash(hasher, &0u64));
+          shrunk.exceptional.insert(shrunk_i0, shrunk_i1, 0);
+          shrunk.count += 1;
+        } else {
+          let shrunk_i = shrunk.buckets.index(min_i as u64);
+          shrunk.insert_fp(hasher, shrunk_i, fp);
+        }
+      }
       *self = shrunk;
     }
     self.exceptional.shrink_to_fit();

@@ -358,3 +358,44 @@ fn test_numeric_types() {
     assert!(filter_usize.contains(&(i as usize)));
   }
 }
+
+/// Test different entries per bucket (e.g. 2 and 8).
+#[test]
+fn test_different_entries_per_bucket() {
+  for entries in [2, 8] {
+    let mut filter: CuckooFilter<u64> = CuckooFilterBuilder::new()
+      .initial_capacity(200)
+      .false_positive_probability(0.01)
+      .entries_per_bucket(entries)
+      .finish();
+
+    let data = unique_u64(200, entries as u64);
+    for item in &data {
+      filter.add(item);
+    }
+    for item in &data {
+      assert!(filter.contains(item));
+    }
+    for item in &data[..50] {
+      assert!(filter.remove(item));
+      assert!(!filter.contains(item));
+    }
+    for item in &data[50..] {
+      assert!(filter.contains(item));
+    }
+  }
+}
+
+/// Test shrink_to_fit preserves all items including exceptional ones.
+#[test]
+fn test_shrink_to_fit_preserves_items() {
+  let mut filter = CuckooFilter::<u64>::new(1000, 0.001);
+  let data = unique_u64(500, 42);
+  for item in &data {
+    filter.add(item);
+  }
+  filter.shrink_to_fit();
+  for item in &data {
+    assert!(filter.contains(item), "Item {item} must exist after shrink");
+  }
+}
