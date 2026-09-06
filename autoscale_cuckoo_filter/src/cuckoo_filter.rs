@@ -236,11 +236,10 @@ impl<T: Hash + ?Sized, H: Hasher + Clone> CuckooFilter<T, H> {
   fn contains_hash(&self, hash: u64) -> bool {
     // Reverse: newest filter more likely to contain item
     // 逆序：最新的过滤器更可能包含元素
-    self
-      .filters
-      .iter()
-      .rev()
-      .any(|f| f.contains(&self.hasher, hash))
+    match self.filters.as_slice() {
+      [single] => single.contains(&self.hasher, hash),
+      filters => filters.iter().rev().any(|f| f.contains(&self.hasher, hash)),
+    }
   }
 
   /// Insert item without checking existence (UNSAFE for duplicates).

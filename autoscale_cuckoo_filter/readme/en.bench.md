@@ -20,8 +20,8 @@ Test: 100000 items, capacity=200000
 
 | Library | FPP | Contains (M/s) | Add (M/s) | Remove (M/s) | Memory (KB) |
 |---------|-----|----------------|-----------|--------------|-------------|
-| autoscale_cuckoo_filter | 0.18% | 48.97 (1.00) | 31.88 (1.00) | 53.70 (1.00) | 353.0 |
-| cuckoo_filter | 0.15% | 15.42 (0.31) | 10.29 (0.32) | 15.31 (0.29) | 353.0 |
-| cuckoofilter | 0.27% | 20.28 (0.41) | 21.82 (0.68) | 17.28 (0.32) | 1024.0 |
+| autoscale_cuckoo_filter | 0.18% | 77.32 (1.00) | 31.25 (1.00) | 48.36 (1.00) | 353.0 |
+| cuckoo_filter | 0.15% | 17.23 (0.22) | 10.38 (0.33) | 17.34 (0.36) | 353.0 |
+| cuckoofilter | 0.27% | 23.87 (0.31) | 23.84 (0.76) | 20.80 (0.43) | 1024.0 |
 
 *Ratio in parentheses: relative to autoscale_cuckoo_filter (1.00 = baseline)*

@@ -61,6 +61,34 @@ impl Bits {
     raw >> bit_off
   }
 
+  /// Read raw u64 and its byte/bit offset for a bit position.
+  /// 读取位位置的原始 u64 及其字节/位偏移
+  #[inline(always)]
+  pub fn read_raw_parts(&self, pos: usize) -> (u64, usize, usize) {
+    let byte_idx = pos >> 3;
+    let bit_off = pos & 7;
+    // SAFETY: padding ensures we won't read past buffer
+    // 安全性：填充确保不会读取超出缓冲区
+    let raw = unsafe { self.0.as_ptr().add(byte_idx).cast::<u64>().read_unaligned() };
+    (raw, byte_idx, bit_off)
+  }
+
+  /// Write raw u64 directly to byte offset.
+  /// 直接将原始 u64 写入字节偏移
+  #[inline(always)]
+  pub fn write_raw_at_byte(&mut self, byte_idx: usize, val: u64) {
+    // SAFETY: padding ensures we won't write past buffer
+    // 安全性：填充确保不会写入超出缓冲区
+    unsafe {
+      self
+        .0
+        .as_mut_ptr()
+        .add(byte_idx)
+        .cast::<u64>()
+        .write_unaligned(val);
+    }
+  }
+
   /// Write unsigned integer at given bit position.
   /// 在指定位位置写入无符号整数
   #[inline(always)]

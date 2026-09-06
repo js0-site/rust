@@ -149,21 +149,29 @@ impl Buckets {
     // For small fp_bits (<=16) and 4 entries, read entire bucket at once
     // 对于小指纹位数（<=16）且 4 条目，一次读取整个桶
     if self.entries == 4 && fp_bits <= 16 {
-      let bucket = self.bits.read_raw(base);
+      let (raw, byte_idx, bit_off) = self.bits.read_raw_parts(base);
+      let bucket = raw >> bit_off;
       if (bucket & fp_mask) == target {
-        self.bits.set_uint_masked(base, fp_mask, replacement);
+        let new_raw = (raw & !(fp_mask << bit_off)) | (replacement << bit_off);
+        self.bits.write_raw_at_byte(byte_idx, new_raw);
         return true;
       }
+      let off1 = bit_off + fp_bits;
       if ((bucket >> fp_bits) & fp_mask) == target {
-        self.bits.set_uint_masked(base + fp_bits, fp_mask, replacement);
+        let new_raw = (raw & !(fp_mask << off1)) | (replacement << off1);
+        self.bits.write_raw_at_byte(byte_idx, new_raw);
         return true;
       }
+      let off2 = off1 + fp_bits;
       if ((bucket >> (fp_bits * 2)) & fp_mask) == target {
-        self.bits.set_uint_masked(base + fp_bits * 2, fp_mask, replacement);
+        let new_raw = (raw & !(fp_mask << off2)) | (replacement << off2);
+        self.bits.write_raw_at_byte(byte_idx, new_raw);
         return true;
       }
+      let off3 = off2 + fp_bits;
       if ((bucket >> (fp_bits * 3)) & fp_mask) == target {
-        self.bits.set_uint_masked(base + fp_bits * 3, fp_mask, replacement);
+        let new_raw = (raw & !(fp_mask << off3)) | (replacement << off3);
+        self.bits.write_raw_at_byte(byte_idx, new_raw);
         return true;
       }
       return false;

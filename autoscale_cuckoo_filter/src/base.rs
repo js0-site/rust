@@ -73,9 +73,8 @@ impl Base {
       return true;
     }
     let i1 = self.buckets.alt_index(hasher, i0, fp);
-    // Use | for branchless check (exceptional is rare)
-    // 使用 | 进行无分支检查（exceptional 很少见）
-    self.buckets.contains(i1, fp) | self.exceptional.contains(i0, i1, fp)
+    self.buckets.contains(i1, fp)
+      || (!self.exceptional.0.is_empty() && self.exceptional.contains(i0, i1, fp))
   }
 
   /// Insert item hash.
@@ -102,7 +101,7 @@ impl Base {
     } else {
       self.buckets.remove(i0, fp)
         || self.buckets.remove(i1, fp)
-        || self.exceptional.remove(i0, i1, fp)
+        || (!self.exceptional.0.is_empty() && self.exceptional.remove(i0, i1, fp))
     };
 
     if removed {
