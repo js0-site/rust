@@ -1,0 +1,71 @@
+[package]
+name = "idoq"
+version = "0.1.10"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-dns/rust.git"
+homepage = "https://github.com/js0-dns/rust/tree/main/idoq"
+description = "DNS over QUIC (DoQ) client / DNS over QUIC (DoQ) 客户端"
+keywords = ["dns", "quic", "doq", "resolver"]
+categories = [
+  "network-programming",
+  "asynchronous",
+  "cryptography",
+  "api-bindings",
+  "development-tools",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = ["static"]
+static = ["dep:static_init"]
+
+[dependencies]
+bytes = "1.12.1"
+futures = "0.3.34"
+log = "0.4.34"
+quinn = "0.11.11"
+hipstr = "0.8"
+thiserror = "2.0.20"
+webpki-roots = "1.0.9"
+
+[dependencies.dns_parse]
+version = "0.1.5"
+
+[dependencies.static_init]
+version = "1.0.4"
+optional = true
+features = ["parking_lot"]
+
+[dependencies.idns]
+version = "0.2.16"
+
+[dependencies.rustls]
+version = "0.23.43"
+features = ["ring"]
+
+[dependencies.tokio]
+version = "1.53.1"
+features = ["io-util", "net"]
+
+[dev-dependencies]
+aok = "0.1.18"
+futures = "0.3.34"
+log = "0.4.34"
+log_init = "0.1.39"
+tabled = "0.21.0"
+
+[dev-dependencies.static_init]
+version = "1.0.4"
+features = ["parking_lot"]
+
+[dev-dependencies.idns]
+version = "0.2.16"
+features = ["mx", "cache"]
+
+[dev-dependencies.tokio]
+version = "1.53.1"
+features = ["macros", "rt", "rt-multi-thread", "time", "sync"]

@@ -1,0 +1,71 @@
+[
+  {
+    "date": "2025-12-30 17:04:49",
+    "commit": "71a4e84",
+    "branch": "dev"
+  },
+  {
+    "date": "2025-12-30 17:04:58",
+    "commit": "71a4e84",
+    "branch": "dev",
+    "encode": 73430,
+    "decode": 6683.6,
+    "roundtrip": 81558
+  },
+  {
+    "date": "2025-12-30 17:06:01",
+    "commit": "a3b6865",
+    "branch": "dev",
+    "encode": 74085,
+    "decode": 6462.3,
+    "roundtrip": 80271
+  },
+  {
+    "date": "2025-12-30 17:07:34",
+    "commit": "535f10a",
+    "branch": "dev",
+    "encode": 73877,
+    "decode": 6485.2,
+    "roundtrip": 80000
+  },
+  {
+    "date": "2025-12-30 17:09:05",
+    "commit": "1b9f01e",
+    "branch": "dev",
+    "encode": 73990,
+    "decode": 4579.6,
+    "roundtrip": 76217
+  },
+  {
+    "date": "2025-12-30 17:10:36",
+    "commit": "b37d54c",
+    "branch": "dev",
+    "encode": 22249,
+    "decode": 4601.5,
+    "roundtrip": 25949
+  },
+  {
+    "date": "2025-12-30 17:11:38",
+    "commit": "494a4ee",
+    "branch": "dev",
+    "encode": 22527,
+    "decode": 4685.6,
+    "roundtrip": 25721
+  },
+  {
+    "date": "2025-12-30 17:14:06",
+    "commit": "87a18bf",
+    "branch": "dev",
+    "encode": 22338,
+    "decode": 4656.5,
+    "roundtrip": 25026
+  },
+  {
+    "date": "2025-12-30 17:15:47",
+    "commit": "f0e254c",
+    "branch": "dev",
+    "encode": 22582,
+    "decode": 4715.3,
+    "roundtrip": 26198
+  }
+]

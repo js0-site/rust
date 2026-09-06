@@ -1,0 +1,95 @@
+use core::{
+  hash::Hasher,
+  ops::{BitXor, BitXorAssign},
+};
+
+use rapidhash::fast::RapidHasher as BaseRapidHasher;
+
+const MIX_C1: u64 = 0xff51_afd7_ed55_8ccd;
+
+/// RapidHash / WyHash style 64-bit mixer (128-bit product based).
+/// 基于 RapidHash / WyHash 的 128 位乘法混淆实现。
+///
+/// RapidHash 和 WyHash 均使用这种 (A * B) -> lo ^ hi 的策略，
+/// 利用 64x64->128 乘法指令实现极高的混合质量和速度。
+/// 这是一个经受住时间考验的方案，完全满足 Binary Fuse Filter 的需求。
+#[inline(always)]
+pub const fn mix64(k: u64) -> u64 {
+  // RapidHash/WyHash 核心混淆逻辑： (x * C) ^ ((x * C) >> 64)
+  // 这里的常数选用之前使用的高质量常数 MIX_C1
+  let r = (k as u128).wrapping_mul(MIX_C1 as u128);
+  (r ^ (r >> 64)) as u64
+}
+
+/// Mixes key and seed into a guaranteed non-zero 64-bit hash.
+/// 将键和种子混淆为保证非零的 64 位哈希值。
+#[inline(always)]
+pub const fn mix_key(key: u64, seed: u64) -> u64 {
+  let hash = mix64(key.wrapping_add(seed));
+  if hash == 0 { 1 } else { hash }
+}
+
+/// A high-speed Hasher wrapper using the official hash crate.
+/// 基于官方 hash crate 的高速度哈希器封装
+///
+/// Used for HashProxy to process non-u64 types.
+/// 用于 HashProxy 处理非 u64 类型。
+#[derive(Clone)]
+pub struct RapidHasher(BaseRapidHasher<'static>);
+
+impl Default for RapidHasher {
+  #[inline(always)]
+  fn default() -> Self {
+    Self(BaseRapidHasher::new(MIX_C1))
+  }
+}
+
+impl Hasher for RapidHasher {
+  #[inline(always)]
+  fn finish(&self) -> u64 {
+    self.0.finish()
+  }
+
+  #[inline(always)]
+  fn write(&mut self, bytes: &[u8]) {
+    self.0.write(bytes);
+  }
+
+  #[inline(always)]
+  fn write_u64(&mut self, i: u64) {
+    self.0.write_u64(i);
+  }
+}
+
+/// Fingerprint type constraint.
+/// 指纹类型约束
+pub trait Fingerprint:
+  Default + Copy + PartialEq + BitXorAssign + BitXor<Output = Self> + 'static
+{
+  /// Zero value constant.
+  /// 零值常量
+  const ZERO: Self;
+
+  /// Computes a fingerprint from a hash.
+  /// 从哈希值计算指纹
+  fn from_hash(hash: u64) -> Self;
+}
+
+macro_rules! impl_fingerprint {
+  ($ty:ty) => {
+    impl Fingerprint for $ty {
+      const ZERO: Self = 0;
+
+      #[inline(always)]
+      fn from_hash(hash: u64) -> Self {
+        // mix64 已提供充分雪崩效应，直接使用低位即可
+        // mix64 already provides sufficient avalanche effect, just use low bits
+        hash as Self
+      }
+    }
+  };
+}
+
+impl_fingerprint!(u8);
+impl_fingerprint!(u16);
+impl_fingerprint!(u32);
