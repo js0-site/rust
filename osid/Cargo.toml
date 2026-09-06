@@ -1,0 +1,27 @@
+[package]
+name = "osid"
+version = "0.1.2"
+edition = "2024"
+license = "MulanPSL-2.0"
+repository = "https://github.com/js0-site/rust.git"
+homepage = "https://github.com/js0-site/rust/tree/main/osid"
+description = "Persistent machine ID across reboots / 跨重启持久化机器标识"
+keywords = ["machine-id", "unique-id", "persistent", "cross-platform"]
+categories = ["os", "development-tools", "data-structures", "no-std", "filesystem"]
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[features]
+default = []
+
+[dependencies]
+dirs = "7"
+hostname = "0.4"
+rand = "0.10"
+thiserror = "2.0.20"
+ub64 = { version = "0.1", features = ["u64"] }
+
+[dev-dependencies]
+aok = "0.1.18"

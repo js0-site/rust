@@ -1,0 +1,95 @@
+[
+  {
+    "date": "2026-01-17_15:33:51",
+    "commit": "5f0b3a8",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 5623.61,
+    "latency_avg_ns": 3177.58,
+    "latency_p99_ns": 250
+  },
+  {
+    "date": "2026-01-17_15:34:03",
+    "commit": "3a22399",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 5841.29,
+    "latency_avg_ns": 3263.74,
+    "latency_p99_ns": 291
+  },
+  {
+    "date": "2026-01-17_15:34:26",
+    "commit": "648f46c",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 345.11,
+    "latency_avg_ns": 22.11,
+    "latency_p99_ns": 209
+  },
+  {
+    "date": "2026-01-17_15:34:42",
+    "commit": "648f46c",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 342.33,
+    "latency_avg_ns": 22.29,
+    "latency_p99_ns": 209
+  },
+  {
+    "date": "2026-01-17_15:36:35",
+    "commit": "e53096e",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 332.6,
+    "latency_avg_ns": 22.94,
+    "latency_p99_ns": 209
+  },
+  {
+    "date": "2026-01-17_15:37:36",
+    "commit": "de22ddc",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 316.48,
+    "seq_mb_s": 5961.72,
+    "build_mb_s": 1485.68,
+    "comp_ratio": 18.47,
+    "latency_avg_ns": 24.11,
+    "latency_p99_ns": 209
+  },
+  {
+    "date": "2026-01-17_15:39:14",
+    "commit": "90b7287",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 346.53,
+    "seq_mb_s": 5929.77,
+    "build_mb_s": 1476.15,
+    "comp_ratio": 18.47,
+    "latency_avg_ns": 22.02,
+    "latency_p99_ns": 209
+  },
+  {
+    "date": "2026-01-17_15:39:42",
+    "commit": "a099abc",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 320.5,
+    "seq_mb_s": 5762.09,
+    "build_mb_s": 1467.75,
+    "comp_ratio": 18.47,
+    "latency_avg_ns": 23.8,
+    "latency_p99_ns": 250
+  },
+  {
+    "date": "2026-01-17_15:40:15",
+    "commit": "923d10f",
+    "branch": "dev",
+    "data_size": 1048576000,
+    "random_mb_s": 343.78,
+    "seq_mb_s": 5825.45,
+    "build_mb_s": 1444.69,
+    "comp_ratio": 18.47,
+    "latency_avg_ns": 22.19,
+    "latency_p99_ns": 209
+  }
+]
