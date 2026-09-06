@@ -1,6 +1,8 @@
 //! Bucket storage for cuckoo filter fingerprints.
 //! 布谷鸟过滤器指纹的桶存储
 
+use std::hash::Hasher;
+
 use crate::bits::Bits;
 
 /// Bucket array for storing fingerprints.
@@ -64,9 +66,16 @@ impl Buckets {
 
   /// Compute bucket index from hash.
   /// 从哈希计算桶索引
-  #[inline]
+  #[inline(always)]
   pub fn index(&self, hash: u64) -> usize {
     (hash as usize) & self.idx_mask
+  }
+
+  /// Compute alternate bucket index for a given bucket index and fingerprint.
+  /// 为给定的桶索引和指纹计算备选桶索引
+  #[inline(always)]
+  pub fn alt_index<H: Hasher + Clone>(&self, hasher: &H, i: usize, fp: u64) -> usize {
+    self.index(i as u64 ^ crate::hash(hasher, &fp))
   }
 
   /// Extract fingerprint from hash.
@@ -129,11 +138,10 @@ impl Buckets {
     false
   }
 
-  /// Try to insert fingerprint into bucket.
-  /// 尝试将指纹插入桶
+  /// Find first entry matching `target` and replace it with `replacement`.
+  /// 查找第一个与 `target` 匹配的条目并将其替换为 `replacement`
   #[inline]
-  pub fn try_insert(&mut self, idx: usize, fp: u64) -> bool {
-    debug_assert_ne!(fp, 0);
+  fn find_and_replace(&mut self, idx: usize, target: u64, replacement: u64) -> bool {
     let base = self.bucket_bits * idx;
     let fp_bits = self.fp_bits;
     let fp_mask = self.fp_mask;
@@ -142,35 +150,43 @@ impl Buckets {
     // 对于小指纹位数（<=16）且 4 条目，一次读取整个桶
     if self.entries == 4 && fp_bits <= 16 {
       let bucket = self.bits.read_raw(base);
-      if (bucket & fp_mask) == 0 {
-        self.bits.set_uint_masked(base, fp_mask, fp);
+      if (bucket & fp_mask) == target {
+        self.bits.set_uint_masked(base, fp_mask, replacement);
         return true;
       }
-      if ((bucket >> fp_bits) & fp_mask) == 0 {
-        self.bits.set_uint_masked(base + fp_bits, fp_mask, fp);
+      if ((bucket >> fp_bits) & fp_mask) == target {
+        self.bits.set_uint_masked(base + fp_bits, fp_mask, replacement);
         return true;
       }
-      if ((bucket >> (fp_bits * 2)) & fp_mask) == 0 {
-        self.bits.set_uint_masked(base + fp_bits * 2, fp_mask, fp);
+      if ((bucket >> (fp_bits * 2)) & fp_mask) == target {
+        self.bits.set_uint_masked(base + fp_bits * 2, fp_mask, replacement);
         return true;
       }
-      if ((bucket >> (fp_bits * 3)) & fp_mask) == 0 {
-        self.bits.set_uint_masked(base + fp_bits * 3, fp_mask, fp);
+      if ((bucket >> (fp_bits * 3)) & fp_mask) == target {
+        self.bits.set_uint_masked(base + fp_bits * 3, fp_mask, replacement);
         return true;
       }
       return false;
     }
 
-    // Fallback for larger fp_bits
-    // 大指纹位数的回退路径
+    // Fallback for other configurations
+    // 其他配置的回退路径
     for i in 0..self.entries {
       let off = base + fp_bits * i;
-      if self.bits.get_uint_masked(off, fp_mask) == 0 {
-        self.bits.set_uint_masked(off, fp_mask, fp);
+      if self.bits.get_uint_masked(off, fp_mask) == target {
+        self.bits.set_uint_masked(off, fp_mask, replacement);
         return true;
       }
     }
     false
+  }
+
+  /// Try to insert fingerprint into bucket.
+  /// 尝试将指纹插入桶
+  #[inline(always)]
+  pub fn try_insert(&mut self, idx: usize, fp: u64) -> bool {
+    debug_assert_ne!(fp, 0);
+    self.find_and_replace(idx, 0, fp)
   }
 
   /// Swap fingerprint with random entry in bucket using fastrand.
@@ -188,46 +204,10 @@ impl Buckets {
 
   /// Remove fingerprint from bucket.
   /// 从桶中移除指纹
-  #[inline]
+  #[inline(always)]
   pub fn remove(&mut self, idx: usize, fp: u64) -> bool {
     debug_assert_ne!(fp, 0);
-    let base = self.bucket_bits * idx;
-    let fp_bits = self.fp_bits;
-    let fp_mask = self.fp_mask;
-
-    // For small fp_bits (<=16) and 4 entries, read entire bucket at once
-    // 对于小指纹位数（<=16）且 4 条目，一次读取整个桶
-    if self.entries == 4 && fp_bits <= 16 {
-      let bucket = self.bits.read_raw(base);
-      if (bucket & fp_mask) == fp {
-        self.bits.set_uint_masked(base, fp_mask, 0);
-        return true;
-      }
-      if ((bucket >> fp_bits) & fp_mask) == fp {
-        self.bits.set_uint_masked(base + fp_bits, fp_mask, 0);
-        return true;
-      }
-      if ((bucket >> (fp_bits * 2)) & fp_mask) == fp {
-        self.bits.set_uint_masked(base + fp_bits * 2, fp_mask, 0);
-        return true;
-      }
-      if ((bucket >> (fp_bits * 3)) & fp_mask) == fp {
-        self.bits.set_uint_masked(base + fp_bits * 3, fp_mask, 0);
-        return true;
-      }
-      return false;
-    }
-
-    // Fallback for larger fp_bits
-    // 大指纹位数的回退路径
-    for i in 0..self.entries {
-      let off = base + fp_bits * i;
-      if self.bits.get_uint_masked(off, fp_mask) == fp {
-        self.bits.set_uint_masked(off, fp_mask, 0);
-        return true;
-      }
-    }
-    false
+    self.find_and_replace(idx, fp, 0)
   }
 
   /// Get fingerprint at specific position.

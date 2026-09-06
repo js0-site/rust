@@ -45,7 +45,7 @@ impl<H: Hasher + Clone> CuckooFilterBuilder<H> {
   /// 设置初始容量提示
   #[must_use]
   pub fn initial_capacity(mut self, hint: usize) -> Self {
-    self.capacity = hint;
+    self.capacity = hint.max(1);
     self
   }
 
@@ -65,7 +65,7 @@ impl<H: Hasher + Clone> CuckooFilterBuilder<H> {
   /// 设置每桶条目数
   #[must_use]
   pub fn entries_per_bucket(mut self, n: usize) -> Self {
-    self.entries = n;
+    self.entries = n.max(1);
     self
   }
 
@@ -319,12 +319,11 @@ impl<T: Hash + ?Sized, H: Hasher + Clone> CuckooFilter<T, H> {
     U: Hash + ?Sized,
   {
     let hash = crate::hash(&self.hasher, item);
-    for filter in self.filters.iter_mut().rev() {
-      if filter.remove(&self.hasher, hash) {
-        return true;
-      }
-    }
-    false
+    self
+      .filters
+      .iter_mut()
+      .rev()
+      .any(|f| f.remove(&self.hasher, hash))
   }
 
   fn grow(&mut self) {

@@ -46,12 +46,7 @@ impl Bits {
   /// 使用预计算的掩码读取无符号整数
   #[inline(always)]
   pub fn get_uint_masked(&self, pos: usize, mask: u64) -> u64 {
-    let byte_idx = pos >> 3;
-    let bit_off = pos & 7;
-    // SAFETY: padding ensures we won't read past buffer
-    // 安全性：填充确保不会读取超出缓冲区
-    let raw = unsafe { self.0.as_ptr().add(byte_idx).cast::<u64>().read_unaligned() };
-    (raw >> bit_off) & mask
+    self.read_raw(pos) & mask
   }
 
   /// Read raw u64 at bit position (no masking).

@@ -62,18 +62,17 @@ impl Base {
   #[inline]
   pub fn contains<H: Hasher + Clone>(&self, hasher: &H, hash: u64) -> bool {
     let fp = self.buckets.fingerprint(hash);
+    let i0 = self.buckets.index(hash);
     if fp == 0 {
-      let i0 = self.buckets.index(hash);
-      let i1 = self.buckets.index(i0 as u64 ^ crate::hash(hasher, &fp));
+      let i1 = self.buckets.alt_index(hasher, i0, fp);
       return self.exceptional.contains(i0, i1, fp);
     }
     // Hot path: check i0 first, defer i1 calculation
     // 热路径：先检查 i0，延迟计算 i1
-    let i0 = self.buckets.index(hash);
     if self.buckets.contains(i0, fp) {
       return true;
     }
-    let i1 = self.buckets.index(i0 as u64 ^ crate::hash(hasher, &fp));
+    let i1 = self.buckets.alt_index(hasher, i0, fp);
     // Use | for branchless check (exceptional is rare)
     // 使用 | 进行无分支检查（exceptional 很少见）
     self.buckets.contains(i1, fp) | self.exceptional.contains(i0, i1, fp)
@@ -94,10 +93,10 @@ impl Base {
   pub fn remove<H: Hasher + Clone>(&mut self, hasher: &H, hash: u64) -> bool {
     let fp = self.buckets.fingerprint(hash);
     let i0 = self.buckets.index(hash);
-    let i1 = self.buckets.index(i0 as u64 ^ crate::hash(hasher, &fp));
+    let i1 = self.buckets.alt_index(hasher, i0, fp);
 
-    // Try remove in order: exceptional -> bucket i0 -> bucket i1
-    // 按顺序尝试移除：exceptional -> 桶 i0 -> 桶 i1
+    // Try remove in order: bucket i0 -> bucket i1 -> exceptional
+    // 按顺序尝试移除：桶 i0 -> 桶 i1 -> exceptional
     let removed = if fp == 0 {
       self.exceptional.remove(i0, i1, fp)
     } else {
@@ -135,7 +134,7 @@ impl Base {
       for &(fp, min_i) in &self.exceptional.0 {
         if fp == 0 {
           let shrunk_i0 = shrunk.buckets.index(min_i as u64);
-          let shrunk_i1 = shrunk.buckets.index(shrunk_i0 as u64 ^ crate::hash(hasher, &0u64));
+          let shrunk_i1 = shrunk.buckets.alt_index(hasher, shrunk_i0, 0);
           shrunk.exceptional.insert(shrunk_i0, shrunk_i1, 0);
           shrunk.count += 1;
         } else {
@@ -155,7 +154,7 @@ impl Base {
     self.count += 1;
 
     if fp == 0 {
-      let i1 = self.buckets.index(i0 as u64 ^ crate::hash(hasher, &fp));
+      let i1 = self.buckets.alt_index(hasher, i0, fp);
       self.exceptional.insert(i0, i1, 0);
       return;
     }
@@ -168,7 +167,7 @@ impl Base {
 
     // Compute i1 only when needed
     // 仅在需要时计算 i1
-    let i1 = self.buckets.index(i0 as u64 ^ crate::hash(hasher, &fp));
+    let i1 = self.buckets.alt_index(hasher, i0, fp);
     if self.buckets.try_insert(i1, fp) {
       return;
     }
@@ -179,7 +178,7 @@ impl Base {
     for _ in 0..self.max_kicks {
       fp = self.buckets.random_swap(i, fp);
       prev_i = i;
-      i = self.buckets.index(i as u64 ^ crate::hash(hasher, &fp));
+      i = self.buckets.alt_index(hasher, i, fp);
       if self.buckets.try_insert(i, fp) {
         return;
       }
