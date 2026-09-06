@@ -9,7 +9,7 @@ license = "MIT"
 name = "jdb_xorf"
 readme = "README.md"
 repository = "https://github.com/js0-site/rust"
-version = "0.13.15"
+version = "0.13.16"
 
 [dependencies]
 libm = { version = "0.2.16" }
